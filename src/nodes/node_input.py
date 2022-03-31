@@ -11,7 +11,7 @@ from PySide2.QtWidgets import (
 )
 
 
-from ..widgets.master_node import Node, NodeContentCreator
+from ..widgets.node_graphics import Node, NodeContentCreator
 LOGGER = logging.getLogger('nodeeditor.node_input')
 
 

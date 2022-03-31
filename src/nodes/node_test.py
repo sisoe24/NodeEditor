@@ -8,7 +8,7 @@ from PySide2.QtWidgets import (
 )
 from src.widget_color import widget_color
 
-from src.widgets.master_node import Node, NodeContentCreator
+from src.widgets.node_graphics import Node, NodeContentCreator
 LOGGER = logging.getLogger('nodeeditor.node_test')
 
 

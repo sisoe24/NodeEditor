@@ -15,6 +15,27 @@ from PySide2.QtWidgets import (
 LOGGER = logging.getLogger('nodeeditor.master_node')
 
 
+class NodeContent(QWidget):
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+        self._layout = QVBoxLayout()
+        # self._layout.setContentsMargins(10, 10, 10, 10)
+        self.setLayout(self._layout)
+
+    def add_widget(self, widget: QWidget):
+        self._layout.addWidget(widget)
+
+    def add_input(self, widget: QWidget):
+        self._layout.addWidget(widget)
+
+    def add_output(self, text: str):
+        widget = QLabel(text)
+        widget.setAlignment(Qt.AlignRight)
+        self._layout.addWidget(widget)
+
+
 class NodeGraphics(QGraphicsItem):
     _width = 150
     _title_height = 25
@@ -152,27 +173,6 @@ class NodeGraphics(QGraphicsItem):
     def boundingRect(self):
         """Set the bounding margins for the node."""
         return QRectF(0, 0, self._width, self._height).normalized()
-
-
-class NodeContent(QWidget):
-
-    def __init__(self, parent=None):
-        super().__init__(parent)
-
-        self._layout = QVBoxLayout()
-        # self._layout.setContentsMargins(10, 10, 10, 10)
-        self.setLayout(self._layout)
-
-    def add_widget(self, widget: QWidget):
-        self._layout.addWidget(widget)
-
-    def add_input(self, widget: QWidget):
-        self._layout.addWidget(widget)
-
-    def add_output(self, text: str):
-        widget = QLabel(text)
-        widget.setAlignment(Qt.AlignRight)
-        self._layout.addWidget(widget)
 
 
 class NodeInterface(abc.ABC):

@@ -24,10 +24,10 @@ class NodeInputContent(NodeContent):
         self.combo_box = QComboBox()
         self.combo_box.addItems(['foo', 'bar'])
 
-        self.add_output('Output')
-        self.add_widget(self.combo_box)
-        self.add_output('Output')
-        self.add_widget(QLabel('Input'))
+        # self.add_widget(self.combo_box)
+        self.add_output('Output 1')
+        self.add_output('Output 2')
+        self.add_input(QLabel('Input 1'))
 
 
 class NodeInput(Node):

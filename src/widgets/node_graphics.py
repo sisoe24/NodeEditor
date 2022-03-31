@@ -33,6 +33,9 @@ class NodeContent(QWidget):
         self._layout.setSpacing(15)
         self.setLayout(self._layout)
 
+    def __str__(self) -> str:
+        return f"<Socket {hex(id(self))[2:5]}..{hex(id(self))[-3:]}>"
+
     def _is_widget(func):
         def wrapper(*args):
             widget = args[1]
@@ -196,6 +199,9 @@ class NodeGraphics(QGraphicsItem):
         # TODO: initialize in init
         self._node_title = draw_title()
         self._node_body = draw_body()
+
+    def __str__(self) -> str:
+        return f"<Node {hex(id(self))[2:5]}..{hex(id(self))[-3:]}>"
 
     def paint(self, painter, option, widget=None):
         """Paint the content of the node."""

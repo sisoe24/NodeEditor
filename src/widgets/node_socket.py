@@ -30,6 +30,9 @@ class SocketGraphics(QGraphicsItem):
     def boundingRect(self):
         return self._socket_body.boundingRect()
 
+    def __str__(self) -> str:
+        return f"<Socket {hex(id(self))[2:5]}..{hex(id(self))[-3:]}>"
+
 
 class Socket:
     def __init__(self, node=None):

@@ -1,22 +1,18 @@
 import sys
 import logging
 
-from PySide2.QtCore import QPoint, Qt
-from PySide2.QtGui import QColor, QBrush, QPen
 from PySide2.QtWidgets import (
     QLabel,
     QApplication,
     QWidget,
     QMainWindow,
     QVBoxLayout,
-    QGraphicsItem
 )
 
 
 from src.widgets.editor_scene import Scene
 from src.widgets.editor_view import GraphicsView
-from src.nodes import node_input
-from src.nodes import node_test
+from src.examples.nodes import *
 
 LOGGER = logging.getLogger('nodeeditor.main')
 
@@ -41,10 +37,10 @@ class NodeEditor(QWidget):
         self._debug_add_nodes()
 
     def _debug_add_nodes(self):
-        node = node_test.NodeTest(self.scene)
+        node = nodes.NodeExample2(self.scene)
         node.set_position(-450, -250)
 
-        node1 = node_input.NodeInput(self.scene)
+        node1 = nodes.NodeExample1(self.scene)
         node1.set_position(-70, -50)
 
 

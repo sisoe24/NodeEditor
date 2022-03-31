@@ -1,9 +1,10 @@
 import abc
 import logging
 
-from PySide2.QtCore import Signal, Qt, QRectF
-from PySide2.QtGui import QPainterPathStroker, QFont, QPen, QColor, QPainterPath, QBrush
+from PySide2.QtCore import Qt, QRectF
+from PySide2.QtGui import QFont, QPen, QColor, QPainterPath, QBrush
 from PySide2.QtWidgets import (
+    QSpacerItem,
     QLabel,
     QGraphicsItem,
     QGraphicsTextItem,
@@ -11,6 +12,9 @@ from PySide2.QtWidgets import (
     QVBoxLayout,
     QWidget
 )
+
+from src.widget_color import widget_color
+from src.widgets.node_socket import Socket
 
 LOGGER = logging.getLogger('nodeeditor.master_node')
 
@@ -20,20 +24,54 @@ class NodeContent(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
 
+        self.inputs = []
+        self.outputs = []
+
         self._layout = QVBoxLayout()
-        # self._layout.setContentsMargins(10, 10, 10, 10)
+        self._layout.setContentsMargins(10, 10, 10, 10)
+        self._layout.addSpacerItem(QSpacerItem(0, 0))
+        self._layout.setSpacing(15)
         self.setLayout(self._layout)
 
-    def add_widget(self, widget: QWidget):
+    def _is_widget(func):
+        def wrapper(*args):
+            widget = args[1]
+            if isinstance(widget, QWidget):
+                return func(*args)
+            LOGGER.error('Item is not a Widget: %s', widget)
+        return wrapper
+
+    @_is_widget
+    def add_widget(self, widget):
+        """Add a widget into the node graphics
+
+        A widget is not going to have any input or output sockets connected.
+
+        Args:
+            widget (any): A instance of a QWidget class.
+        """
         self._layout.addWidget(widget)
 
-    def add_input(self, widget: QWidget):
+    @_is_widget
+    def add_input(self, widget):
+        """Add an input widget with a socket.
+
+        Args:
+            widget (any): A instance of a QWidget class.
+        """
+        self.inputs.append(widget)
         self._layout.addWidget(widget)
 
     def add_output(self, text: str):
+        """Add an output widget with a socket.
+
+        Args:
+            text (str): The name of the output label
+        """
         widget = QLabel(text)
         widget.setAlignment(Qt.AlignRight)
         self._layout.addWidget(widget)
+        self.outputs.append(widget)
 
 
 class NodeGraphics(QGraphicsItem):
@@ -42,7 +80,6 @@ class NodeGraphics(QGraphicsItem):
 
     def __init__(self, node: 'Node', content: QWidget, parent=None):
         super().__init__(parent)
-        LOGGER.info('Node graphics')
 
         self.node = node
         self.content = content
@@ -56,6 +93,9 @@ class NodeGraphics(QGraphicsItem):
         self._draw_graphics()
 
     def _set_colors(self):
+        """Initialize the node graphics colors."""
+
+        # TODO: initialize in init
         self._node_border = QPen(QColor('#111111'))
         self._node_selected = QPen(QColor('#DD8600'))
 
@@ -95,7 +135,15 @@ class NodeGraphics(QGraphicsItem):
         gr_content.setWidget(self.content)
 
     def _draw_graphics(self):
+        """Draw the node graphics content.
+
+        This function gets called when the class gets initialized and creates
+        the shape of the node graphics which are composed of 2 parts: the body,
+        the title.
+
+        """
         def draw_body():
+            """Draw the main body of the node."""
             path = QPainterPath()
 
             width_angle = self._width - 10
@@ -123,6 +171,7 @@ class NodeGraphics(QGraphicsItem):
             return path
 
         def draw_title():
+            """Draw the title body of the node."""
             path = QPainterPath()
 
             width_angle = self._width - 10
@@ -144,6 +193,7 @@ class NodeGraphics(QGraphicsItem):
             path.closeSubpath()
             return path
 
+        # TODO: initialize in init
         self._node_title = draw_title()
         self._node_body = draw_body()
 
@@ -172,7 +222,7 @@ class NodeGraphics(QGraphicsItem):
 
     def boundingRect(self):
         """Set the bounding margins for the node."""
-        return QRectF(0, 0, self._width, self._height).normalized()
+        return self._node_body.boundingRect()
 
 
 class NodeInterface(abc.ABC):
@@ -198,5 +248,37 @@ class Node(NodeInterface):
         self.node_graphics = NodeGraphics(node, content)
         scene.graphics_scene.addItem(self.node_graphics)
 
+        self._add_inputs(node)
+        self._add_outputs(node)
+
+    def _add_sockets(self, widgets, is_input=True):
+        """Add sockets to node.
+
+        Sockets will be added at the left or right of the node based on which
+        type of widgets is assign to it.
+
+        Args:
+            widgets (list): a list of widgets to assign a socket.
+            is_input (bool, optional): If True, sockets will be positioned on,
+            the left. If False, will be position on the right. Defaults to True.
+        """
+        # arbitrary offset to account for the widget position
+        offset = 8
+        width = self.node_graphics._width
+
+        for widget in widgets:
+            y = self.node_graphics._title_height + widget.pos().y() + offset
+            socket = Socket(self.node_graphics)
+            socket.socket_graphics.setPos(0 if is_input else width, y)
+
+    def _add_inputs(self, node):
+        self._add_sockets(node.node_content.inputs)
+
+    def _add_outputs(self, node):
+        self._add_sockets(node.node_content.outputs, False)
+
     def set_position(self, x: int, y: int):
         self.node_graphics.setPos(x, y)
+
+    def __str__(self):
+        return f'{self.__class__.__name__}'

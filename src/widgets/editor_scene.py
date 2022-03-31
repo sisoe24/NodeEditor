@@ -40,10 +40,10 @@ class GraphicScene(QGraphicsScene):
         super().drawBackground(painter, rect)
 
         # Get scene bounding size converted as integers for the range loop
-        left = int(floor(rect.left()))
-        right = int(ceil(rect.right()))
-        top = int(floor(rect.top()))
-        bottom = int(ceil(rect.bottom()))
+        left = round(rect.left())
+        right = round(rect.right())
+        top = round(rect.top())
+        bottom = round(rect.bottom())
 
         x_points = []
         y_points = []

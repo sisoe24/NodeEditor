@@ -6,6 +6,8 @@ from PySide2.QtGui import QPainter, QMouseEvent
 from PySide2.QtWidgets import (
     QGraphicsView
 )
+from src.widgets.node_graphics import NodeGraphics
+from src.widgets.node_socket import SocketGraphics
 
 LOGGER = logging.getLogger('nodeeditor.view')
 
@@ -52,6 +54,14 @@ class GraphicsView(QGraphicsView):
         # the viewport.
         self.setDragMode(QGraphicsView.RubberBandDrag)
 
+    def _get_graphic_item(self, event):
+        """Get the item under the cursor.
+
+        Returns:
+            any: the object item under the cursor
+        """
+        return self.itemAt(event.pos())
+
     def mouseMoveEvent(self, event):
         x = event.pos().x()
         y = event.pos().y()
@@ -63,7 +73,11 @@ class GraphicsView(QGraphicsView):
         button = event.button()
 
         if button == Qt.MidButton:
-            self.middleMouseButtonPress(event)
+            self._middleMouseButtonPress(event)
+        elif button == Qt.LeftButton:
+            self._leftMouseButtonPress(event)
+        elif button == Qt.RightButton:
+            self._rightMouseButtonPress(event)
         else:
             super().mousePressEvent(event)
 
@@ -72,11 +86,15 @@ class GraphicsView(QGraphicsView):
         button = event.button()
 
         if button == Qt.MidButton:
-            self.middleMouseButtonRelease(event)
+            self._middleMouseButtonRelease(event)
+        elif button == Qt.LeftButton:
+            self._leftMouseButtonRelease(event)
+        elif button == Qt.RightButton:
+            self._rightMouseButtonRelease(event)
         else:
             super().mouseReleaseEvent(event)
 
-    @ staticmethod
+    @staticmethod
     def _drag_mouse_event(event):
         """Create the drag mouse event.
 
@@ -94,7 +112,7 @@ class GraphicsView(QGraphicsView):
             Qt.LeftButton, event.buttons() & ~Qt.LeftButton, event.modifiers()
         )
 
-    def middleMouseButtonPress(self, event):
+    def _middleMouseButtonPress(self, event):
         """Release event for the middle button.
 
         This function will mimic a Left Mouse Button Press event and set the
@@ -113,7 +131,7 @@ class GraphicsView(QGraphicsView):
         self.setDragMode(QGraphicsView.ScrollHandDrag)
         super().mousePressEvent(self._drag_mouse_event(event))
 
-    def middleMouseButtonRelease(self, event):
+    def _middleMouseButtonRelease(self, event):
         """Release event for the middle button.
 
         This function will mimic a Left Mouse Button Release event and set the
@@ -124,6 +142,23 @@ class GraphicsView(QGraphicsView):
         """
         super().mouseReleaseEvent(self._drag_mouse_event(event))
         self.setDragMode(QGraphicsView.RubberBandDrag)
+
+    def _leftMouseButtonPress(self, event):
+        item = self._get_graphic_item(event)
+        if isinstance(item, SocketGraphics):
+            event.ignore()
+        else:
+            super().mousePressEvent(event)
+
+    def _leftMouseButtonRelease(self, event):
+        super().mouseReleaseEvent(event)
+
+    def _rightMouseButtonPress(self, event):
+        LOGGER.debug(self._get_graphic_item(event))
+        super().mousePressEvent(event)
+
+    def _rightMouseButtonRelease(self, event):
+        super().mouseReleaseEvent(event)
 
     def wheelEvent(self, event):
         """Override wheel event to create the zoom effect

@@ -8,11 +8,11 @@ from PySide2.QtWidgets import (
 )
 from src.widget_color import widget_color
 
-from src.widgets.node_graphics import Node, NodeContentCreator
+from src.widgets.node_graphics import Node, NodeContent
 LOGGER = logging.getLogger('nodeeditor.node_test')
 
 
-class NodeContent(NodeContentCreator):
+class NodeTestContent(NodeContent):
     """The node content widgets container class."""
 
     def __init__(self, parent=None):
@@ -29,7 +29,7 @@ class NodeTest(Node):
     title = "Test Node"
 
     def __init__(self, scene):
-        self.node_content = NodeContent()
+        self.node_content = NodeTestContent()
         super().__init__(scene=scene, node=self, content=self.node_content)
 
     @property

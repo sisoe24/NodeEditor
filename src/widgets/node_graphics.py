@@ -154,7 +154,7 @@ class NodeGraphics(QGraphicsItem):
         return QRectF(0, 0, self._width, self._height).normalized()
 
 
-class NodeContentCreator(QWidget):
+class NodeContent(QWidget):
 
     def __init__(self, parent=None):
         super().__init__(parent)

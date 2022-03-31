@@ -11,11 +11,11 @@ from PySide2.QtWidgets import (
 )
 
 
-from ..widgets.node_graphics import Node, NodeContentCreator
+from ..widgets.node_graphics import Node, NodeContent
 LOGGER = logging.getLogger('nodeeditor.node_input')
 
 
-class NodeContent(NodeContentCreator):
+class NodeInputContent(NodeContent):
     """The node content widgets container class."""
 
     def __init__(self, parent=None):
@@ -35,7 +35,7 @@ class NodeInput(Node):
     title = "Input Node"
 
     def __init__(self, scene):
-        self.node_content = NodeContent()
+        self.node_content = NodeInputContent()
         super().__init__(scene=scene, node=self, content=self.node_content)
 
     @property

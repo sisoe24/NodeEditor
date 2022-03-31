@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "nodeeditor"
+version = "0.1.0"
+description = "Visual Scripting Node Editor"
+authors = ["virgilsisoe <virgilsisoe@gmail.com>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = ">=3.6, <=3.7.7"
+PySide2 = "5.12.2"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

@@ -32,11 +32,10 @@ class NodeEdgeGraphics(QGraphicsPathItem):
     def paint(self, painter, option, widget=None):
         path = QPainterPath(QPointF(0, 0))
         path.lineTo(self.mapFromScene(self.end_socket.get_position()))
-        # self.setPath(path)
+        self.setPath(path)
 
         painter.setPen(self._pen_selected if self.isSelected() else self._pen)
-        painter.drawPath(path)
-        # painter.drawPath(self.path())
+        painter.drawPath(self.path())
 
     def boundingRect(self):
         return self.shape().boundingRect()

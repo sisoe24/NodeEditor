@@ -6,10 +6,11 @@ from PySide2.QtGui import QPainter, QMouseEvent
 from PySide2.QtWidgets import (
     QGraphicsView
 )
-from src.widgets.node_graphics import NodeGraphics
+
 from src.widgets.node_socket import SocketGraphics
 
 LOGGER = logging.getLogger('nodeeditor.view')
+LOGGER.setLevel(logging.DEBUG)
 
 
 class GraphicsView(QGraphicsView):
@@ -25,7 +26,7 @@ class GraphicsView(QGraphicsView):
         ZoomRange = namedtuple('ZoomRange', ['min', 'max'])
         self.zoom_range = ZoomRange(5, 15)
 
-        self._debug_zoom()
+        # self._debug_zoom()
 
     def _debug_zoom(self):
         z = 3.65
@@ -63,10 +64,13 @@ class GraphicsView(QGraphicsView):
         return self.itemAt(event.pos())
 
     def mouseMoveEvent(self, event):
-        x = event.pos().x()
-        y = event.pos().y()
-        self.mouse_position.emit(f'{x}, {y}')
+        self._update_mouse_position(event)
         return super().mouseMoveEvent(event)
+
+    def _update_mouse_position(self, event):
+        """Emit a signal to update mouse position label status."""
+        pos = self.mapToScene(event.pos())
+        self.mouse_position.emit(f'{round(pos.x())}, {round(pos.y())}')
 
     def mousePressEvent(self, event):
         """Override the mousePressEvent event."""
@@ -154,7 +158,7 @@ class GraphicsView(QGraphicsView):
         super().mouseReleaseEvent(event)
 
     def _rightMouseButtonPress(self, event):
-        LOGGER.debug(self._get_graphic_item(event))
+        LOGGER.info(self._get_graphic_item(event))
         super().mousePressEvent(event)
 
     def _rightMouseButtonRelease(self, event):

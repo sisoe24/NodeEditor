@@ -13,6 +13,7 @@ from PySide2.QtWidgets import (
 from src.widgets.editor_scene import Scene
 from src.widgets.editor_view import GraphicsView
 from src.examples.nodes import *
+from src.widgets.node_edge import NodeEdge
 
 LOGGER = logging.getLogger('nodeeditor.main')
 
@@ -37,11 +38,16 @@ class NodeEditor(QWidget):
         self._debug_add_nodes()
 
     def _debug_add_nodes(self):
-        node = nodes.NodeExample2(self.scene)
-        node.set_position(-450, -250)
-
         node1 = nodes.NodeExample1(self.scene)
-        node1.set_position(-70, -50)
+        node1.set_position(0, 0)
+
+        node2 = nodes.NodeExample2(self.scene)
+        node2.set_position(-450, -250)
+
+        start_socket = node2.output_sockets[0]
+        end_socket = node1.input_sockets[0]
+
+        NodeEdge(start_socket, end_socket)
 
 
 class MainWindow(QMainWindow):

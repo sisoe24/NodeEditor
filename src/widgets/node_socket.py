@@ -37,3 +37,7 @@ class SocketGraphics(QGraphicsItem):
 class Socket:
     def __init__(self, node=None):
         self.socket_graphics = SocketGraphics(node)
+
+    def get_position(self):
+        """Get socket position in the scene."""
+        return self.socket_graphics.scenePos()

@@ -254,6 +254,9 @@ class Node(NodeInterface):
         self.node_graphics = NodeGraphics(node, content)
         scene.graphics_scene.addItem(self.node_graphics)
 
+        self.input_sockets = []
+        self.output_sockets = []
+
         self._add_inputs(node)
         self._add_outputs(node)
 
@@ -274,14 +277,19 @@ class Node(NodeInterface):
 
         for widget in widgets:
             y = self.node_graphics._title_height + widget.pos().y() + offset
+
             socket = Socket(self.node_graphics)
             socket.socket_graphics.setPos(0 if is_input else width, y)
 
+            yield socket
+
     def _add_inputs(self, node):
-        self._add_sockets(node.node_content.inputs)
+        for socket in self._add_sockets(node.node_content.inputs):
+            self.input_sockets.append(socket)
 
     def _add_outputs(self, node):
-        self._add_sockets(node.node_content.outputs, False)
+        for socket in self._add_sockets(node.node_content.outputs, False):
+            self.output_sockets.append(socket)
 
     def set_position(self, x: int, y: int):
         self.node_graphics.setPos(x, y)

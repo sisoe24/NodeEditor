@@ -1,7 +1,7 @@
 import abc
 import logging
 
-from PySide2.QtCore import Qt, QRectF
+from PySide2.QtCore import Qt
 from PySide2.QtGui import QFont, QPen, QColor, QPainterPath, QBrush
 from PySide2.QtWidgets import (
     QSpacerItem,
@@ -13,8 +13,8 @@ from PySide2.QtWidgets import (
     QWidget
 )
 
-from src.widget_color import widget_color
 from src.widgets.node_socket import Socket
+from src.utils import class_id
 
 LOGGER = logging.getLogger('nodeeditor.master_node')
 
@@ -97,7 +97,6 @@ class NodeGraphics(QGraphicsItem):
 
     def _set_colors(self):
         """Initialize the node graphics colors."""
-
         # TODO: initialize in init
         self._node_border = QPen(QColor('#111111'))
         self._node_selected = QPen(QColor('#DD8600'))
@@ -200,9 +199,6 @@ class NodeGraphics(QGraphicsItem):
         self._node_title = draw_title()
         self._node_body = draw_body()
 
-    def __str__(self) -> str:
-        return f"<Node {hex(id(self))[2:5]}..{hex(id(self))[-3:]}>"
-
     def paint(self, painter, option, widget=None):
         """Paint the content of the node."""
 
@@ -229,6 +225,9 @@ class NodeGraphics(QGraphicsItem):
     def boundingRect(self):
         """Set the bounding margins for the node."""
         return self._node_body.boundingRect()
+
+    def __str__(self) -> str:
+        return class_id('NodeGraphics', self)
 
 
 class NodeInterface(abc.ABC):

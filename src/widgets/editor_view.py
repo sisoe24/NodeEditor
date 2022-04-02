@@ -7,6 +7,7 @@ from PySide2.QtWidgets import (
     QGraphicsView
 )
 from src.widgets.node_edge import NodeEdge, NodeEdgeGraphics
+from src.widgets.node_graphics import NodeGraphics
 
 from src.widgets.node_socket import SocketGraphics
 
@@ -30,11 +31,23 @@ class GraphicsView(QGraphicsView):
         self._debug_zoom()
 
         self.drag_mode = None
-        self.selected_item = None
+        self._selected_item = None
 
     def _debug_zoom(self):
         z = 3.15
         self.scale(z, z)
+
+    @property
+    def selected_item(self):
+        return self._selected_item
+
+    @selected_item.setter
+    def selected_item(self, item):
+        # Check if item belongs to a node class
+        if hasattr(item, 'parentItem') and isinstance(item.parentItem(), NodeGraphics):
+            self._selected_item = item.parentItem()
+        else:
+            self._selected_item = item
 
     def _set_flags(self):
         """Set up some flags for the UI view."""
@@ -188,6 +201,14 @@ class GraphicsView(QGraphicsView):
     def mouseMoveEvent(self, event):
         self._update_mouse_position(event)
         return super().mouseMoveEvent(event)
+
+    def keyPressEvent(self, event):
+        key = event.key()
+
+        if key == Qt.Key_Delete and self.selected_item:
+            self.scene().removeItem(self.selected_item)
+
+        return super().keyPressEvent(event)
 
     def wheelEvent(self, event):
         """Override wheel event to create the zoom effect.

@@ -33,6 +33,10 @@ class SocketGraphics(QGraphicsItem):
     def __str__(self) -> str:
         return f"<Socket {hex(id(self))[2:5]}..{hex(id(self))[-3:]}>"
 
+    def get_position(self):
+        """Get socket position in the scene."""
+        return self.scenePos()
+
 
 class Socket:
     def __init__(self, node=None):

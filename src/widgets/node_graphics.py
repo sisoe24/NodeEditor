@@ -91,8 +91,8 @@ class NodeGraphics(QGraphicsItem):
 
         self._set_flags()
         self._set_colors()
-        self._init_title()
-        self._init_content()
+        self._draw_title()
+        self._draw_content()
         self._draw_graphics()
 
     def _set_colors(self):
@@ -109,7 +109,7 @@ class NodeGraphics(QGraphicsItem):
         self.setFlag(QGraphicsItem.ItemIsSelectable)
         self.setFlag(QGraphicsItem.ItemIsMovable)
 
-    def _init_title(self):
+    def _draw_title(self):
         """Set Node title."""
         # title gets created at 0,0 thats why is already inside the title box
 
@@ -125,7 +125,7 @@ class NodeGraphics(QGraphicsItem):
         title_item.setPos(title_sx_padding, 0)
         title_item.setTextWidth(self._width - 2 * title_sx_padding)
 
-    def _init_content(self):
+    def _draw_content(self):
         """Set Node contents.
 
         Contents are set inside a QGraphicsProxyWidget in a custom geometry

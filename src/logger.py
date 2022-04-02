@@ -18,7 +18,7 @@ LOGGER.setLevel(logging.WARNING)
 DEBUG_FILE = os.path.join(LOG_PATH, 'debug.log')
 
 BASE_FORMAT = logging.Formatter(
-    '[%(asctime)s]  %(levelname)-10s %(filename)-25s %(funcName)-25s :: %(message)s',
+    '%(levelname)-10s %(filename)-25s %(funcName)-25s :: %(message)s',
     "%m-%d %I:%M%p")
 
 

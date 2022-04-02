@@ -6,6 +6,7 @@ from PySide2.QtGui import QPainter, QMouseEvent
 from PySide2.QtWidgets import (
     QGraphicsView
 )
+from src.widgets.node_edge import NodeEdge, NodeEdgeGraphics
 
 from src.widgets.node_socket import SocketGraphics
 
@@ -14,7 +15,7 @@ LOGGER.setLevel(logging.DEBUG)
 
 
 class GraphicsView(QGraphicsView):
-    mouse_position = Signal(str)
+    mouse_position = Signal(float, float)
 
     def __init__(self, graphic_scene, parent=None):
         super().__init__(graphic_scene, parent)
@@ -26,10 +27,13 @@ class GraphicsView(QGraphicsView):
         ZoomRange = namedtuple('ZoomRange', ['min', 'max'])
         self.zoom_range = ZoomRange(5, 15)
 
-        # self._debug_zoom()
+        self._debug_zoom()
+
+        self.drag_mode = None
+        self.selected_item = None
 
     def _debug_zoom(self):
-        z = 3.65
+        z = 3.15
         self.scale(z, z)
 
     def _set_flags(self):
@@ -55,7 +59,7 @@ class GraphicsView(QGraphicsView):
         # the viewport.
         self.setDragMode(QGraphicsView.RubberBandDrag)
 
-    def _get_graphic_item(self, event):
+    def _get_graphic_item(self, event: QMouseEvent):
         """Get the item under the cursor.
 
         Returns:
@@ -63,43 +67,13 @@ class GraphicsView(QGraphicsView):
         """
         return self.itemAt(event.pos())
 
-    def mouseMoveEvent(self, event):
-        self._update_mouse_position(event)
-        return super().mouseMoveEvent(event)
-
-    def _update_mouse_position(self, event):
+    def _update_mouse_position(self, event: QMouseEvent):
         """Emit a signal to update mouse position label status."""
         pos = self.mapToScene(event.pos())
-        self.mouse_position.emit(f'{round(pos.x())}, {round(pos.y())}')
-
-    def mousePressEvent(self, event):
-        """Override the mousePressEvent event."""
-        button = event.button()
-
-        if button == Qt.MidButton:
-            self._middleMouseButtonPress(event)
-        elif button == Qt.LeftButton:
-            self._leftMouseButtonPress(event)
-        elif button == Qt.RightButton:
-            self._rightMouseButtonPress(event)
-        else:
-            super().mousePressEvent(event)
-
-    def mouseReleaseEvent(self, event):
-        """Override the mouseReleaseEvent event."""
-        button = event.button()
-
-        if button == Qt.MidButton:
-            self._middleMouseButtonRelease(event)
-        elif button == Qt.LeftButton:
-            self._leftMouseButtonRelease(event)
-        elif button == Qt.RightButton:
-            self._rightMouseButtonRelease(event)
-        else:
-            super().mouseReleaseEvent(event)
+        self.mouse_position.emit(pos.x(), pos.y())
 
     @staticmethod
-    def _drag_mouse_event(event):
+    def _drag_mouse_event(event: QMouseEvent):
         """Create the drag mouse event.
 
         This function mimic a Left Mouse button drag while the middle mouse btn
@@ -116,7 +90,7 @@ class GraphicsView(QGraphicsView):
             Qt.LeftButton, event.buttons() & ~Qt.LeftButton, event.modifiers()
         )
 
-    def _middleMouseButtonPress(self, event):
+    def _middleMouseButtonPress(self, event: QMouseEvent):
         """Release event for the middle button.
 
         This function will mimic a Left Mouse Button Press event and set the
@@ -135,7 +109,7 @@ class GraphicsView(QGraphicsView):
         self.setDragMode(QGraphicsView.ScrollHandDrag)
         super().mousePressEvent(self._drag_mouse_event(event))
 
-    def _middleMouseButtonRelease(self, event):
+    def _middleMouseButtonRelease(self, event: QMouseEvent):
         """Release event for the middle button.
 
         This function will mimic a Left Mouse Button Release event and set the
@@ -149,12 +123,33 @@ class GraphicsView(QGraphicsView):
 
     def _leftMouseButtonPress(self, event):
         item = self._get_graphic_item(event)
+        LOGGER.debug('Clicked on item: %s', item)
+        self.selected_item = item
+
         if isinstance(item, SocketGraphics):
-            event.ignore()
-        else:
-            super().mousePressEvent(event)
+            self.drag_mode = True
+            LOGGER.debug('Drag Mode Enabled')
+
+            self.start = item
+            self.edge = NodeEdge(self, item, None)
+        super().mousePressEvent(event)
 
     def _leftMouseButtonRelease(self, event):
+        item = self._get_graphic_item(event)
+        LOGGER.debug('Released on item: %s', item)
+
+        if self.drag_mode:
+            if not item:
+                pass
+            elif isinstance(item, SocketGraphics):
+                self.scene().removeItem(self.edge.edge_graphics)
+                NodeEdge(self, self.start, item)
+            elif self.edge:
+                self.scene().removeItem(self.edge.edge_graphics)
+
+            self.drag_mode = False
+            LOGGER.debug('Drag Mode Disabled')
+
         super().mouseReleaseEvent(event)
 
     def _rightMouseButtonPress(self, event):
@@ -164,8 +159,38 @@ class GraphicsView(QGraphicsView):
     def _rightMouseButtonRelease(self, event):
         super().mouseReleaseEvent(event)
 
+    def mousePressEvent(self, event: QMouseEvent):
+        """Override the mousePressEvent event."""
+        button = event.button()
+
+        if button == Qt.MidButton:
+            self._middleMouseButtonPress(event)
+        elif button == Qt.LeftButton:
+            self._leftMouseButtonPress(event)
+        elif button == Qt.RightButton:
+            self._rightMouseButtonPress(event)
+        else:
+            super().mousePressEvent(event)
+
+    def mouseReleaseEvent(self, event: QMouseEvent):
+        """Override the mouseReleaseEvent event."""
+        button = event.button()
+
+        if button == Qt.MidButton:
+            self._middleMouseButtonRelease(event)
+        elif button == Qt.LeftButton:
+            self._leftMouseButtonRelease(event)
+        elif button == Qt.RightButton:
+            self._rightMouseButtonRelease(event)
+        else:
+            super().mouseReleaseEvent(event)
+
+    def mouseMoveEvent(self, event):
+        self._update_mouse_position(event)
+        return super().mouseMoveEvent(event)
+
     def wheelEvent(self, event):
-        """Override wheel event to create the zoom effect
+        """Override wheel event to create the zoom effect.
 
         The zoom is based on a zoom_factor and zoom_level. If zoom is
         bigger/lower than the zoom_level, will be clamped and stop from zooming

@@ -41,7 +41,8 @@ class NodeContent(QWidget):
             widget = args[1]
             if isinstance(widget, QWidget):
                 return func(*args)
-            LOGGER.error('Item is not a Widget: %s', widget)
+            LOGGER.error('Item is not a child of QObject: %s %s',
+                         type(widget), widget)
         return wrapper
 
     @_is_widget

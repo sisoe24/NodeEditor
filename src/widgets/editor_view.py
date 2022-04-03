@@ -34,7 +34,7 @@ class GraphicsView(QGraphicsView):
         self._selected_item = None
 
     def _debug_zoom(self):
-        z = 3.15
+        z = 2.15
         self.scale(z, z)
 
     @property
@@ -113,11 +113,11 @@ class GraphicsView(QGraphicsView):
             event (QEvent): the mouse event.
         """
         # the release event is for the select box
-        release_event = QMouseEvent(
-            QEvent.MouseButtonRelease, event.localPos(), event.screenPos(),
-            Qt.LeftButton, Qt.NoButton, event.modifiers()
-        )
-        super().mousePressEvent(release_event)
+        # release_event = QMouseEvent(
+        #     QEvent.MouseButtonRelease, event.localPos(), event.screenPos(),
+        #     Qt.LeftButton, Qt.NoButton, event.modifiers()
+        # )
+        # super().mousePressEvent(release_event)
 
         self.setDragMode(QGraphicsView.ScrollHandDrag)
         super().mousePressEvent(self._drag_mouse_event(event))
@@ -144,7 +144,13 @@ class GraphicsView(QGraphicsView):
 
             self.drag_mode = True
             LOGGER.debug('Drag Mode Enabled')
+
             self._start_socket = item
+
+            # when drawing the edge, need to set the node z value to stay behind
+            # otherwise is not able to recognize the socket if is bellow him.
+            self._start_socket.parentItem().setZValue(-1.0)
+
             self.edge = NodeEdge(self, item, None)
 
         super().mousePressEvent(event)
@@ -155,6 +161,10 @@ class GraphicsView(QGraphicsView):
 
         if self.drag_mode:
             if isinstance(item, SocketGraphics):
+
+                # Reset the zvalue for the socket
+                self._start_socket.parentItem().setZValue(0)
+
                 self.scene().removeItem(self.edge.edge_graphics)
                 NodeEdge(self, self._start_socket, item)
             elif self.edge:

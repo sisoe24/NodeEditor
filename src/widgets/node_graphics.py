@@ -12,6 +12,7 @@ from PySide2.QtWidgets import (
     QVBoxLayout,
     QWidget
 )
+from src.widgets.node_edge import NodeEdgeGraphics
 
 from src.widgets.node_socket import Socket
 from src.utils import class_id
@@ -84,9 +85,9 @@ class NodeGraphics(QGraphicsItem):
 
         self.node = node
         self.content = content
+        self._edges = []
 
         self._height = max(self.node.layout_size.height(), 50)
-        self.edges = []
 
         self._set_flags()
         self._set_colors()
@@ -94,8 +95,16 @@ class NodeGraphics(QGraphicsItem):
         self._draw_content()
         self._draw_graphics()
 
-    def add_edge(self, edge):
-        self.edges.append(edge)
+    def add_edge(self, edge: NodeEdgeGraphics):
+        """Add edge to list for reference.
+
+        After creating an edge, it needs to get appended to the node list in
+        order to be able to reference it later when the node gets deleted.
+
+        Args:
+            edge (NodeEdgeGraphics): A NodeEdgeGraphics object.
+        """
+        self._edges.append(edge)
 
     def _set_colors(self):
         """Initialize the node graphics colors."""

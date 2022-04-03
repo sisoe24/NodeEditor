@@ -33,9 +33,6 @@ class NodeContent(QWidget):
         self._layout.setSpacing(15)
         self.setLayout(self._layout)
 
-    def __str__(self) -> str:
-        return f"<Socket {hex(id(self))[2:5]}..{hex(id(self))[-3:]}>"
-
     def _is_widget(func):
         def wrapper(*args):
             widget = args[1]

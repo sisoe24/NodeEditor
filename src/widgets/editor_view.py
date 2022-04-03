@@ -6,10 +6,10 @@ from PySide2.QtGui import QPainter, QMouseEvent
 from PySide2.QtWidgets import (
     QGraphicsView
 )
-from src.widgets.node_edge import NodeEdge, NodeEdgeTmp
+from src.widgets.node_edge import NodeEdge, NodeEdgeGraphics, NodeEdgeTmp
 from src.widgets.node_graphics import NodeGraphics
 
-from src.widgets.node_socket import SocketGraphics
+from src.widgets.node_socket import Socket, SocketGraphics
 
 LOGGER = logging.getLogger('nodeeditor.view')
 LOGGER.setLevel(logging.DEBUG)
@@ -147,6 +147,7 @@ class GraphicsView(QGraphicsView):
             self.setDragMode(QGraphicsView.NoDrag)
 
             self.drag_mode = True
+
             LOGGER.debug('Drag Mode Enabled')
 
             self._start_socket = item
@@ -155,7 +156,7 @@ class GraphicsView(QGraphicsView):
             # otherwise is not able to recognize the socket if is bellow him.
             self._start_socket.parentItem().setZValue(-1.0)
 
-            self._edge_tmp = NodeEdgeTmp(self, item)
+            self._edge_tmp = NodeEdgeTmp(self, self._start_socket)
 
         super().mousePressEvent(event)
 
@@ -184,7 +185,16 @@ class GraphicsView(QGraphicsView):
         super().mouseReleaseEvent(event)
 
     def _rightMouseButtonPress(self, event):
-        LOGGER.info(self._get_graphic_item(event))
+        """Debug use."""
+        item = self._get_graphic_item(event)
+        if isinstance(item, SocketGraphics):
+            LOGGER.info(item)
+        elif isinstance(item, NodeEdgeGraphics):
+            LOGGER.info(item)
+        elif hasattr(item, 'parentItem') and isinstance(item.parentItem(), NodeGraphics):
+            item = item.parentItem()
+            LOGGER.info('Node %s, edges: %s', item, item._edges)
+
         super().mousePressEvent(event)
 
     def _rightMouseButtonRelease(self, event):
@@ -227,10 +237,11 @@ class GraphicsView(QGraphicsView):
         key = event.key()
 
         if key == Qt.Key_Delete and self.selected_item:
-            for edge in self.selected_item.edges:
-                self.scene().removeItem(edge.edge_graphics)
 
-            self.scene().removeItem(self.selected_item)
+            if isinstance(self.selected_item, NodeGraphics):
+                self.selected_item.delete_node()
+            elif isinstance(self.selected_item, NodeEdgeGraphics):
+                self.selected_item.delete_edge()
 
         return super().keyPressEvent(event)
 

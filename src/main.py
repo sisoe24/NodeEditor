@@ -52,7 +52,9 @@ class NodeEditor(QWidget):
         start_socket = node_example.output_sockets[0]
         end_socket = node_debug.input_sockets[0]
 
-        NodeEdge(self.view, start_socket.socket_graphics, end_socket)
+        edge = NodeEdge(self.view, start_socket.socket_graphics,
+                        end_socket.socket_graphics)
+        print("➡ debug edge :", end_socket.socket_graphics.parentItem().edges)
 
 
 class MainWindow(QMainWindow):

@@ -74,7 +74,7 @@ class NodeEdgeGraphics(QGraphicsPathItem):
 class NodeEdge:
     def __init__(self, view, start_socket, end_socket):
         self.edge_graphics = NodeEdgeGraphics(view, start_socket, end_socket)
-
+        end_socket.parentItem().add_edge(self)
 
 class NodeEdgeTmp:
     def __init__(self, view, start_socket):

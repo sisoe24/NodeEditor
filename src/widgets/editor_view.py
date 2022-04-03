@@ -6,7 +6,7 @@ from PySide2.QtGui import QPainter, QMouseEvent
 from PySide2.QtWidgets import (
     QGraphicsView
 )
-from src.widgets.node_edge import NodeEdge, NodeEdgeGraphics
+from src.widgets.node_edge import NodeEdge, NodeEdgeTmp
 from src.widgets.node_graphics import NodeGraphics
 
 from src.widgets.node_socket import SocketGraphics
@@ -20,7 +20,7 @@ class GraphicsView(QGraphicsView):
 
     def __init__(self, graphic_scene, parent=None):
         super().__init__(graphic_scene, parent)
-        LOGGER.info('Init Graphics View')
+        LOGGER.debug('Init Graphics View')
 
         self._set_flags()
 
@@ -32,6 +32,8 @@ class GraphicsView(QGraphicsView):
 
         self.drag_mode = None
         self._selected_item = None
+        self._edge_tmp = None
+        self._start_socket = None
 
     def _debug_zoom(self):
         z = 5.15
@@ -138,6 +140,7 @@ class GraphicsView(QGraphicsView):
     def _leftMouseButtonPress(self, event):
         item = self._get_graphic_item(event)
         LOGGER.debug('Clicked on item: %s', item)
+
         self.selected_item = item
 
         if isinstance(item, SocketGraphics):
@@ -152,7 +155,7 @@ class GraphicsView(QGraphicsView):
             # otherwise is not able to recognize the socket if is bellow him.
             self._start_socket.parentItem().setZValue(-1.0)
 
-            self.edge = NodeEdge(self, item, None)
+            self._edge_tmp = NodeEdgeTmp(self, item)
 
         super().mousePressEvent(event)
 
@@ -167,11 +170,12 @@ class GraphicsView(QGraphicsView):
         if self.drag_mode:
             if isinstance(item, SocketGraphics):
 
-                self.scene().removeItem(self.edge.edge_graphics)
+                self.scene().removeItem(self._edge_tmp.edge_graphics)
                 NodeEdge(self, self._start_socket, item)
-            elif self.edge:
+
+            elif self._edge_tmp:
                 LOGGER.debug('Edge release was not on a socket. delete')
-                self.scene().removeItem(self.edge.edge_graphics)
+                self.scene().removeItem(self._edge_tmp.edge_graphics)
 
             self.drag_mode = False
             LOGGER.debug('Drag Mode Disabled')
@@ -223,6 +227,9 @@ class GraphicsView(QGraphicsView):
         key = event.key()
 
         if key == Qt.Key_Delete and self.selected_item:
+            for edge in self.selected_item.edges:
+                self.scene().removeItem(edge.edge_graphics)
+
             self.scene().removeItem(self.selected_item)
 
         return super().keyPressEvent(event)

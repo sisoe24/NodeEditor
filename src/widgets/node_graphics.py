@@ -86,12 +86,16 @@ class NodeGraphics(QGraphicsItem):
         self.content = content
 
         self._height = max(self.node.layout_size.height(), 50)
+        self.edges = []
 
         self._set_flags()
         self._set_colors()
         self._draw_title()
         self._draw_content()
         self._draw_graphics()
+
+    def add_edge(self, edge):
+        self.edges.append(edge)
 
     def _set_colors(self):
         """Initialize the node graphics colors."""

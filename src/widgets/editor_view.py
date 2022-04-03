@@ -140,11 +140,13 @@ class GraphicsView(QGraphicsView):
         self.selected_item = item
 
         if isinstance(item, SocketGraphics):
+            self.setDragMode(QGraphicsView.NoDrag)
+
             self.drag_mode = True
             LOGGER.debug('Drag Mode Enabled')
-
-            self.start = item
+            self._start_socket = item
             self.edge = NodeEdge(self, item, None)
+
         super().mousePressEvent(event)
 
     def _leftMouseButtonRelease(self, event):
@@ -152,17 +154,17 @@ class GraphicsView(QGraphicsView):
         LOGGER.debug('Released on item: %s', item)
 
         if self.drag_mode:
-            if not item:
-                pass
-            elif isinstance(item, SocketGraphics):
+            if isinstance(item, SocketGraphics):
                 self.scene().removeItem(self.edge.edge_graphics)
-                NodeEdge(self, self.start, item)
+                NodeEdge(self, self._start_socket, item)
             elif self.edge:
+                LOGGER.debug('Edge release was not on a socket. delete')
                 self.scene().removeItem(self.edge.edge_graphics)
 
             self.drag_mode = False
             LOGGER.debug('Drag Mode Disabled')
 
+        self.setDragMode(QGraphicsView.RubberBandDrag)
         super().mouseReleaseEvent(event)
 
     def _rightMouseButtonPress(self, event):
@@ -199,6 +201,9 @@ class GraphicsView(QGraphicsView):
             super().mouseReleaseEvent(event)
 
     def mouseMoveEvent(self, event):
+        if self.drag_mode:
+            self.scene().update()
+
         self._update_mouse_position(event)
         return super().mouseMoveEvent(event)
 

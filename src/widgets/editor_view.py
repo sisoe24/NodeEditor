@@ -34,7 +34,7 @@ class GraphicsView(QGraphicsView):
         self._selected_item = None
 
     def _debug_zoom(self):
-        z = 2.15
+        z = 5.15
         self.scale(z, z)
 
     @property
@@ -46,6 +46,7 @@ class GraphicsView(QGraphicsView):
         # Check if item belongs to a node class
         if hasattr(item, 'parentItem') and isinstance(item.parentItem(), NodeGraphics):
             self._selected_item = item.parentItem()
+            self._selected_item.setZValue(1)
         else:
             self._selected_item = item
 
@@ -159,11 +160,12 @@ class GraphicsView(QGraphicsView):
         item = self._get_graphic_item(event)
         LOGGER.debug('Released on item: %s', item)
 
+        # move node above other nodes when selected
+        if hasattr(self.selected_item, 'setZValue'):
+            self.selected_item.setZValue(0)
+
         if self.drag_mode:
             if isinstance(item, SocketGraphics):
-
-                # Reset the zvalue for the socket
-                self._start_socket.parentItem().setZValue(0)
 
                 self.scene().removeItem(self.edge.edge_graphics)
                 NodeEdge(self, self._start_socket, item)

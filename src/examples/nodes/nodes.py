@@ -2,6 +2,7 @@ import logging
 
 from PySide2.QtCore import Qt
 from PySide2.QtWidgets import (
+    QCheckBox,
     QComboBox,
     QLabel,
     QTextEdit
@@ -47,16 +48,39 @@ class NodeExample2Content(NodeContent):
     def __init__(self, parent=None):
         super().__init__(parent)
 
-        self.add_output('Output')
-        self.add_input(QTextEdit('Random text'))
+        self.add_output('Debug Output')
+        self.add_input(QLabel('Debug Input'))
 
 
 class NodeExample2(Node):
+    title_background = Qt.green
+    title = "Debug Node"
+
+    def __init__(self, scene):
+        self.node_content = NodeExample2Content()
+        super().__init__(scene=scene, node=self, content=self.node_content)
+
+    @property
+    def layout_size(self):
+        return self.node_content._layout.sizeHint()
+
+
+class NodeExample3Content(NodeContent):
+    """The node content widgets container class."""
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+        self.add_output('Output')
+        self.add_input(QCheckBox('Random text'))
+
+
+class NodeExample3(Node):
     title_background = Qt.black
     title = "Test Node"
 
     def __init__(self, scene):
-        self.node_content = NodeExample2Content()
+        self.node_content = NodeExample3Content()
         super().__init__(scene=scene, node=self, content=self.node_content)
 
     @property

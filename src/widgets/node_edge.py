@@ -19,7 +19,7 @@ class NodeEdgeGraphics(QGraphicsPathItem):
 
     def __init__(self, view, start_socket, end_socket):
         super().__init__(start_socket)
-        LOGGER.info('Creating edge')
+        LOGGER.debug('Creating edge')
 
         self.view: QGraphicsView = view
         self.start_socket = start_socket

@@ -106,6 +106,21 @@ class NodeGraphics(QGraphicsItem):
         """
         self._edges.append(edge)
 
+    def delete_node(self):
+        """Delete the graphics node and its edges.
+
+        Edges will also be removed from siblings nodes, both graphically and
+        internally.
+        """
+        scene = self.scene()
+
+        # remove any edges connected
+        for edge in self._edges:
+            edge.clear_end_points()
+            scene.removeItem(edge.edge_graphics)
+
+        scene.removeItem(self)
+
     def _set_colors(self):
         """Initialize the node graphics colors."""
         # TODO: initialize in init

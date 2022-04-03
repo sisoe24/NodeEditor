@@ -21,17 +21,13 @@ class NodeEdgeGraphics(QGraphicsPathItem):
         super().__init__(start_socket)
         LOGGER.debug('Creating edge')
 
-        self.view: QGraphicsView = view
-        self.start_socket = start_socket
         self.end_socket = end_socket
 
-        self.mouse_pos = (start_socket.get_position().x(),
-                          start_socket.get_position().y())
+        self._mouse_position = self.mapToScene(QPointF(0, 0))
+        view.mouse_position.connect(self._set_mouse)
 
         self._set_colors()
         self._set_flags()
-
-        self.view.mouse_position.connect(self._set_mouse)
 
     def _set_colors(self):
         self._pen_selected = QPen(QColor('#DD8600'))
@@ -46,7 +42,7 @@ class NodeEdgeGraphics(QGraphicsPathItem):
 
     def _set_mouse(self, x, y):
         # FIXME: ugly
-        self.mouse_pos = (x, y)
+        self._mouse_position = QPointF(x, y)
 
     def paint(self, painter, option, widget=None):
         stroke = QPainterPathStroker()
@@ -58,7 +54,7 @@ class NodeEdgeGraphics(QGraphicsPathItem):
         if self.end_socket:
             end = self.mapFromScene(self.end_socket.get_position())
         else:
-            end = self.mapFromScene(*self.mouse_pos)
+            end = self.mapFromScene(self._mouse_position)
 
         path.lineTo(end)
         stroker_path = stroke.createStroke(path)
@@ -77,5 +73,9 @@ class NodeEdgeGraphics(QGraphicsPathItem):
 
 class NodeEdge:
     def __init__(self, view, start_socket, end_socket):
-
         self.edge_graphics = NodeEdgeGraphics(view, start_socket, end_socket)
+
+
+class NodeEdgeTmp:
+    def __init__(self, view, start_socket):
+        self.edge_graphics = NodeEdgeGraphics(view, start_socket, None)

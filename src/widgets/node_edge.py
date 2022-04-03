@@ -42,8 +42,7 @@ class NodeEdgeGraphics(QGraphicsPathItem):
 
     def _set_flags(self):
         self.setFlag(QGraphicsItem.ItemIsSelectable)
-        # FIXME: edge stays on top of the socket
-        self.setZValue(-1.0)
+        self.setFlag(QGraphicsItem.ItemStacksBehindParent)
 
     def _set_mouse(self, x, y):
         # FIXME: ugly

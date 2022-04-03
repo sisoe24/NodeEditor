@@ -14,6 +14,11 @@ class SocketGraphics(QGraphicsItem):
         self._outline_pen.setWidthF(0.5)
 
         self._draw_graphics()
+        self._set_flags()
+
+    def _set_flags(self):
+        """Initialize UI for the Node graphic content."""
+        self.setFlag(QGraphicsItem.ItemIsSelectable)
 
     def _draw_graphics(self):
         """Draw the graphics of the socket ellipse."""

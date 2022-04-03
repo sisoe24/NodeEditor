@@ -23,9 +23,6 @@ class NodeEdgeGraphics(QGraphicsPathItem):
 
         self.edge = edge
 
-        self._mouse_position = self.mapToScene(QPointF(0, 0))
-        self.edge._view.mouse_position.connect(self._set_mouse)
-
         self._set_colors()
         self._set_flags()
 
@@ -45,25 +42,15 @@ class NodeEdgeGraphics(QGraphicsPathItem):
         self.setFlag(QGraphicsItem.ItemIsSelectable)
         self.setFlag(QGraphicsItem.ItemStacksBehindParent)
 
-    def _set_mouse(self, x, y):
-        # FIXME: ugly
-        self._mouse_position = QPointF(x, y)
-
     def paint(self, painter, option, widget=None):
+        """Paint the edge between the nodes."""
+        path = QPainterPath(QPointF(0, 0))
+        path.lineTo(self.mapFromScene(self.edge.end_point_loc))
+
         stroke = QPainterPathStroker()
         stroke.setJoinStyle(Qt.RoundJoin)
         stroke.setWidth(1.5)
-
-        path = QPainterPath(QPointF(0, 0))
-
-        if self.edge.end_point:
-            end = self.mapFromScene(self.edge.end_point.get_position())
-        else:
-            end = self.mapFromScene(self._mouse_position)
-
-        path.lineTo(end)
         stroker_path = stroke.createStroke(path)
-
         self.setPath(stroker_path)
 
         painter.setPen(self._pen_selected if self.isSelected() else self._pen)
@@ -81,11 +68,17 @@ class _EdgeInterface(abc.ABC):
     @property
     @abc.abstractmethod
     def start_point(self):
-        pass
+        """Start point Socket."""
 
     @property
     def end_point(self):
+        """End point Socket."""
         return None
+
+    @property
+    @abc.abstractmethod
+    def end_point_loc(self):
+        """End point scene location."""
 
 
 class NodeEdge(_EdgeInterface):
@@ -106,6 +99,10 @@ class NodeEdge(_EdgeInterface):
     def end_point(self):
         return self._end_socket
 
+    @property
+    def end_point_loc(self):
+        return self.end_point.get_position()
+
     def clear_end_points(self):
         # TODO: might need to clean a specific edge when multiple are present
         self.start_point.parentItem()._edges.clear()
@@ -125,6 +122,10 @@ class NodeEdge(_EdgeInterface):
 class NodeEdgeTmp(_EdgeInterface):
     def __init__(self, view, start_socket):
 
+        self._mouse_position = QPointF(start_socket.get_position().x(),
+                                       start_socket.get_position().y())
+        view.mouse_position.connect(self._set_end_point_loc)
+
         self._start_socket = start_socket
         self._view = view
         self.edge_graphics = NodeEdgeGraphics(self)
@@ -132,3 +133,10 @@ class NodeEdgeTmp(_EdgeInterface):
     @property
     def start_point(self):
         return self._start_socket
+
+    @property
+    def end_point_loc(self):
+        return self._mouse_position
+
+    def _set_end_point_loc(self, x, y):
+        self._mouse_position = QPointF(x, y)

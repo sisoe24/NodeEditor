@@ -1,7 +1,7 @@
 import logging
 
-from PySide2.QtCore import QPointF
-from PySide2.QtGui import QPen, QPainterPath, QColor
+from PySide2.QtCore import QPointF,  Qt
+from PySide2.QtGui import QPen, QPainterPath, QColor, QPainterPathStroker
 
 from PySide2.QtWidgets import (
     QGraphicsPathItem,
@@ -35,10 +35,10 @@ class NodeEdgeGraphics(QGraphicsPathItem):
 
     def _set_colors(self):
         self._pen_selected = QPen(QColor('#DD8600'))
-        self._pen_selected.setWidthF(3.0)
+        self._pen_selected.setWidthF(2.0)
 
         self._pen = QPen(QColor("#001000"))
-        self._pen.setWidthF(3.0)
+        self._pen.setWidthF(2.0)
 
     def _set_flags(self):
         self.setFlag(QGraphicsItem.ItemIsSelectable)
@@ -49,6 +49,10 @@ class NodeEdgeGraphics(QGraphicsPathItem):
         self.mouse_pos = (x, y)
 
     def paint(self, painter, option, widget=None):
+        stroke = QPainterPathStroker()
+        stroke.setJoinStyle(Qt.RoundJoin)
+        stroke.setWidth(1.5)
+
         path = QPainterPath(QPointF(0, 0))
 
         if self.end_socket:
@@ -57,7 +61,9 @@ class NodeEdgeGraphics(QGraphicsPathItem):
             end = self.mapFromScene(*self.mouse_pos)
 
         path.lineTo(end)
-        self.setPath(path)
+        stroker_path = stroke.createStroke(path)
+
+        self.setPath(stroker_path)
 
         painter.setPen(self._pen_selected if self.isSelected() else self._pen)
         painter.drawPath(self.path())

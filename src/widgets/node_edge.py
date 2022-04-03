@@ -1,3 +1,5 @@
+import logging
+
 from PySide2.QtCore import QPointF
 from PySide2.QtGui import QPen, QPainterPath, QColor
 
@@ -9,11 +11,15 @@ from PySide2.QtWidgets import (
 
 from src.utils import class_id
 
+LOGGER = logging.getLogger('nodeeditor.edge')
+LOGGER.setLevel(logging.DEBUG)
+
 
 class NodeEdgeGraphics(QGraphicsPathItem):
 
     def __init__(self, view, start_socket, end_socket):
         super().__init__(start_socket)
+        LOGGER.info('Creating edge')
 
         self.view: QGraphicsView = view
         self.start_socket = start_socket

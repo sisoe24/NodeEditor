@@ -17,8 +17,7 @@ class GraphicScene(QGraphicsScene):
         super().__init__(parent)
         LOGGER.info('Init Graphical Scene')
 
-        self._grid_pen = QPen(QColor("#282828"))
-        self._grid_pen.setWidth(2)
+        self._grid_pattern = QBrush(QColor("#282828"), Qt.Dense7Pattern)
 
         self.setBackgroundBrush(QColor("#393939"))
 
@@ -38,28 +37,7 @@ class GraphicScene(QGraphicsScene):
 
     def drawBackground(self, painter, rect):
         super().drawBackground(painter, rect)
-
-        # Get scene bounding size converted as integers for the range loop
-        left = round(rect.left())
-        right = round(rect.right())
-        top = round(rect.top())
-        bottom = round(rect.bottom())
-
-        x_points = []
-        y_points = []
-
-        # TODO: change grid_size based on zoom level
-        grid_size = 20
-
-        # Draw the grid
-        for x in range(left, right, grid_size):
-            x_points.append(QPoint(x, top))
-
-            for y in range(top, bottom, grid_size):
-                y_points.append(QPoint(x, y))
-
-        painter.setPen(self._grid_pen)
-        painter.drawPoints(x_points + y_points)
+        painter.fillRect(rect, self._grid_pattern)
 
 
 class Scene:

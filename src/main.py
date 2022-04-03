@@ -39,19 +39,20 @@ class NodeEditor(QWidget):
 
     def _debug_add_nodes(self):
 
-        node_example = nodes.NodeExample1(self.scene)
-        node_example.set_position(-170, 0)
+        node_test = nodes.NodeExample3(self.scene)
+        node_test.set_position(-245, 0)
 
         node_debug = nodes.NodeExample2(self.scene)
-        node_debug.set_position(0, 0)
+        node_debug.set_position(95, 0)
 
-        node_test = nodes.NodeExample3(self.scene)
-        node_test.set_position(-350, 0)
+        node_example = nodes.NodeExample1(self.scene)
+        node_example.set_position(-75, 0)
 
-        # start_socket = node_example.output_sockets[0]
-        # end_socket = node_debug.input_sockets[0]
+        # create debug edge
+        start_socket = node_example.output_sockets[0]
+        end_socket = node_debug.input_sockets[0]
 
-        # NodeEdge(self.view, start_socket.socket_graphics, end_socket)
+        NodeEdge(self.view, start_socket.socket_graphics, end_socket)
 
 
 class MainWindow(QMainWindow):

@@ -24,6 +24,7 @@ class NodeExample1Content(NodeContent):
 
         self.add_output('Output 1')
         self.add_output('Output 2')
+        self.add_output('Output 3')
         self.add_widget(QLabel('----'))
         self.add_input(QLabel('Input 1'))
         self.add_input(QLabel('Input 2'))
@@ -49,7 +50,8 @@ class NodeExample2Content(NodeContent):
         super().__init__(parent)
 
         self.add_output('Debug Output')
-        self.add_input(QLabel('Debug Input'))
+        self.add_input(QLabel('Debug Input 1'))
+        self.add_input(QLabel('Debug Input 2'))
 
 
 class NodeExample2(Node):

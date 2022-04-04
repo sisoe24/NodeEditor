@@ -147,13 +147,19 @@ class GraphicsView(QGraphicsView):
             self.setDragMode(QGraphicsView.NoDrag)
 
             self.drag_mode = True
-
             LOGGER.debug('Drag Mode Enabled')
 
             self._start_socket = item
 
+            if self._start_socket.has_edge():
+
+                # re assign start socket to the initial starting point
+                self._start_socket = self._start_socket.edge.start_point
+                item.remove_edge()
+
             # when drawing the edge, need to set the node z value to stay behind
             # otherwise is not able to recognize the socket if is bellow him.
+
             self._start_socket.parentItem().setZValue(-1.0)
 
             self._edge_tmp = NodeEdgeTmp(self, self._start_socket)
@@ -166,13 +172,31 @@ class GraphicsView(QGraphicsView):
 
         # move node above other nodes when selected
         if hasattr(self.selected_item, 'setZValue'):
+            # BUG when connecting an output to an input and releasing.
+            # the zValue gets reset only for the input and not the output
+            # which remains at -1.0, thus connecting back from input to output
+            #  does not work
             self.selected_item.setZValue(0)
+
+        if item == self._start_socket:
+            LOGGER.debug('End socket is start socket. abort')
+            self.scene().removeItem(self._edge_tmp.edge_graphics)
+            super().mouseReleaseEvent(event)
+            return
 
         if self.drag_mode:
             if isinstance(item, SocketGraphics):
+                end_socket = item
 
                 self.scene().removeItem(self._edge_tmp.edge_graphics)
-                NodeEdge(self, self._start_socket, item)
+
+                # TODO: this should happen also if trying to connect from
+                # output to input
+                if end_socket.has_edge():
+                    end_socket.remove_edge()
+
+                edge = NodeEdge(self, self._start_socket, end_socket)
+                end_socket.edge = edge
 
             elif self._edge_tmp:
                 LOGGER.debug('Edge release was not on a socket. delete')
@@ -193,7 +217,8 @@ class GraphicsView(QGraphicsView):
             LOGGER.info(item)
         elif hasattr(item, 'parentItem') and isinstance(item.parentItem(), NodeGraphics):
             item = item.parentItem()
-            LOGGER.info('Node %s, edges: %s', item, item._edges)
+            LOGGER.info('Node %s, edges: %s, zValue: %s', item,
+                        len(item._edges), item.zValue())
 
         super().mousePressEvent(event)
 

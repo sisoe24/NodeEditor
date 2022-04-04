@@ -238,18 +238,14 @@ class GraphicsView(QGraphicsView):
 
         selected_items = self.scene().selectedItems()
 
-        if key == Qt.Key_Delete:
+        if key == Qt.Key_Delete and selected_items:
 
-            if self.selected_item:
-                if isinstance(self.selected_item, NodeGraphics):
-                    self.selected_item.delete_node()
-                elif isinstance(self.selected_item, NodeEdgeGraphics):
-                    self.selected_item.delete_edge()
+            for item in selected_items:
 
-            # BUG: GraphicsScene::removeItem: scene is different from this scene
-            elif selected_items:
-                for item in selected_items:
-                    self.scene().removeItem(item)
+                if isinstance(item, NodeEdgeGraphics):
+                    item.delete_edge()
+                elif isinstance(item, NodeGraphics):
+                    item.delete_node()
 
         return super().keyPressEvent(event)
 

@@ -29,7 +29,16 @@ class NodeEdgeGraphics(QGraphicsPathItem):
     def delete_edge(self):
         """Delete the graphic edge and remove its reference from siblings nodes."""
         self.edge.clear_end_points()
-        self.scene().removeItem(self)
+
+        # FIXME: temporary solution when deleting a node before and edge
+        # in a multi selection. because the node removes the edge, the selection
+        # still keeps a reference to it, so calling it will result in the scene.
+        # not being found.
+        try:
+            self.scene().removeItem(self)
+        except AttributeError as err:
+            LOGGER.warning(
+                'Could not delete edge: %s. It might have been already deleted. Error: %s', self, err)
 
     def _set_colors(self):
         self._pen_selected = QPen(QColor('#DD8600'))

@@ -28,7 +28,7 @@ class NodeEdgeGraphics(QGraphicsPathItem):
 
     def delete_edge(self):
         """Delete the graphic edge and remove its reference from siblings nodes."""
-        self.edge.clear_end_points()
+        self.edge.clear_reference()
 
         # FIXME: temporary solution when deleting a node before and edge
         # in a multi selection. because the node removes the edge, the selection
@@ -69,7 +69,7 @@ class NodeEdgeGraphics(QGraphicsPathItem):
         return self.shape().boundingRect()
 
     def __str__(self) -> str:
-        return class_id('NodeEdge', self)
+        return class_id('NodeEdgeGraphics', self)
 
 
 class _EdgeInterface(abc.ABC):
@@ -98,7 +98,10 @@ class NodeEdge(_EdgeInterface):
         self._view = view
 
         self.edge_graphics = NodeEdgeGraphics(self)
-        self._add_end_points()
+        self._add_reference_points()
+
+    def __str__(self) -> str:
+        return class_id('NodeEdge', self)
 
     @property
     def start_point(self):
@@ -112,20 +115,20 @@ class NodeEdge(_EdgeInterface):
     def end_point_loc(self):
         return self.end_point.get_position()
 
-    def clear_end_points(self):
-        # TODO: might need to clean a specific edge when multiple are present
-        self.start_point.parentItem()._edges.clear()
-        self.end_point.parentItem()._edges.clear()
+    def clear_reference(self):
+        """Remove Edge reference inside the Node edge list."""
+        self.start_point.parentItem().remove_edge(self)
+        self.end_point.parentItem().remove_edge(self)
 
-    def _add_end_points(self):
+    def _add_reference_points(self):
         """Add the edge to the end points.
 
         When creating the edge, automatically add its reference to the end points
         (starting socket and end socket) `edges` attribute. This is to be able
         to have a reference when deleting the nodes.
         """
-        self._end_socket.parentItem().add_edge(self)
-        self._start_socket.parentItem().add_edge(self)
+        self.start_point.parentItem().add_edge(self)
+        self.end_point.parentItem().add_edge(self)
 
 
 class NodeEdgeTmp(_EdgeInterface):
@@ -149,3 +152,6 @@ class NodeEdgeTmp(_EdgeInterface):
 
     def _set_end_point_loc(self, x, y):
         self._mouse_position = QPointF(x, y)
+
+    def __str__(self) -> str:
+        return class_id('NodeEdgeTmp', self)

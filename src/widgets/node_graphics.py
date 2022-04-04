@@ -12,7 +12,7 @@ from PySide2.QtWidgets import (
     QVBoxLayout,
     QWidget
 )
-from src.widgets.node_edge import NodeEdgeGraphics
+from src.widgets.node_edge import NodeEdge, NodeEdgeGraphics
 
 from src.widgets.node_socket import Socket
 from src.utils import class_id
@@ -95,16 +95,26 @@ class NodeGraphics(QGraphicsItem):
         self._draw_content()
         self._draw_graphics()
 
-    def add_edge(self, edge: NodeEdgeGraphics):
+    def add_edge(self, edge: NodeEdge):
         """Add edge to list for reference.
 
         After creating an edge, it needs to get appended to the node list in
         order to be able to reference it later when the node gets deleted.
 
         Args:
-            edge (NodeEdgeGraphics): A NodeEdgeGraphics object.
+            edge (NodeEdge): A NodeEdge object.
         """
         self._edges.append(edge)
+
+    def remove_edge(self, edge: NodeEdge):
+        """Remove edge from list of reference.
+
+        This usually happens when deleting a node.
+
+        Args:
+            edge (NodeEdge): A NodeEdge object.
+        """
+        self._edges.remove(edge)
 
     def delete_node(self):
         """Delete the graphics node and its edges.
@@ -114,9 +124,12 @@ class NodeGraphics(QGraphicsItem):
         """
         scene = self.scene()
 
-        # remove any edges connected
-        for edge in self._edges:
-            edge.clear_end_points()
+        # because edges will be removed from the list, I need a copy to avoid
+        # modifying the original list while parsing it
+        edges = self._edges.copy()
+
+        for edge in edges:
+            edge.clear_reference()
             scene.removeItem(edge.edge_graphics)
 
         scene.removeItem(self)

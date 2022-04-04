@@ -120,6 +120,9 @@ class NodeEdge(_EdgeInterface):
         self.start_point.parentItem().remove_edge(self)
         self.end_point.parentItem().remove_edge(self)
 
+        self.start_point.edge = None
+        self.end_point.edge = None
+
     def _add_reference_points(self):
         """Add the edge to the end points.
 

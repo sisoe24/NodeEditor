@@ -1,9 +1,11 @@
 
 from PySide2.QtCore import Qt
-from PySide2.QtGui import QPen, QPainterPath, QBrush
+from PySide2.QtGui import QColor, QPen, QPainterPath, QBrush
 from PySide2.QtWidgets import (
     QGraphicsItem
 )
+
+from src.utils import class_id
 
 
 class SocketGraphics(QGraphicsItem):
@@ -36,7 +38,7 @@ class SocketGraphics(QGraphicsItem):
         return self._socket_body.boundingRect()
 
     def __str__(self) -> str:
-        return f"<Socket {hex(id(self))[2:5]}..{hex(id(self))[-3:]}>"
+        return class_id('Socket', self)
 
     def get_position(self):
         """Get socket position in the scene."""

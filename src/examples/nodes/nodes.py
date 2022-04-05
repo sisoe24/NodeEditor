@@ -5,7 +5,6 @@ from PySide2.QtWidgets import (
     QCheckBox,
     QComboBox,
     QLabel,
-    QTextEdit
 )
 
 
@@ -30,7 +29,7 @@ class NodeExample1Content(NodeContent):
         self.add_input(QLabel('Input 2'))
 
 
-class NodeExample1(Node):
+class NodeExample(Node):
     title_background = Qt.red
     title = "Example Node1"
 
@@ -54,7 +53,7 @@ class NodeExample2Content(NodeContent):
         self.add_input(QLabel('Debug Input 2'))
 
 
-class NodeExample2(Node):
+class NodeDebug(Node):
     title_background = Qt.green
     title = "Debug Node"
 
@@ -73,11 +72,12 @@ class NodeExample3Content(NodeContent):
     def __init__(self, parent=None):
         super().__init__(parent)
 
-        self.add_output('Output')
+        self.add_output('Output 1')
+        self.add_output('Output 2')
         self.add_input(QCheckBox('Random text'))
 
 
-class NodeExample3(Node):
+class NodeTest(Node):
     title_background = Qt.black
     title = "Test Node"
 

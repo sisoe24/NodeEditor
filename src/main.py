@@ -47,6 +47,7 @@ class NodeEditor(QWidget):
 
         node_example = nodes.NodeExample1(self.scene)
         node_example.set_position(-75, 0)
+        return
 
         # create debug edge
         start_socket = node_example.output_sockets[0]

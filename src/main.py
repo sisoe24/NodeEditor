@@ -51,38 +51,31 @@ class NodeEditor(QWidget):
 
     def _debug_add_nodes(self):
 
-        # return
+        return
         node_test = nodes.NodeTest(self.scene)
         node_test.set_position(-245, 0)
 
         node_debug = nodes.NodeDebug(self.scene)
         node_debug.set_position(95, 0)
 
-        # node_example = nodes.NodeExample(self.scene)
-        # node_example.set_position(-75, 0)
+        node_example = nodes.NodeExample(self.scene)
+        node_example.set_position(-75, 0)
 
         # create debug edge
-        start_socket = node_test.output_sockets[0]
+        start_socket_b = node_test.output_sockets[1]
+        start_socket_a = node_test.output_sockets[0]
         end_socket_a = node_debug.input_sockets[0]
         end_socket_b = node_debug.input_sockets[1]
+        end_socket_c = node_debug.input_sockets[2]
 
-        NodeEdge(self.view, start_socket.socket_graphics,
+        NodeEdge(self.view, start_socket_a.socket_graphics,
                  end_socket_a.socket_graphics)
 
-        NodeEdge(self.view, start_socket.socket_graphics,
+        NodeEdge(self.view, start_socket_a.socket_graphics,
                  end_socket_b.socket_graphics)
 
-        # start_socket = node_example.output_sockets[1]
-        # end_socket = node_debug.input_sockets[0]
-
-        # NodeEdge(self.view, start_socket.socket_graphics,
-        #          end_socket.socket_graphics)
-
-        # start_socket = node_example.output_sockets[2]
-        # end_socket = node_debug.input_sockets[1]
-
-        # NodeEdge(self.view, start_socket.socket_graphics,
-        #          end_socket.socket_graphics)
+        NodeEdge(self.view, start_socket_b.socket_graphics,
+                 end_socket_c.socket_graphics)
 
 
 class MainWindow(QMainWindow):
@@ -100,44 +93,46 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self.node_editor)
         self.set_status_bar()
 
-        # self.load_file()
-        self.save_file()
+        self.load_file()
+        # self.save_file()
 
     def save_file(self):
         scene: QGraphicsScene = self.node_editor.scene.graphics_scene
 
         nodes = [x for x in scene.items() if isinstance(x, NodeGraphics)]
 
-        state = {'nodes': []}
+        graph_state = {'nodes': []}
         for item in nodes:
-            print("➡ item :", item)
 
             edges = {}
+            index = 0
 
-            for index, input_socket in enumerate(item.node.output_sockets):
+            for input_socket in item.node.output_sockets:
                 socket = input_socket.socket_graphics
-                if socket.is_connected():
-                    edges[f'edge.{index}'] = {
-                        'start_socket': socket.edge.start_point.index,
-                        'end_socket': {
-                            'node': socket.edge.end_point.node.node.id(),
-                            'socket': socket.edge.end_point.index
-                        }}
+                if socket.has_edge():
+                    for edge in socket.edges:
+                        edges[f'edge.{index}'] = {
+                            'start_socket': edge.start_point.index,
+                            'end_socket': {
+                                'node': edge.end_point.node.node.id(),
+                                'socket': edge.end_point.index
+                            }}
+                        index += 1
 
-            state['nodes'].append(
+            graph_state['nodes'].append(
                 {item.node.id(): {
                     'class': f'{item.node}',
                     'position': {'x': item.pos().x(), 'y': item.pos().y()},
                     'edges': edges
                 }})
 
-        with open('save_tmp.json', 'w') as file:
-            json.dump(state, file, indent=2)
+        with open('save_file.json', 'w', encoding='utf-8') as file:
+            json.dump(graph_state, file, indent=2)
 
     def load_file(self):
         # TODO: extract into own module/class
 
-        with open('save_tmp.json', 'r', encoding='utf-8') as file:
+        with open('save_file.json', 'r', encoding='utf-8') as file:
             data = json.load(file)
 
         node_edges = {}

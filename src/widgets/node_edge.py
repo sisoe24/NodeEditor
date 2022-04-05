@@ -118,8 +118,8 @@ class NodeEdge(_EdgeInterface):
         self.start_point.parentItem().remove_edge(self)
         self.end_point.parentItem().remove_edge(self)
 
-        self.start_point.edge = None
-        self.end_point.edge = None
+        self.start_point._edges = []
+        self.end_point._edges = []
 
     def _add_reference_points(self):
         """Add the edge to the end points.
@@ -128,8 +128,8 @@ class NodeEdge(_EdgeInterface):
         (starting socket and end socket) `edges` attribute. This is to be able
         to have a reference when deleting the nodes.
         """
-        self._start_socket.edge = self
-        self._end_socket.edge = self
+        self.start_point.add_edge(self)
+        self.end_point.add_edge(self)
 
         self.start_point.parentItem().add_edge(self)
         self.end_point.parentItem().add_edge(self)

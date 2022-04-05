@@ -19,7 +19,6 @@ class NodeEdgeGraphics(QGraphicsPathItem):
 
     def __init__(self, edge):
         super().__init__(edge.start_point)
-        LOGGER.debug('Creating edge')
 
         self.edge = edge
 
@@ -93,15 +92,14 @@ class _EdgeInterface(abc.ABC):
 class NodeEdge(_EdgeInterface):
     def __init__(self, view, start_socket, end_socket):
 
+        LOGGER.debug('Create connected edge')
+
         self._start_socket = start_socket
         self._end_socket = end_socket
         self._view = view
 
         self.edge_graphics = NodeEdgeGraphics(self)
         self._add_reference_points()
-
-    def __str__(self) -> str:
-        return class_id('NodeEdge', self)
 
     @property
     def start_point(self):
@@ -130,12 +128,23 @@ class NodeEdge(_EdgeInterface):
         (starting socket and end socket) `edges` attribute. This is to be able
         to have a reference when deleting the nodes.
         """
+        self._start_socket.edge = self
+        self._end_socket.edge = self
+
         self.start_point.parentItem().add_edge(self)
         self.end_point.parentItem().add_edge(self)
+
+    def __del__(self):
+        # Review: how to make it work
+        print('Delete NodeEdge')
+
+    def __str__(self) -> str:
+        return class_id('NodeEdge', self)
 
 
 class NodeEdgeTmp(_EdgeInterface):
     def __init__(self, view, start_socket):
+        LOGGER.debug('Create temporary edge')
 
         self._mouse_position = QPointF(start_socket.get_position().x(),
                                        start_socket.get_position().y())

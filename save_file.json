@@ -1,0 +1,66 @@
+{
+    "nodes": [
+        {
+            "NodeExample1.123": {
+                "class": "NodeExample1",
+                "position": {
+                    "x": -185,
+                    "y": -70
+                },
+                "edges": {
+                    "edge1": {
+                        "start_socket": 0,
+                        "end_socket": {
+                            "node": "NodeExample2.345",
+                            "socket": 0
+                        }
+                    },
+                    "edge2": {
+                        "start_socket": 2,
+                        "end_socket": {
+                            "node": "NodeExample2.345",
+                            "socket": 1
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "NodeExample2.345": {
+                "class": "NodeExample2",
+                "position": {
+                    "x": 50,
+                    "y": -70
+                },
+                "edges": {
+                    "edge1": {
+                        "start_socket": 0,
+                        "end_socket": {
+                            "node": "NodeExample1.123",
+                            "socket": 1
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "NodeExample2.678": {
+                "class": "NodeExample2",
+                "position": {
+                    "x": 50,
+                    "y": -250
+                }
+            }
+        }
+    ],
+    "edges": {
+        "edge1": {
+            "start_socket": {
+                "NodeExample1": 0
+            },
+            "end_socket": {
+                "NodeExample2": 1
+            }
+        }
+    }
+}

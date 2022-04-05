@@ -24,13 +24,10 @@ class SocketGraphics(QGraphicsItem):
         if self._is_input:
             self._color = Qt.green
 
-        self._edge = None
+        self._edges = []
 
         self._draw_graphics()
         self._set_flags()
-
-    def is_connected(self):
-        return bool(self.edge)
 
     def is_input(self):
         return self._is_input
@@ -44,20 +41,22 @@ class SocketGraphics(QGraphicsItem):
         return self._index
 
     @property
-    def edge(self):
-        return self._edge
+    def edges(self):
+        return self._edges
 
-    @edge.setter
-    def edge(self, edge: NodeEdge):
-        self._edge = edge
+    def add_edge(self, edge: NodeEdge):
+        self._edges.append(edge)
 
     def has_edge(self):
-        return bool(self.edge)
+        return bool(self._edges)
 
     def remove_edge(self):
-        self.scene().removeItem(self.edge.edge_graphics)
-        self.edge.clear_reference()
-        self.edge = None
+        # FIXME: is not intuitive getting the first index of the list
+        edge = self._edges[0]
+
+        edge.clear_reference()
+        self.scene().removeItem(edge.edge_graphics)
+        edge = None
 
     def _set_flags(self):
         """Initialize UI for the Node graphic content."""

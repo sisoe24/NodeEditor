@@ -316,7 +316,7 @@ class Node(NodeInterface):
         for widget in widgets:
             y = self.node_graphics._title_height + widget.pos().y() + offset
 
-            socket = Socket(self.node_graphics)
+            socket = Socket(self.node_graphics, is_input)
             socket.socket_graphics.setPos(0 if is_input else width, y)
 
             yield socket

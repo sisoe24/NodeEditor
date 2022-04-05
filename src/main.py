@@ -50,35 +50,39 @@ class NodeEditor(QWidget):
         self._debug_add_nodes()
 
     def _debug_add_nodes(self):
-        return
 
-        node_test = nodes.NodeExample3(self.scene)
+        # return
+        node_test = nodes.NodeTest(self.scene)
         node_test.set_position(-245, 0)
 
-        node_debug = nodes.NodeExample2(self.scene)
+        node_debug = nodes.NodeDebug(self.scene)
         node_debug.set_position(95, 0)
 
-        node_example = nodes.NodeExample1(self.scene)
-        node_example.set_position(-75, 0)
+        # node_example = nodes.NodeExample(self.scene)
+        # node_example.set_position(-75, 0)
 
         # create debug edge
-        start_socket = node_example.output_sockets[0]
-        end_socket = node_debug.input_sockets[0]
+        start_socket = node_test.output_sockets[0]
+        end_socket_a = node_debug.input_sockets[0]
+        end_socket_b = node_debug.input_sockets[1]
 
         NodeEdge(self.view, start_socket.socket_graphics,
-                 end_socket.socket_graphics)
-
-        start_socket = node_example.output_sockets[1]
-        end_socket = node_debug.input_sockets[0]
+                 end_socket_a.socket_graphics)
 
         NodeEdge(self.view, start_socket.socket_graphics,
-                 end_socket.socket_graphics)
+                 end_socket_b.socket_graphics)
 
-        start_socket = node_example.output_sockets[2]
-        end_socket = node_debug.input_sockets[1]
+        # start_socket = node_example.output_sockets[1]
+        # end_socket = node_debug.input_sockets[0]
 
-        NodeEdge(self.view, start_socket.socket_graphics,
-                 end_socket.socket_graphics)
+        # NodeEdge(self.view, start_socket.socket_graphics,
+        #          end_socket.socket_graphics)
+
+        # start_socket = node_example.output_sockets[2]
+        # end_socket = node_debug.input_sockets[1]
+
+        # NodeEdge(self.view, start_socket.socket_graphics,
+        #          end_socket.socket_graphics)
 
 
 class MainWindow(QMainWindow):
@@ -87,49 +91,53 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("NodeEditor")
         self.setGeometry(-1077.296875, -5.31640625, 1080, 1980)
 
-        # QCoreApplication.setOrganizationName('virgilsisoe')
-        # QCoreApplication.setOrganizationDomain('nodeeditor.com')
-        # QCoreApplication.setApplicationName('Node Editor')
-
-        self.settings = QSettings(os.path.join(
-            os.getcwd(), 'NodeEditor.ini'), QSettings.IniFormat)
-
         self.mouse_position = QLabel('')
         self.node_editor = NodeEditor()
         self.node_editor.view.mouse_position.connect(self.set_coords)
 
-        # i = self.saveState(1)
-        # self.restoreState(i)
-        # print("➡ i :", i)
         self._add_actions()
 
         self.setCentralWidget(self.node_editor)
         self.set_status_bar()
 
-        # self.check_state()
-        self.load_file()
+        # self.load_file()
+        self.save_file()
 
-    def check_state(self):
+    def save_file(self):
         scene: QGraphicsScene = self.node_editor.scene.graphics_scene
 
         nodes = [x for x in scene.items() if isinstance(x, NodeGraphics)]
 
-        self.settings.beginGroup('state')
-        state = {}
+        state = {'nodes': []}
         for item in nodes:
             print("➡ item :", item)
 
-            # self.settings.setValue('abc', item.node)
-            # state[str(item.node)] = {item}
-        self.settings.endGroup()
-        pprint(state)
+            edges = {}
 
-        # with open('save_file.json', 'w') as file:
-        #     json.dump(state, file)
+            for index, input_socket in enumerate(item.node.output_sockets):
+                socket = input_socket.socket_graphics
+                if socket.is_connected():
+                    edges[f'edge.{index}'] = {
+                        'start_socket': socket.edge.start_point.index,
+                        'end_socket': {
+                            'node': socket.edge.end_point.node.node.id(),
+                            'socket': socket.edge.end_point.index
+                        }}
+
+            state['nodes'].append(
+                {item.node.id(): {
+                    'class': f'{item.node}',
+                    'position': {'x': item.pos().x(), 'y': item.pos().y()},
+                    'edges': edges
+                }})
+
+        with open('save_tmp.json', 'w') as file:
+            json.dump(state, file, indent=2)
 
     def load_file(self):
+        # TODO: extract into own module/class
 
-        with open('save_file.json', 'r') as file:
+        with open('save_tmp.json', 'r', encoding='utf-8') as file:
             data = json.load(file)
 
         node_edges = {}
@@ -147,8 +155,6 @@ class MainWindow(QMainWindow):
                 edges = node_attributes.get('edges', {})
                 node_edges[node_type] = {'obj': node, 'edges': edges}
 
-        # pprint(node_edges)
-
         for node, connections in node_edges.items():
             obj = connections['obj']
             for edge in connections['edges'].values():
@@ -162,11 +168,10 @@ class MainWindow(QMainWindow):
                 NodeEdge(self.node_editor.view,
                          start_socket.socket_graphics,
                          end_socket.socket_graphics)
-            break
 
     def _add_actions(self):
         save = QAction('Save File', self)
-        save.triggered.connect(self.check_state)
+        save.triggered.connect(self.save_file)
 
         load = QAction('Load File', self)
         load.triggered.connect(self.load_file)

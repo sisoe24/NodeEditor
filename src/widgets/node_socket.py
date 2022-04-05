@@ -10,9 +10,11 @@ from src.widgets.node_edge import NodeEdge
 
 
 class SocketGraphics(QGraphicsItem):
-    def __init__(self, node, is_input, parent=None):
+    def __init__(self, node,  index, is_input, parent=None):
         super().__init__(node)
 
+        self._node = node
+        self._index = index
         self._is_input = is_input
 
         self._outline_pen = QPen(Qt.black)
@@ -27,8 +29,19 @@ class SocketGraphics(QGraphicsItem):
         self._draw_graphics()
         self._set_flags()
 
+    def is_connected(self):
+        return bool(self.edge)
+
     def is_input(self):
         return self._is_input
+
+    @property
+    def node(self):
+        return self._node
+
+    @property
+    def index(self):
+        return self._index
 
     @property
     def edge(self):
@@ -74,8 +87,8 @@ class SocketGraphics(QGraphicsItem):
 
 
 class Socket:
-    def __init__(self, node, is_input):
-        self.socket_graphics = SocketGraphics(node, is_input)
+    def __init__(self, node, index, is_input):
+        self.socket_graphics = SocketGraphics(node, index, is_input)
 
     def get_position(self):
         """Get socket position in the scene."""

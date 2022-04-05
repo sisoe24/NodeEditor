@@ -12,7 +12,7 @@ from ...widgets.node_graphics import Node, NodeContent
 LOGGER = logging.getLogger('nodeeditor.node_input')
 
 
-class NodeExample1Content(NodeContent):
+class _NodeExampleContent(NodeContent):
     """The node content widgets container class."""
 
     def __init__(self, parent=None):
@@ -34,7 +34,7 @@ class NodeExample(Node):
     title = "Example Node1"
 
     def __init__(self, scene):
-        self.node_content = NodeExample1Content()
+        self.node_content = _NodeExampleContent()
         super().__init__(scene=scene, node=self, content=self.node_content)
 
     @property
@@ -42,7 +42,7 @@ class NodeExample(Node):
         return self.node_content._layout.sizeHint()
 
 
-class NodeExample2Content(NodeContent):
+class _NodeDebugContent(NodeContent):
     """The node content widgets container class."""
 
     def __init__(self, parent=None):
@@ -51,6 +51,7 @@ class NodeExample2Content(NodeContent):
         self.add_output('Debug Output')
         self.add_input(QLabel('Debug Input 1'))
         self.add_input(QLabel('Debug Input 2'))
+        self.add_input(QLabel('Debug Input 3'))
 
 
 class NodeDebug(Node):
@@ -58,7 +59,7 @@ class NodeDebug(Node):
     title = "Debug Node"
 
     def __init__(self, scene):
-        self.node_content = NodeExample2Content()
+        self.node_content = _NodeDebugContent()
         super().__init__(scene=scene, node=self, content=self.node_content)
 
     @property
@@ -66,7 +67,7 @@ class NodeDebug(Node):
         return self.node_content._layout.sizeHint()
 
 
-class NodeExample3Content(NodeContent):
+class _NodeTestContent(NodeContent):
     """The node content widgets container class."""
 
     def __init__(self, parent=None):
@@ -74,6 +75,7 @@ class NodeExample3Content(NodeContent):
 
         self.add_output('Output 1')
         self.add_output('Output 2')
+        self.add_output('Output 3')
         self.add_input(QCheckBox('Random text'))
 
 
@@ -82,7 +84,7 @@ class NodeTest(Node):
     title = "Test Node"
 
     def __init__(self, scene):
-        self.node_content = NodeExample3Content()
+        self.node_content = _NodeTestContent()
         super().__init__(scene=scene, node=self, content=self.node_content)
 
     @property

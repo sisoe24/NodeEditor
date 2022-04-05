@@ -334,3 +334,7 @@ class Node(NodeInterface):
 
     def __str__(self):
         return f'{self.__class__.__name__}'
+
+    def id(self):
+        name = f'{self.__class__.__name__}'
+        return f'{name}.{id(self)}'

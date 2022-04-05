@@ -36,7 +36,7 @@ class GraphicsView(QGraphicsView):
         self._clicked_socket = None
 
     def _debug_zoom(self):
-        z = 5.15
+        z = 2.15
         self.scale(z, z)
 
     @property
@@ -183,6 +183,7 @@ class GraphicsView(QGraphicsView):
         LOGGER.debug('Restart_pointleased on item: %s', item)
 
         if not item:
+            super().mouseReleaseEvent(event)
             return
 
         # move node above other nodes when selected
@@ -191,6 +192,7 @@ class GraphicsView(QGraphicsView):
 
         if item == self._clicked_socket:
             self._delete_tmp_edge('End socket is start socket. abort')
+            super().mouseReleaseEvent(event)
             return
 
         if self.drag_mode:
@@ -201,6 +203,7 @@ class GraphicsView(QGraphicsView):
                 if not end_socket.is_input() and not self._clicked_socket.is_input():
                     self._delete_tmp_edge(
                         'Start socket and End socket are both output sockets.')
+                    super().mouseReleaseEvent(event)
                     return
 
                 self._delete_tmp_edge()

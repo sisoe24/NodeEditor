@@ -155,8 +155,11 @@ class GraphicsView(QGraphicsView):
             if self._clicked_socket.is_input() and self._clicked_socket.has_edge():
                 LOGGER.debug('Socket has an edge connected already')
 
+                start_point = self._clicked_socket.edge.start_point
+                end_point = self._clicked_socket.edge.end_point
+
                 # re assign start socket to the initial starting point
-                self._clicked_socket = self._clicked_socket.edge.end_point
+                self._clicked_socket = end_point if start_point.is_input() else start_point
 
                 # delete the original edge
                 item.remove_edge()
@@ -177,7 +180,7 @@ class GraphicsView(QGraphicsView):
 
     def _leftMouseButtonRelease(self, event):
         item = self._get_graphic_item(event)
-        LOGGER.debug('Released on item: %s', item)
+        LOGGER.debug('Restart_pointleased on item: %s', item)
 
         if not item:
             return

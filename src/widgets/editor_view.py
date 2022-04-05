@@ -33,7 +33,7 @@ class GraphicsView(QGraphicsView):
         self.drag_mode = None
         self._selected_item = None
         self._edge_tmp = None
-        self._start_socket = None
+        self._clicked_socket = None
 
     def _debug_zoom(self):
         z = 5.15
@@ -149,58 +149,65 @@ class GraphicsView(QGraphicsView):
             self.drag_mode = True
             LOGGER.debug('Drag Mode Enabled')
 
-            self._start_socket = item
+            self._clicked_socket = item
 
-            if self._start_socket.has_edge():
+            # input socket should only have 1 edge con nected
+            if self._clicked_socket.is_input() and self._clicked_socket.has_edge():
+                LOGGER.debug('Socket has an edge connected already')
 
                 # re assign start socket to the initial starting point
-                self._start_socket = self._start_socket.edge.start_point
+                self._clicked_socket = self._clicked_socket.edge.end_point
+
+                # delete the original edge
                 item.remove_edge()
 
-            # when drawing the edge, need to set the node z value to stay behind
-            # otherwise is not able to recognize the socket if is bellow him.
+            # FIXME: when drawing the edge, need to set the node zValue to stay
+            # behind the socket otherwise will not able to recognize it
+            self._clicked_socket.parentItem().setZValue(-1.0)
 
-            self._start_socket.parentItem().setZValue(-1.0)
-
-            self._edge_tmp = NodeEdgeTmp(self, self._start_socket)
+            self._edge_tmp = NodeEdgeTmp(self, self._clicked_socket)
 
         super().mousePressEvent(event)
+
+    def _delete_tmp_edge(self, msg=None):
+        LOGGER.debug('Delete temporary edge')
+        if msg:
+            LOGGER.debug(msg)
+        self.scene().removeItem(self._edge_tmp.edge_graphics)
 
     def _leftMouseButtonRelease(self, event):
         item = self._get_graphic_item(event)
         LOGGER.debug('Released on item: %s', item)
 
+        if not item:
+            return
+
         # move node above other nodes when selected
         if hasattr(self.selected_item, 'setZValue'):
-            # BUG when connecting an output to an input and releasing.
-            # the zValue gets reset only for the input and not the output
-            # which remains at -1.0, thus connecting back from input to output
-            #  does not work
             self.selected_item.setZValue(0)
 
-        if item == self._start_socket:
-            LOGGER.debug('End socket is start socket. abort')
-            self.scene().removeItem(self._edge_tmp.edge_graphics)
-            super().mouseReleaseEvent(event)
+        if item == self._clicked_socket:
+            self._delete_tmp_edge('End socket is start socket. abort')
             return
 
         if self.drag_mode:
             if isinstance(item, SocketGraphics):
                 end_socket = item
 
-                self.scene().removeItem(self._edge_tmp.edge_graphics)
+                # FIXME: ugly
+                if not end_socket.is_input() and not self._clicked_socket.is_input():
+                    self._delete_tmp_edge(
+                        'Start socket and End socket are both output sockets.')
+                    return
 
-                # TODO: this should happen also if trying to connect from
-                # output to input
+                self._delete_tmp_edge()
                 if end_socket.has_edge():
                     end_socket.remove_edge()
 
-                edge = NodeEdge(self, self._start_socket, end_socket)
-                end_socket.edge = edge
+                NodeEdge(self, self._clicked_socket, end_socket)
 
             elif self._edge_tmp:
-                LOGGER.debug('Edge release was not on a socket. delete')
-                self.scene().removeItem(self._edge_tmp.edge_graphics)
+                self._delete_tmp_edge('Edge release was not on a socket')
 
             self.drag_mode = False
             LOGGER.debug('Drag Mode Disabled')
@@ -212,7 +219,7 @@ class GraphicsView(QGraphicsView):
         """Debug use."""
         item = self._get_graphic_item(event)
         if isinstance(item, SocketGraphics):
-            LOGGER.info(item)
+            LOGGER.info('socket: %s - edge: %s', item, item.edge)
         elif isinstance(item, NodeEdgeGraphics):
             LOGGER.info(item)
         elif hasattr(item, 'parentItem') and isinstance(item.parentItem(), NodeGraphics):

@@ -85,7 +85,6 @@ class NodeGraphics(QGraphicsItem):
 
         self.node = node
         self.content = content
-        self._edges = []
 
         self._height = max(self.node.layout_size.height(), 50)
 
@@ -95,44 +94,11 @@ class NodeGraphics(QGraphicsItem):
         self._draw_content()
         self._draw_graphics()
 
-    def add_edge(self, edge: NodeEdge):
-        """Add edge to list for reference.
-
-        After creating an edge, it needs to get appended to the node list in
-        order to be able to reference it later when the node gets deleted.
-
-        Args:
-            edge (NodeEdge): A NodeEdge object.
-        """
-        self._edges.append(edge)
-
-    def remove_edge(self, edge: NodeEdge):
-        """Remove edge from list of reference.
-
-        This usually happens when deleting a node.
-
-        Args:
-            edge (NodeEdge): A NodeEdge object.
-        """
-        self._edges.remove(edge)
-
     def delete_node(self):
-        """Delete the graphics node and its edges.
-
-        Edges will also be removed from siblings nodes, both graphically and
-        internally.
-        """
-        scene = self.scene()
-
-        # because edges will be removed from the list, I need a copy to avoid
-        # modifying the original list while parsing it
-        edges = self._edges.copy()
-
-        for edge in edges:
-            edge.clear_reference()
-            scene.removeItem(edge.edge_graphics)
-
-        scene.removeItem(self)
+        """Delete the graphics node and its input edges."""
+        for socket in self.node.input_sockets:
+            socket.socket_graphics.remove_edges()
+        self.scene().removeItem(self)
 
     def _set_colors(self):
         """Initialize the node graphics colors."""
@@ -151,9 +117,6 @@ class NodeGraphics(QGraphicsItem):
     def _draw_title(self):
         """Set Node title."""
         # title gets created at 0,0 thats why is already inside the title box
-
-        # Review: don't know what its doing
-        # self._title_item.node = self.node
         title_item = QGraphicsTextItem(self)
 
         title_item.setPlainText(self.node.title)
@@ -298,6 +261,8 @@ class Node(NodeInterface):
         self._add_inputs(node)
         self._add_outputs(node)
 
+        self._name = f'{self.__class__.__name__}'
+
     def _add_sockets(self, widgets, is_input=True):
         """Add sockets to node.
 
@@ -332,9 +297,8 @@ class Node(NodeInterface):
     def set_position(self, x: int, y: int):
         self.node_graphics.setPos(x, y)
 
-    def __str__(self):
-        return f'{self.__class__.__name__}'
-
     def id(self):
-        name = f'{self.__class__.__name__}'
-        return f'{name}.{id(self)}'
+        return f'{self._name}.{id(self)}'
+
+    def __str__(self):
+        return self._name

@@ -18,7 +18,7 @@ LOGGER.setLevel(logging.DEBUG)
 class NodeEdgeGraphics(QGraphicsPathItem):
 
     def __init__(self, edge):
-        super().__init__(edge.start_point)
+        super().__init__(edge.start_socket)
 
         self.edge = edge
 
@@ -75,11 +75,11 @@ class _EdgeInterface(abc.ABC):
 
     @property
     @abc.abstractmethod
-    def start_point(self):
+    def start_socket(self):
         """Start point Socket."""
 
     @property
-    def end_point(self):
+    def end_socket(self):
         """End point Socket."""
         return None
 
@@ -102,26 +102,26 @@ class NodeEdge(_EdgeInterface):
         self._add_reference()
 
     @property
-    def start_point(self):
+    def start_socket(self):
         return self._start_socket
 
     @property
-    def end_point(self):
+    def end_socket(self):
         return self._end_socket
 
     @property
     def end_point_loc(self):
-        return self.end_point.get_position()
+        return self.end_socket.get_position()
 
     def clear_reference(self):
         """Remove Edge reference inside the sockets."""
-        self.start_point.clear_reference()
-        self.end_point.clear_reference()
+        self.start_socket.clear_edges_reference()
+        self.end_socket.clear_edges_reference()
 
     def _add_reference(self):
         """Add the edge reference to socket list."""
-        self.start_point.add_edge(self)
-        self.end_point.add_edge(self)
+        self.start_socket.add_edge(self)
+        self.end_socket.add_edge(self)
 
     def __del__(self):
         # Review: how to make it work
@@ -144,7 +144,7 @@ class NodeEdgeTmp(_EdgeInterface):
         self.edge_graphics = NodeEdgeGraphics(self)
 
     @property
-    def start_point(self):
+    def start_socket(self):
         return self._start_socket
 
     @property

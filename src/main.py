@@ -112,10 +112,10 @@ class MainWindow(QMainWindow):
                 if socket.has_edge():
                     for edge in socket.edges:
                         edges[f'edge.{index}'] = {
-                            'start_socket': edge.start_point.index,
+                            'start_socket': edge.start_socket.index,
                             'end_socket': {
-                                'node': edge.end_point.node.node.id(),
-                                'socket': edge.end_point.index
+                                'node': edge.end_socket.node.node.id(),
+                                'socket': edge.end_socket.index
                             }}
                         index += 1
 

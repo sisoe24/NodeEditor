@@ -155,11 +155,11 @@ class GraphicsView(QGraphicsView):
             if self._clicked_socket.is_input() and self._clicked_socket.has_edge():
                 LOGGER.debug('Socket has an edge connected already')
 
-                start_point = self._clicked_socket.edge.start_point
-                end_point = self._clicked_socket.edge.end_point
+                start_socket = self._clicked_socket.edge.start_socket
+                end_socket = self._clicked_socket.edge.end_socket
 
                 # re assign start socket to the initial starting point
-                self._clicked_socket = end_point if start_point.is_input() else start_point
+                self._clicked_socket = end_socket if start_socket.is_input() else start_socket
 
                 # delete the original edge
                 item.remove_edges()

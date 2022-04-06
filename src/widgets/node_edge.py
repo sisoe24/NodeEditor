@@ -99,7 +99,7 @@ class NodeEdge(_EdgeInterface):
         self._view = view
 
         self.edge_graphics = NodeEdgeGraphics(self)
-        self._add_reference_points()
+        self._add_reference()
 
     @property
     def start_point(self):
@@ -114,25 +114,14 @@ class NodeEdge(_EdgeInterface):
         return self.end_point.get_position()
 
     def clear_reference(self):
-        """Remove Edge reference inside the Node edge list."""
-        self.start_point.parentItem().remove_edge(self)
-        self.end_point.parentItem().remove_edge(self)
+        """Remove Edge reference inside the sockets."""
+        self.start_point.clear_reference()
+        self.end_point.clear_reference()
 
-        self.start_point._edges = []
-        self.end_point._edges = []
-
-    def _add_reference_points(self):
-        """Add the edge to the end points.
-
-        When creating the edge, automatically add its reference to the end points
-        (starting socket and end socket) `edges` attribute. This is to be able
-        to have a reference when deleting the nodes.
-        """
+    def _add_reference(self):
+        """Add the edge reference to socket list."""
         self.start_point.add_edge(self)
         self.end_point.add_edge(self)
-
-        self.start_point.parentItem().add_edge(self)
-        self.end_point.parentItem().add_edge(self)
 
     def __del__(self):
         # Review: how to make it work

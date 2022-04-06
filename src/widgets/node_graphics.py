@@ -298,7 +298,7 @@ class Node(NodeInterface):
         self.node_graphics.setPos(x, y)
 
     def id(self):
-        return f'{self._name}.{id(self)}'
+        return f'{self._name}_{id(self)}'
 
     def __str__(self):
         return self._name

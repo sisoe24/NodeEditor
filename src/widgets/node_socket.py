@@ -41,6 +41,12 @@ class SocketGraphics(QGraphicsItem):
         return self._index
 
     @property
+    def edge(self):
+        if self.is_input():
+            return self._edges[0]
+        raise RuntimeWarning('Socket is not an Input socket')
+
+    @property
     def edges(self):
         return self._edges
 
@@ -50,13 +56,13 @@ class SocketGraphics(QGraphicsItem):
     def has_edge(self):
         return bool(self._edges)
 
-    def remove_edge(self):
-        # FIXME: is not intuitive getting the first index of the list
-        edge = self._edges[0]
+    def remove_edges(self):
+        """Delete all the edges bound to a socket."""
+        for edge in self.edges:
+            edge.edge_graphics.delete_edge()
 
-        edge.clear_reference()
-        self.scene().removeItem(edge.edge_graphics)
-        edge = None
+    def clear_edges_reference(self):
+        self._edges = []
 
     def _set_flags(self):
         """Initialize UI for the Node graphic content."""

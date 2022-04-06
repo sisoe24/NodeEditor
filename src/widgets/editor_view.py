@@ -151,7 +151,7 @@ class GraphicsView(QGraphicsView):
 
             self._clicked_socket = item
 
-            # input socket should only have 1 edge con nected
+            # input socket should only have 1 edge connected
             if self._clicked_socket.is_input() and self._clicked_socket.has_edge():
                 LOGGER.debug('Socket has an edge connected already')
 
@@ -162,7 +162,7 @@ class GraphicsView(QGraphicsView):
                 self._clicked_socket = end_point if start_point.is_input() else start_point
 
                 # delete the original edge
-                item.remove_edge()
+                item.remove_edges()
 
             # FIXME: when drawing the edge, need to set the node zValue to stay
             # behind the socket otherwise will not able to recognize it
@@ -180,7 +180,7 @@ class GraphicsView(QGraphicsView):
 
     def _leftMouseButtonRelease(self, event):
         item = self._get_graphic_item(event)
-        LOGGER.debug('Restart_pointleased on item: %s', item)
+        LOGGER.debug('Released on item: %s', item)
 
         if not item:
             super().mouseReleaseEvent(event)
@@ -208,7 +208,7 @@ class GraphicsView(QGraphicsView):
 
                 self._delete_tmp_edge()
                 if end_socket.has_edge():
-                    end_socket.remove_edge()
+                    end_socket.remove_edges()
 
                 NodeEdge(self, self._clicked_socket, end_socket)
 
@@ -225,13 +225,13 @@ class GraphicsView(QGraphicsView):
         """Debug use."""
         item = self._get_graphic_item(event)
         if isinstance(item, SocketGraphics):
-            LOGGER.info('socket: %s - edge: %s', item, item.edge)
+            LOGGER.info('socket: %s - edge: %s', item, item.edges)
         elif isinstance(item, NodeEdgeGraphics):
             LOGGER.info(item)
         elif hasattr(item, 'parentItem') and isinstance(item.parentItem(), NodeGraphics):
             item = item.parentItem()
-            LOGGER.info('Node %s, edges: %s, zValue: %s', item,
-                        len(item._edges), item.zValue())
+            LOGGER.info('Node %s, edges: TODO, zValue: %s',
+                        item, item.zValue())
 
         super().mousePressEvent(event)
 

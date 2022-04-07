@@ -1,5 +1,8 @@
 import abc
+import json
 import logging
+from collections import OrderedDict
+import pprint
 
 from PySide2.QtCore import QPointF,  Qt
 from PySide2.QtGui import QPen, QPainterPath, QColor, QPainterPathStroker
@@ -26,8 +29,13 @@ class NodeEdgeGraphics(QGraphicsPathItem):
         self._set_flags()
 
     def delete_edge(self):
-        """Delete the graphic edge and remove its reference from siblings nodes."""
-        self.edge.clear_reference()
+        """Delete the graphic edge.
+
+        Remove the edge graphics from the scene and delete its reference from
+        its connected sockets.
+        """
+        self.edge.start_socket.clear_reference(self.edge)
+        self.edge.end_socket.clear_reference(self.edge)
 
         # FIXME: temporary solution when deleting a node before and edge
         # in a multi selection. because the node removes the edge, the selection
@@ -38,6 +46,8 @@ class NodeEdgeGraphics(QGraphicsPathItem):
         except AttributeError as err:
             LOGGER.warning(
                 'Could not delete edge: %s. It might have been already deleted. Error: %s', self, err)
+
+        del self.edge
 
     def _set_colors(self):
         self._pen_selected = QPen(QColor('#DD8600'))
@@ -69,6 +79,27 @@ class NodeEdgeGraphics(QGraphicsPathItem):
 
     def __str__(self) -> str:
         return class_id('NodeEdgeGraphics', self)
+
+    def __repr__(self) -> str:
+        data = {
+            'id': str(self),
+            'start_socket': {
+                'node': str(self.edge.start_socket.node),
+                'socket': str(self.edge.start_socket),
+                'index': str(self.edge.start_socket.index)
+            },
+            'end_socket': {
+                'node': str(self.edge.end_socket.node),
+                'socket': str(self.edge.end_socket),
+                'index': str(self.edge.end_socket.index)
+            },
+        }
+
+        # dont like using pprint here
+        return json.dumps(data, indent=2)
+
+    def __del__(self):
+        print('Sorry to see you go bro')
 
 
 class _EdgeInterface(abc.ABC):
@@ -112,11 +143,6 @@ class NodeEdge(_EdgeInterface):
     @property
     def end_point_loc(self):
         return self.end_socket.get_position()
-
-    def clear_reference(self):
-        """Remove Edge reference inside the sockets."""
-        self.start_socket.clear_edges_reference()
-        self.end_socket.clear_edges_reference()
 
     def _add_reference(self):
         """Add the edge reference to socket list."""

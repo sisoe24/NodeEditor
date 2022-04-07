@@ -111,6 +111,9 @@ class SocketOutput(SocketGraphics):
     def add_edge(self, edge: 'NodeEdge'):
         self._edges.append(edge)
 
+    def has_edge(self):
+        return bool(self._edges)
+
     def clear_reference(self, edge):
         self._edges.remove(edge)
 

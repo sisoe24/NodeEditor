@@ -41,34 +41,39 @@ def load_file(self):
                      end_socket.socket_graphics)
 
 
-def save_file(self):
-    scene = self.node_editor.scene.graphics_scene
-
-    nodes = [x for x in scene.items() if isinstance(x, NodeGraphics)]
-
+def save_file(scene):
+    """Save current graph scene."""
+    # Review: I might not need a key 'nodes'
     graph_state = {'nodes': []}
-    for item in nodes:
 
-        edges = {}
+    graph_nodes = [n for n in scene.items() if isinstance(n, NodeGraphics)]
+
+    for node in graph_nodes:
+
+        output_edges = {}
         index = 0
 
-        for input_socket in item.node.output_sockets:
-            socket = input_socket.socket_graphics
+        for output_socket in node.node.output_sockets:
+            socket = output_socket.socket_graphics
+
             if socket.has_edge():
+
                 for edge in socket.edges:
-                    edges[f'edge.{index}'] = {
+
+                    output_edges[f'edge.{index}'] = {
                         'start_socket': edge.start_socket.index,
                         'end_socket': {
                             'node': edge.end_socket.node.node.id(),
                             'socket': edge.end_socket.index
                         }}
+
                     index += 1
 
         graph_state['nodes'].append(
-            {item.node.id(): {
-                'class': f'{item.node}',
-                'position': {'x': item.pos().x(), 'y': item.pos().y()},
-                'edges': edges
+            {node.node.id(): {
+                'class': f'{node.node}',
+                'position': {'x': node.pos().x(), 'y': node.pos().y()},
+                'output_edges': output_edges
             }})
 
     with open('save_file.json', 'w', encoding='utf-8') as file:

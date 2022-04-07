@@ -182,7 +182,14 @@ class GraphicsView(QGraphicsView):
         self.scene().removeItem(self._edge_tmp.edge_graphics)
 
         # Review: dont know about this
-        # del self._edge_tmp
+
+    def _is_same_socket_type(self, end_socket):
+        """Check if input and output socket are the same type."""
+        # FIXME: ugly
+        return (isinstance(self._clicked_socket, SocketOutput) and
+                isinstance(end_socket, SocketOutput) or
+                isinstance(self._clicked_socket, SocketInput) and
+                isinstance(end_socket, SocketInput))
 
     def _leftMouseButtonRelease(self, event):
         item = self._get_graphic_item(event)
@@ -208,13 +215,7 @@ class GraphicsView(QGraphicsView):
             if isinstance(item, SocketGraphics):
                 end_socket = item
 
-                # FIXME: ugly
-                if (
-                    isinstance(self._clicked_socket, SocketOutput) and
-                    isinstance(end_socket, SocketOutput) or
-                    isinstance(self._clicked_socket, SocketInput) and
-                    isinstance(end_socket, SocketInput)
-                ):
+                if self._is_same_socket_type(end_socket):
                     self._delete_tmp_edge(
                         'Start and End socket are both same type sockets.')
                     super().mouseReleaseEvent(event)

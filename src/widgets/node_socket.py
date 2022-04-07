@@ -10,27 +10,17 @@ from src.widgets.node_edge import NodeEdge
 
 
 class SocketGraphics(QGraphicsItem):
-    def __init__(self, node,  index, is_input, parent=None):
+    def __init__(self, node,  index):
         super().__init__(node)
 
         self._node = node
         self._index = index
-        self._is_input = is_input
 
         self._outline_pen = QPen(Qt.black)
         self._outline_pen.setWidthF(0.5)
 
-        self._color = Qt.red
-        if self._is_input:
-            self._color = Qt.green
-
-        self._edges = []
-
         self._draw_graphics()
         self._set_flags()
-
-    def is_input(self):
-        return self._is_input
 
     @property
     def node(self):
@@ -39,30 +29,6 @@ class SocketGraphics(QGraphicsItem):
     @property
     def index(self):
         return self._index
-
-    @property
-    def edge(self):
-        if self.is_input():
-            return self._edges[0]
-        raise RuntimeWarning('Socket is not an Input socket')
-
-    @property
-    def edges(self):
-        return self._edges
-
-    def add_edge(self, edge: NodeEdge):
-        self._edges.append(edge)
-
-    def has_edge(self):
-        return bool(self._edges)
-
-    def remove_edges(self):
-        """Delete all the edges bound to a socket."""
-        for edge in self.edges:
-            edge.edge_graphics.delete_edge()
-
-    def clear_edges_reference(self):
-        self._edges = []
 
     def _set_flags(self):
         """Initialize UI for the Node graphic content."""
@@ -76,7 +42,7 @@ class SocketGraphics(QGraphicsItem):
         self._socket_body = path
 
     def paint(self, painter, option, widget=None):
-        painter.setBrush(QBrush(self._color))
+        painter.setBrush(QBrush(self.color))
         painter.setPen(self._outline_pen)
         painter.drawPath(self._socket_body)
 
@@ -91,9 +57,60 @@ class SocketGraphics(QGraphicsItem):
         return self.scenePos()
 
 
+class SocketInput(SocketGraphics):
+    color = Qt.green
+
+    def __init__(self, node, index):
+        super().__init__(node, index)
+        self._edge = None
+
+    @property
+    def edge(self):
+        return self._edge
+
+    def has_edge(self):
+        return bool(self._edge)
+
+    def add_edge(self, edge: NodeEdge):
+        self._edge = edge
+
+    def clear_reference(self, edge):
+        self._edge = None
+
+    def remove_edge(self):
+        self.edge.edge_graphics.delete_edge()
+
+    def __str__(self) -> str:
+        return class_id('SocketInput', self)
+
+
+class SocketOutput(SocketGraphics):
+    color = Qt.blue
+
+    def __init__(self, node, index):
+        super().__init__(node, index)
+        self._edges = []
+
+    @property
+    def edges(self):
+        return self._edges
+
+    def add_edge(self, edge: NodeEdge):
+        self._edges.append(edge)
+
+    def clear_reference(self, edge):
+        self._edges.remove(edge)
+
+    def __str__(self) -> str:
+        return class_id('SocketOutput', self)
+
+
 class Socket:
     def __init__(self, node, index, is_input):
-        self.socket_graphics = SocketGraphics(node, index, is_input)
+        if is_input:
+            self.socket_graphics = SocketInput(node, index)
+        else:
+            self.socket_graphics = SocketOutput(node, index)
 
     def get_position(self):
         """Get socket position in the scene."""

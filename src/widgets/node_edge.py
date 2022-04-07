@@ -35,16 +35,7 @@ class NodeEdgeGraphics(QGraphicsPathItem):
         """
         self.edge.start_socket.clear_reference(self.edge)
         self.edge.end_socket.clear_reference()
-
-        # FIXME: temporary solution.
-        # Deleting a node with edges, will automatically remove them but the
-        # scene selection will still have them inside the selection reference.
-        try:
-            self.scene().removeItem(self)
-        except AttributeError as err:
-            LOGGER.warning(
-                'Could not delete edge: %s. It might have been already deleted. Error: %s', self, err)
-
+        self.scene().removeItem(self)
         # del self.edge
 
     def _set_colors(self):

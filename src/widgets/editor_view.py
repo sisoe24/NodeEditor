@@ -293,12 +293,17 @@ class GraphicsView(QGraphicsView):
 
         if key == Qt.Key_Delete and selected_items:
 
-            for item in selected_items:
+            def obj_list(obj):
+                return [_ for _ in selected_items if isinstance(_, obj)]
 
-                if isinstance(item, NodeEdgeGraphics):
-                    item.delete_edge()
-                elif isinstance(item, NodeGraphics):
-                    item.delete_node()
+            # FIXME: I have to delete the edges before deleting the nodes or
+            # it might cause some problems when delete an edge after deleting
+            # its parent node (which deletes the edge)
+            for edge in obj_list(NodeEdgeGraphics):
+                edge.delete_edge()
+
+            for node in obj_list(NodeGraphics):
+                node.delete_node()
 
         return super().keyPressEvent(event)
 

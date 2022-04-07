@@ -1,4 +1,5 @@
 import abc
+import json
 import pprint
 import logging
 
@@ -234,7 +235,10 @@ class NodeGraphics(QGraphicsItem):
     def __str__(self) -> str:
         return class_id('NodeGraphics', self)
 
-    def __repr__(self):
+    def id(self):
+        return f'{self.node}.{id(self)}'
+
+    def info(self) -> dict:
         def get_sockets(sockets_list, is_input=False):
             sockets = {}
 
@@ -253,16 +257,18 @@ class NodeGraphics(QGraphicsItem):
         position = self.pos()
 
         data = {
-            'class': self.node._name,
+            'class': str(self.node),
             'class_object': str(self),
-            'id': self.node.id(),
+            'id': self.id(),
             'zValue': self.zValue(),
             'position': {'x': position.x(), 'y': position.y()},
             'input_sockets': get_sockets(self.node.input_sockets, True),
             'output_sockets': get_sockets(self.node.output_sockets),
         }
-        return pprint.pformat(data, 1, 100)
-        # return json.dumps(data, indent=2)
+        return data
+
+    def __repr__(self):
+        return pprint.pformat(self.info(), 1, 100)
 
 
 class NodeInterface(abc.ABC):
@@ -293,8 +299,6 @@ class Node(NodeInterface):
 
         self._add_inputs(node)
         self._add_outputs(node)
-
-        self._name = f'{self.__class__.__name__}'
 
     def _add_sockets(self, widgets, is_input=True):
         """Add sockets to node.
@@ -330,8 +334,5 @@ class Node(NodeInterface):
     def set_position(self, x: int, y: int):
         self.node_graphics.setPos(x, y)
 
-    def id(self):
-        return f'{self._name}_{id(self)}'
-
     def __str__(self):
-        return self._name
+        return f'{self.__class__.__name__}'

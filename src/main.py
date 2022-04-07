@@ -62,14 +62,11 @@ class NodeEditor(QWidget):
         end_socket_b = node_debug.input_sockets[1]
         end_socket_c = node_debug.input_sockets[2]
 
-        NodeEdge(self.view, start_socket_a.socket_graphics,
-                 end_socket_a.socket_graphics)
+        NodeEdge(start_socket_a.socket_graphics, end_socket_a.socket_graphics)
 
-        NodeEdge(self.view, start_socket_a.socket_graphics,
-                 end_socket_b.socket_graphics)
+        NodeEdge(start_socket_a.socket_graphics, end_socket_b.socket_graphics)
 
-        NodeEdge(self.view, start_socket_b.socket_graphics,
-                 end_socket_c.socket_graphics)
+        NodeEdge(start_socket_b.socket_graphics, end_socket_c.socket_graphics)
 
 
 class MainWindow(QMainWindow):

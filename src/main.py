@@ -82,17 +82,19 @@ class MainWindow(QMainWindow):
         self.node_editor = NodeEditor()
         self.node_editor.view.mouse_position.connect(self.set_coords)
 
-        self._add_actions()
-
         self.setCentralWidget(self.node_editor)
-        self.set_status_bar()
 
         self._scene = self.node_editor.scene.graphics_scene
+        self._add_actions()
+        self.set_status_bar()
 
         # load_file(self._scene)
         # save_file(self._scene)
 
     def _add_actions(self):
+        new = QAction('New File', self)
+        new.triggered.connect(self._scene.clear)
+
         save = QAction('Save File', self)
         save.triggered.connect(lambda: save_file(self._scene))
 
@@ -101,6 +103,7 @@ class MainWindow(QMainWindow):
 
         toolbar = QToolBar()
         toolbar.setStyleSheet('color: white;')
+        toolbar.addAction(new)
         toolbar.addAction(save)
         toolbar.addAction(load)
         self.addToolBar(toolbar)

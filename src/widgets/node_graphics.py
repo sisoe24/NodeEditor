@@ -1,5 +1,7 @@
 import abc
+import pprint
 import logging
+from typing import OrderedDict
 
 from PySide2.QtCore import Qt
 from PySide2.QtGui import QFont, QPen, QColor, QPainterPath, QBrush
@@ -302,3 +304,25 @@ class Node(NodeInterface):
 
     def __str__(self):
         return self._name
+
+    def __repr__(self):
+        def get_sockets(sockets_list):
+            sockets = {}
+            for socket in sockets_list:
+                socket = socket.socket_graphics
+                sockets[str(socket)] = {
+                    'edges': [str(edge) for edge in socket.edges]
+                }
+            return sockets
+
+        position = self.node_graphics.pos()
+
+        data = OrderedDict({
+            'class': self._name,
+            'id': self.id(),
+            'zValue': self.node_graphics.zValue(),
+            'position': {'x': position.x(), 'y': position.y()},
+            'input_sockets': get_sockets(self.input_sockets),
+            'output_sockets': get_sockets(self.output_sockets),
+        })
+        return pprint.pformat(dict(data), 1, 100)

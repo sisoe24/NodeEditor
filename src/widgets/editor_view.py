@@ -9,7 +9,7 @@ from PySide2.QtWidgets import (
 from src.widgets.node_edge import NodeEdge, NodeEdgeGraphics, NodeEdgeTmp
 from src.widgets.node_graphics import NodeGraphics
 
-from src.widgets.node_socket import Socket, SocketGraphics
+from src.widgets.node_socket import SocketGraphics, SocketInput, SocketOutput
 
 LOGGER = logging.getLogger('nodeeditor.view')
 LOGGER.setLevel(logging.DEBUG)
@@ -152,18 +152,20 @@ class GraphicsView(QGraphicsView):
             self._clicked_socket = item
 
             # input socket should only have 1 edge connected
-            if self._clicked_socket.is_input() and self._clicked_socket.has_edge():
-                LOGGER.debug('Socket has an edge connected already')
+            if isinstance(item, SocketInput) and item.has_edge():
+                LOGGER.debug('SocketInput has an edge connected already')
 
-                start_socket = self._clicked_socket.edge.start_socket
-                end_socket = self._clicked_socket.edge.end_socket
+                start_socket = item.edge.start_socket
+                end_socket = item.edge.end_socket
 
                 # re assign start socket to the initial starting point
-                self._clicked_socket = end_socket if start_socket.is_input() else start_socket
+                self._clicked_socket = (
+                    end_socket if isinstance(start_socket, SocketInput)
+                    else start_socket
+                )
 
                 # delete the original edge
-                # BUG: this should only delete 1 edge
-                item.remove_edges()
+                item.remove_edge()
 
             # FIXME: when drawing the edge, need to set the node zValue to stay
             # behind the socket otherwise will not able to recognize it
@@ -179,6 +181,9 @@ class GraphicsView(QGraphicsView):
             LOGGER.debug(msg)
         self.scene().removeItem(self._edge_tmp.edge_graphics)
 
+        # Review: dont know about this
+        # del self._edge_tmp
+
     def _leftMouseButtonRelease(self, event):
         item = self._get_graphic_item(event)
         LOGGER.debug('Released on item: %s', item)
@@ -189,28 +194,39 @@ class GraphicsView(QGraphicsView):
 
         # move node above other nodes when selected
         if hasattr(self.selected_item, 'setZValue'):
+            # BUG: there might a bug when connected from input to output
+            # where the zValue does not get reset properly
             self.selected_item.setZValue(0)
 
-        if item == self._clicked_socket:
-            self._delete_tmp_edge('End socket is start socket. abort')
-            super().mouseReleaseEvent(event)
-            return
-
         if self.drag_mode:
+
+            if item == self._clicked_socket:
+                self._delete_tmp_edge('End socket is start socket. abort')
+                super().mouseReleaseEvent(event)
+                return
+
             if isinstance(item, SocketGraphics):
                 end_socket = item
 
                 # FIXME: ugly
-                if not end_socket.is_input() and not self._clicked_socket.is_input():
+                if (
+                    isinstance(self._clicked_socket, SocketOutput) and
+                    isinstance(end_socket, SocketOutput) or
+                    isinstance(self._clicked_socket, SocketInput) and
+                    isinstance(end_socket, SocketInput)
+                ):
                     self._delete_tmp_edge(
-                        'Start socket and End socket are both output sockets.')
+                        'Start and End socket are both same type sockets.')
                     super().mouseReleaseEvent(event)
                     return
 
                 self._delete_tmp_edge()
-                if end_socket.has_edge():
-                    # BUG: this should only delete 1 edge
-                    end_socket.remove_edges()
+
+                if isinstance(end_socket, SocketInput) and end_socket.has_edge():
+                    end_socket.remove_edge()
+                elif isinstance(end_socket, SocketOutput):
+                    # invert the sockets if starting point is input to output
+                    end_socket, self._clicked_socket = self._clicked_socket, end_socket
 
                 NodeEdge(self, self._clicked_socket, end_socket)
 
@@ -226,13 +242,10 @@ class GraphicsView(QGraphicsView):
     def _rightMouseButtonPress(self, event):
         """Debug use."""
         item = self._get_graphic_item(event)
-        if isinstance(item, SocketGraphics):
-            LOGGER.info('socket: %s - edge: %s', item, item.edges)
-        elif isinstance(item, NodeEdgeGraphics):
-            LOGGER.info(item)
-        elif hasattr(item, 'parentItem') and isinstance(item.parentItem(), NodeGraphics):
-            item = item.parentItem().node
+        if isinstance(item, (SocketGraphics, NodeEdgeGraphics)):
             print(repr(item))
+        elif hasattr(item, 'parentItem') and isinstance(item.parentItem(), NodeGraphics):
+            print(repr(item.parentItem()))
 
         super().mousePressEvent(event)
 

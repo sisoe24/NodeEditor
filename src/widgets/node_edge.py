@@ -45,7 +45,7 @@ class NodeEdgeGraphics(QGraphicsPathItem):
             LOGGER.warning(
                 'Could not delete edge: %s. It might have been already deleted. Error: %s', self, err)
 
-        del self.edge
+        # del self.edge
 
     def _set_colors(self):
         self._pen_selected = QPen(QColor('#DD8600'))
@@ -78,8 +78,8 @@ class NodeEdgeGraphics(QGraphicsPathItem):
     def __str__(self) -> str:
         return class_id('NodeEdgeGraphics', self)
 
-    def __repr__(self) -> str:
-        data = {
+    def info(self) -> str:
+        return {
             'id': str(self),
             'start_socket': {
                 'node': str(self.edge.start_socket.node),
@@ -93,11 +93,14 @@ class NodeEdgeGraphics(QGraphicsPathItem):
             },
         }
 
-        # dont like using pprint here
-        return json.dumps(data, indent=2)
+    def __repr__(self):
+        return str(self)
 
-    def __del__(self):
-        print('Sorry to see you go bro')
+    def repr(self):
+        return json.dumps(self.info(), indent=2)
+
+    # def __del__(self):
+    #     print('Sorry to see you go bro')
 
 
 class _EdgeInterface(abc.ABC):
@@ -146,9 +149,9 @@ class NodeEdge(_EdgeInterface):
         self.start_socket.add_edge(self)
         self.end_socket.add_edge(self)
 
-    def __del__(self):
-        # Review: how to make it work
-        print('Delete NodeEdge')
+    # def __del__(self):
+    #     # Review: how to make it work
+    #     print('Delete NodeEdge')
 
     def __str__(self) -> str:
         return class_id('NodeEdge', self)

@@ -244,9 +244,9 @@ class GraphicsView(QGraphicsView):
         """Debug use."""
         item = self._get_graphic_item(event)
         if isinstance(item, (SocketGraphics, NodeEdgeGraphics)):
-            print(repr(item))
+            print(item.repr())
         elif hasattr(item, 'parentItem') and isinstance(item.parentItem(), NodeGraphics):
-            print(repr(item.parentItem()))
+            print(item.parentItem().repr())
 
         super().mousePressEvent(event)
 

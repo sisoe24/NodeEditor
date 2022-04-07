@@ -232,9 +232,6 @@ class NodeGraphics(QGraphicsItem):
         """Set the bounding margins for the node."""
         return self._node_body.boundingRect()
 
-    def __str__(self) -> str:
-        return class_id('NodeGraphics', self)
-
     def id(self):
         return f'{self.node}.{id(self)}'
 
@@ -255,8 +252,7 @@ class NodeGraphics(QGraphicsItem):
             return sockets
 
         position = self.pos()
-
-        data = {
+        return {
             'class': str(self.node),
             'class_object': str(self),
             'id': self.id(),
@@ -265,10 +261,15 @@ class NodeGraphics(QGraphicsItem):
             'input_sockets': get_sockets(self.node.input_sockets, True),
             'output_sockets': get_sockets(self.node.output_sockets),
         }
-        return data
 
-    def __repr__(self):
+    def repr(self):
         return pprint.pformat(self.info(), 1, 100)
+
+    def __str__(self) -> str:
+        return class_id('NodeGraphics', self)
+
+    def __repr__(self) -> str:
+        return class_id('NodeGraphics', self)
 
 
 class NodeInterface(abc.ABC):

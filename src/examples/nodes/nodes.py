@@ -35,7 +35,7 @@ class NodeExample(Node):
 
     def __init__(self, scene):
         self.node_content = _NodeExampleContent()
-        super().__init__(scene=scene, node=self, content=self.node_content)
+        super().__init__(scene_graphics=scene, node=self, content=self.node_content)
 
     @property
     def layout_size(self):
@@ -60,7 +60,7 @@ class NodeDebug(Node):
 
     def __init__(self, scene):
         self.node_content = _NodeDebugContent()
-        super().__init__(scene=scene, node=self, content=self.node_content)
+        super().__init__(scene_graphics=scene, node=self, content=self.node_content)
 
     @property
     def layout_size(self):
@@ -85,7 +85,7 @@ class NodeTest(Node):
 
     def __init__(self, scene):
         self.node_content = _NodeTestContent()
-        super().__init__(scene=scene, node=self, content=self.node_content)
+        super().__init__(scene_graphics=scene, node=self, content=self.node_content)
 
     @property
     def layout_size(self):

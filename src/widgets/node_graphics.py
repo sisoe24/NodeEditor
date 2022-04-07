@@ -288,11 +288,11 @@ class NodeInterface(abc.ABC):
 
 class Node(NodeInterface):
 
-    def __init__(self, scene, node, content):
+    def __init__(self, scene_graphics, node, content):
         LOGGER.info('Init Node')
 
         self.node_graphics = NodeGraphics(node, content)
-        scene.graphics_scene.addItem(self.node_graphics)
+        scene_graphics.addItem(self.node_graphics)
 
         self.input_sockets = []
         self.output_sockets = []

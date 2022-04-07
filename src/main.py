@@ -52,8 +52,8 @@ class NodeEditor(QWidget):
         node_debug = nodes.NodeDebug(self.scene)
         node_debug.set_position(95, 0)
 
-        node_example = nodes.NodeExample(self.scene)
-        node_example.set_position(-75, 0)
+        # node_example = nodes.NodeExample(self.scene)
+        # node_example.set_position(-75, 0)
 
         # create debug edge
         start_socket_b = node_test.output_sockets[1]
@@ -87,15 +87,17 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self.node_editor)
         self.set_status_bar()
 
-        # load_file(self)
-        # save_file(self)
+        self._scene = self.node_editor.scene.graphics_scene
+
+        # load_file(self._scene)
+        # save_file(self._scene)
 
     def _add_actions(self):
         save = QAction('Save File', self)
-        save.triggered.connect(lambda: save_file(self))
+        save.triggered.connect(lambda: save_file(self._scene))
 
         load = QAction('Load File', self)
-        load.triggered.connect(lambda: load_file(self))
+        load.triggered.connect(lambda: load_file(self._scene))
 
         toolbar = QToolBar()
         toolbar.setStyleSheet('color: white;')

@@ -29,11 +29,11 @@ def _extract_end_socket(node_edges, edge):
     return end_socket_obj.input_sockets[end_connection['index']]
 
 
-def load_file(self):
+def load_file(scene):
     with open('save_file.json', 'r', encoding='utf-8') as file:
         data = json.load(file)
 
-    node_edges = _create_nodes(self.node_editor.scene, data)
+    node_edges = _create_nodes(scene, data)
 
     for connections in node_edges.values():
         obj = connections['obj']
@@ -43,9 +43,7 @@ def load_file(self):
             start_socket = obj.output_sockets[edge['start_socket_index']]
             end_socket = _extract_end_socket(node_edges, edge)
 
-            NodeEdge(self.node_editor.view,
-                     start_socket.socket_graphics,
-                     end_socket.socket_graphics)
+            NodeEdge(start_socket.socket_graphics, end_socket.socket_graphics)
 
 
 def _extract_output_edges(node: NodeGraphics):

@@ -119,13 +119,12 @@ class _EdgeInterface(abc.ABC):
 
 
 class NodeEdge(_EdgeInterface):
-    def __init__(self, view, start_socket: SocketInput, end_socket: SocketOutput):
+    def __init__(self, start_socket: SocketInput, end_socket: SocketOutput):
 
         LOGGER.debug('Create connected edge')
 
         self._start_socket = start_socket
         self._end_socket = end_socket
-        self._view = view
 
         self.edge_graphics = NodeEdgeGraphics(self)
         self._add_reference()
@@ -164,7 +163,6 @@ class NodeEdgeTmp(_EdgeInterface):
         view.mouse_position.connect(self._set_end_point_loc)
 
         self._start_socket = start_socket
-        self._view = view
         self.edge_graphics = NodeEdgeGraphics(self)
 
     @property

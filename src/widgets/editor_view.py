@@ -228,7 +228,7 @@ class GraphicsView(QGraphicsView):
                     # invert the sockets if starting point is input to output
                     end_socket, self._clicked_socket = self._clicked_socket, end_socket
 
-                NodeEdge(self, self._clicked_socket, end_socket)
+                NodeEdge(self._clicked_socket, end_socket)
 
             elif self._edge_tmp:
                 self._delete_tmp_edge('Edge release was not on a socket')

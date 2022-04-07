@@ -41,40 +41,39 @@ def load_file(self):
                      end_socket.socket_graphics)
 
 
+def _extract_output_edges(node: NodeGraphics):
+    output_edges = {}
+    index = 0
+
+    for output_socket in node.node.output_sockets:
+        socket = output_socket.socket_graphics
+
+        if socket.has_edge():
+            for edge in socket.edges:
+                output_edges[f'edge.{index}'] = {
+                    'start_socket': edge.start_socket.index,
+                    'end_socket': {
+                        'node': edge.end_socket.node.id(),
+                        'socket': edge.end_socket.index
+                    }}
+
+                index += 1
+    return output_edges
+
+
 def save_file(scene):
     """Save current graph scene."""
-    # Review: I might not need a key 'nodes'
-    graph_state = {'nodes': []}
+    graph_state = {}
 
     graph_nodes = [n for n in scene.items() if isinstance(n, NodeGraphics)]
-
     for node in graph_nodes:
 
-        output_edges = {}
-        index = 0
-
-        for output_socket in node.node.output_sockets:
-            socket = output_socket.socket_graphics
-
-            if socket.has_edge():
-
-                for edge in socket.edges:
-
-                    output_edges[f'edge.{index}'] = {
-                        'start_socket': edge.start_socket.index,
-                        'end_socket': {
-                            'node': edge.end_socket.node.node.id(),
-                            'socket': edge.end_socket.index
-                        }}
-
-                    index += 1
-
-        graph_state['nodes'].append(
-            {node.node.id(): {
-                'class': f'{node.node}',
-                'position': {'x': node.pos().x(), 'y': node.pos().y()},
-                'output_edges': output_edges
-            }})
+        node_data = node.info()
+        graph_state[node_data.get('id')] = {
+            'class': node_data.get('class'),
+            'position': node_data.get('position'),
+            'output_edges': _extract_output_edges(node)
+        }
 
     with open('save_file.json', 'w', encoding='utf-8') as file:
         json.dump(graph_state, file, indent=2)

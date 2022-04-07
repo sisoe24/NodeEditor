@@ -1,7 +1,6 @@
 import abc
 import pprint
 import logging
-from typing import OrderedDict
 
 from PySide2.QtCore import Qt
 from PySide2.QtGui import QFont, QPen, QColor, QPainterPath, QBrush
@@ -99,7 +98,9 @@ class NodeGraphics(QGraphicsItem):
     def delete_node(self):
         """Delete the graphics node and its input edges."""
         for socket in self.node.input_sockets:
-            socket.socket_graphics.remove_edges()
+            socket = socket.socket_graphics
+            if socket.has_edge():
+                socket.remove_edge()
         self.scene().removeItem(self)
 
     def _set_colors(self):
@@ -233,6 +234,36 @@ class NodeGraphics(QGraphicsItem):
     def __str__(self) -> str:
         return class_id('NodeGraphics', self)
 
+    def __repr__(self):
+        def get_sockets(sockets_list, is_input=False):
+            sockets = {}
+
+            for index, socket in enumerate(sockets_list):
+                socket = socket.socket_graphics
+
+                # if socket list is input sockets then there is only 1 edge
+                # else output sockets has a list
+                edges = str(socket.edge) if is_input else [
+                    str(edge) for edge in socket.edges]
+
+                sockets[index] = {str(socket): {'edges': edges}}
+
+            return sockets
+
+        position = self.pos()
+
+        data = {
+            'class': self.node._name,
+            'class_object': str(self),
+            'id': self.node.id(),
+            'zValue': self.zValue(),
+            'position': {'x': position.x(), 'y': position.y()},
+            'input_sockets': get_sockets(self.node.input_sockets, True),
+            'output_sockets': get_sockets(self.node.output_sockets),
+        }
+        return pprint.pformat(data, 1, 100)
+        # return json.dumps(data, indent=2)
+
 
 class NodeInterface(abc.ABC):
 
@@ -304,25 +335,3 @@ class Node(NodeInterface):
 
     def __str__(self):
         return self._name
-
-    def __repr__(self):
-        def get_sockets(sockets_list):
-            sockets = {}
-            for socket in sockets_list:
-                socket = socket.socket_graphics
-                sockets[str(socket)] = {
-                    'edges': [str(edge) for edge in socket.edges]
-                }
-            return sockets
-
-        position = self.node_graphics.pos()
-
-        data = OrderedDict({
-            'class': self._name,
-            'id': self.id(),
-            'zValue': self.node_graphics.zValue(),
-            'position': {'x': position.x(), 'y': position.y()},
-            'input_sockets': get_sockets(self.input_sockets),
-            'output_sockets': get_sockets(self.output_sockets),
-        })
-        return pprint.pformat(dict(data), 1, 100)

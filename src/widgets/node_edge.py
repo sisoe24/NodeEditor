@@ -1,8 +1,6 @@
 import abc
 import json
 import logging
-from collections import OrderedDict
-import pprint
 
 from PySide2.QtCore import QPointF,  Qt
 from PySide2.QtGui import QPen, QPainterPath, QColor, QPainterPathStroker
@@ -13,6 +11,7 @@ from PySide2.QtWidgets import (
 )
 
 from src.utils import class_id
+from src.widgets.node_socket import Socket, SocketInput, SocketOutput
 
 LOGGER = logging.getLogger('nodeeditor.edge')
 LOGGER.setLevel(logging.DEBUG)
@@ -37,10 +36,9 @@ class NodeEdgeGraphics(QGraphicsPathItem):
         self.edge.start_socket.clear_reference(self.edge)
         self.edge.end_socket.clear_reference(self.edge)
 
-        # FIXME: temporary solution when deleting a node before and edge
-        # in a multi selection. because the node removes the edge, the selection
-        # still keeps a reference to it, so calling it will result in the scene.
-        # not being found.
+        # FIXME: temporary solution.
+        # Deleting a node with edges, will automatically remove them but the
+        # scene selection will still have them inside the selection reference.
         try:
             self.scene().removeItem(self)
         except AttributeError as err:
@@ -121,7 +119,7 @@ class _EdgeInterface(abc.ABC):
 
 
 class NodeEdge(_EdgeInterface):
-    def __init__(self, view, start_socket, end_socket):
+    def __init__(self, view, start_socket: SocketInput, end_socket: SocketOutput):
 
         LOGGER.debug('Create connected edge')
 
@@ -158,7 +156,7 @@ class NodeEdge(_EdgeInterface):
 
 
 class NodeEdgeTmp(_EdgeInterface):
-    def __init__(self, view, start_socket):
+    def __init__(self, view, start_socket: Socket):
         LOGGER.debug('Create temporary edge')
 
         self._mouse_position = QPointF(start_socket.get_position().x(),

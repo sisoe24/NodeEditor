@@ -162,6 +162,7 @@ class GraphicsView(QGraphicsView):
                 self._clicked_socket = end_socket if start_socket.is_input() else start_socket
 
                 # delete the original edge
+                # BUG: this should only delete 1 edge
                 item.remove_edges()
 
             # FIXME: when drawing the edge, need to set the node zValue to stay
@@ -208,6 +209,7 @@ class GraphicsView(QGraphicsView):
 
                 self._delete_tmp_edge()
                 if end_socket.has_edge():
+                    # BUG: this should only delete 1 edge
                     end_socket.remove_edges()
 
                 NodeEdge(self, self._clicked_socket, end_socket)
@@ -229,9 +231,8 @@ class GraphicsView(QGraphicsView):
         elif isinstance(item, NodeEdgeGraphics):
             LOGGER.info(item)
         elif hasattr(item, 'parentItem') and isinstance(item.parentItem(), NodeGraphics):
-            item = item.parentItem()
-            LOGGER.info('Node %s, edges: TODO, zValue: %s',
-                        item, item.zValue())
+            item = item.parentItem().node
+            print(repr(item))
 
         super().mousePressEvent(event)
 

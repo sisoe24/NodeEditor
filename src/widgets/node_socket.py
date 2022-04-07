@@ -1,4 +1,6 @@
 
+import json
+import pprint
 from PySide2.QtCore import Qt
 from PySide2.QtGui import QColor, QPen, QPainterPath, QBrush
 from PySide2.QtWidgets import (
@@ -6,7 +8,6 @@ from PySide2.QtWidgets import (
 )
 
 from src.utils import class_id
-from src.widgets.node_edge import NodeEdge
 
 
 class SocketGraphics(QGraphicsItem):
@@ -21,6 +22,10 @@ class SocketGraphics(QGraphicsItem):
 
         self._draw_graphics()
         self._set_flags()
+
+    def get_position(self):
+        """Get socket position in the scene."""
+        return self.scenePos()
 
     @property
     def node(self):
@@ -52,9 +57,17 @@ class SocketGraphics(QGraphicsItem):
     def __str__(self) -> str:
         return class_id('SocketGraphics', self)
 
-    def get_position(self):
-        """Get socket position in the scene."""
-        return self.scenePos()
+    def __repr__(self) -> str:
+
+        data = {
+            'object': str(self),
+            'color': self.color.name.decode('utf-8'),
+            'node': str(self.node),
+            'edges': str(self.edge) if isinstance(self, SocketInput) else [
+                str(edge) for edge in self.edges]
+        }
+
+        return json.dumps(data, indent=1)
 
 
 class SocketInput(SocketGraphics):
@@ -71,7 +84,7 @@ class SocketInput(SocketGraphics):
     def has_edge(self):
         return bool(self._edge)
 
-    def add_edge(self, edge: NodeEdge):
+    def add_edge(self, edge):
         self._edge = edge
 
     def clear_reference(self, edge):
@@ -95,7 +108,7 @@ class SocketOutput(SocketGraphics):
     def edges(self):
         return self._edges
 
-    def add_edge(self, edge: NodeEdge):
+    def add_edge(self, edge: 'NodeEdge'):
         self._edges.append(edge)
 
     def clear_reference(self, edge):
@@ -111,7 +124,3 @@ class Socket:
             self.socket_graphics = SocketInput(node, index)
         else:
             self.socket_graphics = SocketOutput(node, index)
-
-    def get_position(self):
-        """Get socket position in the scene."""
-        return self.socket_graphics.scenePos()

@@ -1,40 +1,47 @@
 import json
+from pprint import pprint
 
 from src.examples import nodes
 from src.widgets.node_edge import NodeEdge
 from src.widgets.node_graphics import NodeGraphics
 
 
-def load_file(self):
-    # TODO: extract into own module/class
+def _create_nodes(scene, file_data):
 
+    node_edges = {}
+    for node_type, node_attrs in file_data.items():
+
+        # Review: is there a better way?
+        create_node = getattr(nodes, node_attrs['class'])
+
+        node = create_node(scene)
+        node.set_position(node_attrs['position']['x'],
+                          node_attrs['position']['y'])
+        node_edges[node_type] = {'obj': node,
+                                 'edges': node_attrs.get('output_edges', {})}
+
+    return node_edges
+
+
+def _extract_end_socket(node_edges, edge):
+    end_connection = edge['end_socket']
+    end_socket_obj = node_edges[end_connection['node']]['obj']
+    return end_socket_obj.input_sockets[end_connection['index']]
+
+
+def load_file(self):
     with open('save_file.json', 'r', encoding='utf-8') as file:
         data = json.load(file)
 
-    node_edges = {}
+    node_edges = _create_nodes(self.node_editor.scene, data)
 
-    for node_objects in data['nodes']:
-        for node_type, node_attributes in node_objects.items():
-
-            # Review: is there a better way?
-            create_node = getattr(nodes, node_attributes['class'])
-
-            node = create_node(self.node_editor.scene)
-            node.set_position(node_attributes['position']['x'],
-                              node_attributes['position']['y'])
-
-            edges = node_attributes.get('edges', {})
-            node_edges[node_type] = {'obj': node, 'edges': edges}
-
-    for node, connections in node_edges.items():
+    for connections in node_edges.values():
         obj = connections['obj']
-        for edge in connections['edges'].values():
-            start_socket = obj.output_sockets[edge['start_socket']]
 
-            end_edge = edge['end_socket']
-            end_node = end_edge.get('node')
-            end_socket_obj = node_edges.get(end_node).get('obj')
-            end_socket = end_socket_obj.input_sockets[end_edge['socket']]
+        for edge in connections['edges'].values():
+
+            start_socket = obj.output_sockets[edge['start_socket_index']]
+            end_socket = _extract_end_socket(node_edges, edge)
 
             NodeEdge(self.node_editor.view,
                      start_socket.socket_graphics,
@@ -51,10 +58,10 @@ def _extract_output_edges(node: NodeGraphics):
         if socket.has_edge():
             for edge in socket.edges:
                 output_edges[f'edge.{index}'] = {
-                    'start_socket': edge.start_socket.index,
+                    'start_socket_index': edge.start_socket.index,
                     'end_socket': {
                         'node': edge.end_socket.node.id(),
-                        'socket': edge.end_socket.index
+                        'index': edge.end_socket.index
                     }}
 
                 index += 1

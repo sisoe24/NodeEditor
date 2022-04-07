@@ -87,7 +87,7 @@ class SocketInput(SocketGraphics):
     def add_edge(self, edge):
         self._edge = edge
 
-    def clear_reference(self, edge):
+    def clear_reference(self):
         self._edge = None
 
     def remove_edge(self):

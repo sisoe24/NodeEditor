@@ -34,7 +34,7 @@ class NodeEdgeGraphics(QGraphicsPathItem):
         its connected sockets.
         """
         self.edge.start_socket.clear_reference(self.edge)
-        self.edge.end_socket.clear_reference(self.edge)
+        self.edge.end_socket.clear_reference()
 
         # FIXME: temporary solution.
         # Deleting a node with edges, will automatically remove them but the
@@ -131,11 +131,11 @@ class NodeEdge(_EdgeInterface):
         self._add_reference()
 
     @property
-    def start_socket(self):
+    def start_socket(self) -> SocketOutput:
         return self._start_socket
 
     @property
-    def end_socket(self):
+    def end_socket(self) -> SocketInput:
         return self._end_socket
 
     @property

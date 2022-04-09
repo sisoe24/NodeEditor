@@ -29,21 +29,22 @@ def _extract_end_socket(node_edges, edge):
     return end_socket_obj.input_sockets[end_connection['index']]
 
 
-def load_file(scene):
-    with open('save_file.json', 'r', encoding='utf-8') as file:
-        data = json.load(file)
-
+def load_scene(scene, data):
     node_edges = _create_nodes(scene, data)
 
     for connections in node_edges.values():
         obj = connections['obj']
 
         for edge in connections['edges'].values():
-
             start_socket = obj.output_sockets[edge['start_socket_index']]
             end_socket = _extract_end_socket(node_edges, edge)
 
             NodeEdge(start_socket.socket_graphics, end_socket.socket_graphics)
+
+
+def load_file(scene):
+    with open('save_file.json', 'r', encoding='utf-8') as file:
+        load_scene(scene, json.load(file))
 
 
 def _extract_output_edges(node: NodeGraphics):
@@ -66,19 +67,23 @@ def _extract_output_edges(node: NodeGraphics):
     return output_edges
 
 
-def save_file(scene):
-    """Save current graph scene."""
-    graph_state = {}
+def scene_state(scene) -> dict:
+    """Generate the graph state."""
+    state = {}
 
     graph_nodes = [n for n in scene.items() if isinstance(n, NodeGraphics)]
     for node in graph_nodes:
-
         node_data = node.info()
-        graph_state[node_data.get('id')] = {
+        state[node_data.get('id')] = {
             'class': node_data.get('class'),
             'position': node_data.get('position'),
             'output_edges': _extract_output_edges(node)
         }
 
+    return state
+
+
+def save_file(scene):
+    """Save current graph scene."""
     with open('save_file.json', 'w', encoding='utf-8') as file:
-        json.dump(graph_state, file, indent=2)
+        json.dump(scene_state(scene), file, indent=2)

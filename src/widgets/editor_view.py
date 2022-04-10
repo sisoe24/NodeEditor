@@ -14,7 +14,9 @@ from src.widgets.node_socket import SocketGraphics, SocketInput, SocketOutput
 
 from src.widgets.logic.undo_redo import (
     MoveNodeCommand,
-    ConnectEdgeCommand
+    ConnectEdgeCommand,
+    DeleteNodeCommand,
+    DeleteEdgeCommand,
 )
 
 LOGGER = logging.getLogger('nodeeditor.view')
@@ -330,7 +332,8 @@ class GraphicsView(QGraphicsView):
                 edge.delete_edge()
 
             for node in obj_list(NodeGraphics):
-                node.delete_node()
+                command = DeleteNodeCommand(node, self.scene(), 'Delete node')
+                self.top.undo_stack.push(command)
 
         return super().keyPressEvent(event)
 

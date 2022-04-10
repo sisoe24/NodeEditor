@@ -329,7 +329,8 @@ class GraphicsView(QGraphicsView):
             # it might cause some problems when delete an edge after deleting
             # its parent node (which deletes the edge)
             for edge in obj_list(NodeEdgeGraphics):
-                edge.delete_edge()
+                command = DeleteEdgeCommand(edge, self.scene(), 'Delete edge')
+                self.top.undo_stack.push(command)
 
             for node in obj_list(NodeGraphics):
                 command = DeleteNodeCommand(node, self.scene(), 'Delete node')

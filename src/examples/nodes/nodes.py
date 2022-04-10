@@ -31,7 +31,7 @@ class _NodeExampleContent(NodeContent):
 
 class NodeExample(Node):
     title_background = Qt.red
-    title = "Example Node1"
+    title = "Example Node"
 
     def __init__(self, scene):
         self.node_content = _NodeExampleContent()

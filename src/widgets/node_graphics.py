@@ -80,11 +80,6 @@ class NodeContent(QWidget):
 
 class NodesRegister:
     nodes = {}
-    node_number = {}
-
-    @classmethod
-    def nodes_list(cls):
-        return cls.nodes
 
     @classmethod
     def get_node(cls, node):
@@ -280,17 +275,9 @@ class NodeGraphics(QGraphicsItem):
     def info(self) -> dict:
         def get_sockets(sockets_list, is_input=False):
             sockets = {}
-
             for index, socket in enumerate(sockets_list):
                 socket = socket.socket_graphics
-
-                # if socket list is input sockets then there is only 1 edge
-                # else output sockets has a list
-                edges = str(socket.edge) if is_input else [
-                    str(edge) for edge in socket.edges]
-
-                sockets[index] = {str(socket): {'edges': edges}}
-
+                sockets[index] = {str(socket): {'edges': socket.get_edges()}}
             return sockets
 
         position = self.pos()

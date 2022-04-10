@@ -2,6 +2,7 @@ import json
 from PySide2.QtWidgets import QUndoCommand
 
 from src.utils.graph_state import load_file, load_scene, save_file, scene_state
+from src.widgets.node_edge import NodeEdge
 from src.widgets.node_graphics import NodesRegister
 
 
@@ -24,15 +25,18 @@ class MoveNodeCommand(QUndoCommand):
 
 
 class ConnectEdgeCommand(QUndoCommand):
-    def __init__(self, edge, description):
+    def __init__(self, start_socket, end_socket, description):
         super().__init__(description)
-        self.edge = edge
+        self.start_socket = start_socket
+        self.end_socket = end_socket
+
+        self.edge = None
 
     def undo(self):
-        print('undo')
+        self.edge.edge_graphics.delete_edge()
 
     def redo(self):
-        print('redo')
+        self.edge = NodeEdge(self.start_socket, self.end_socket)
 
 
 class AddNodeCommand(QUndoCommand):

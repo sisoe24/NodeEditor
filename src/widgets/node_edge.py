@@ -72,6 +72,7 @@ class NodeEdgeGraphics(QGraphicsPathItem):
     def info(self) -> str:
         return {
             'id': str(self),
+            'class_id': str(self.edge),
             'start_socket': {
                 'node': str(self.edge.start_socket.node),
                 'socket': str(self.edge.start_socket),

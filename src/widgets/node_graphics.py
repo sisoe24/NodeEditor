@@ -80,6 +80,15 @@ class NodeContent(QWidget):
 
 class NodesRegister:
     nodes = {}
+    nodes_types = {}
+
+    @classmethod
+    def register_type(cls, _class):
+        cls.nodes_types[_class.__name__] = _class
+
+        def wrapper(*args):
+            return _class(args[0])
+        return wrapper
 
     @classmethod
     def get_node(cls, node):

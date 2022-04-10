@@ -8,7 +8,7 @@ from PySide2.QtWidgets import (
 )
 
 
-from ...widgets.node_graphics import Node, NodeContent
+from ...widgets.node_graphics import Node, NodeContent, NodesRegister
 LOGGER = logging.getLogger('nodeeditor.node_input')
 
 
@@ -29,6 +29,7 @@ class _NodeExampleContent(NodeContent):
         self.add_input(QLabel('Input 2'))
 
 
+@NodesRegister.register_type
 class NodeExample(Node):
     title_background = Qt.red
     title = "Example Node"
@@ -53,7 +54,7 @@ class _NodeDebugContent(NodeContent):
         self.add_input(QLabel('Debug Input 2'))
         self.add_input(QLabel('Debug Input 3'))
 
-
+@NodesRegister.register_type
 class NodeDebug(Node):
     title_background = Qt.green
     title = "Debug Node"

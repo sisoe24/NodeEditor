@@ -72,7 +72,8 @@ class SocketGraphics(QGraphicsItem):
         }
 
     def repr(self):
-        return json.dumps(self.info, indent=1)
+        # return pprint.pformat(self.info(), 1, 100)
+        return json.dumps(self.info(), indent=1)
 
 
 class SocketInput(SocketGraphics):
@@ -88,6 +89,9 @@ class SocketInput(SocketGraphics):
 
     def has_edge(self):
         return bool(self._edge)
+
+    def get_edges(self):
+        return self.edge
 
     def add_edge(self, edge):
         self._edge = edge
@@ -116,8 +120,15 @@ class SocketOutput(SocketGraphics):
     def add_edge(self, edge: 'NodeEdge'):
         self._edges.append(edge)
 
+    def get_edges(self):
+        return self.edges
+
     def has_edge(self):
         return bool(self._edges)
+
+    def remove_edge(self, edge):
+        edge = self.edges.index(edge)
+        self.edges[edge].edge_graphics.delete_edge()
 
     def clear_reference(self, edge):
         self._edges.remove(edge)

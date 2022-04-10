@@ -22,6 +22,11 @@ from src.utils import class_id
 LOGGER = logging.getLogger('nodeeditor.master_node')
 
 
+def create_node(scene, node_class):
+    node = NodesRegister.get_node_class(node_class)
+    return node(scene)
+
+
 class NodeContent(QWidget):
 
     def __init__(self, parent=None):
@@ -80,18 +85,27 @@ class NodeContent(QWidget):
 
 class NodesRegister:
     nodes = {}
-    nodes_types = {}
+    nodes_classes = {}
 
     @classmethod
     def register_type(cls, _class):
-        cls.nodes_types[_class.__name__] = _class
+        cls.nodes_classes[_class.__name__] = _class
 
         def wrapper(*args):
             return _class(args[0])
         return wrapper
 
     @classmethod
-    def get_node(cls, node):
+    def get_node_class(cls, node):
+
+        node_class = cls.nodes_classes.get(node)
+        if node_class:
+            return node_class
+
+        raise RuntimeError(f'Node class not found: {node}')
+
+    @classmethod
+    def get_node_from_graph(cls, node):
         return cls.nodes[node._class].get(node._id)
 
     @classmethod

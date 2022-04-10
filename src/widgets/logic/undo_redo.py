@@ -17,11 +17,11 @@ class MoveNodeCommand(QUndoCommand):
         self.previous_position = previous_position
 
     def undo(self):
-        node = NodesRegister.get_node(self.node)
+        node = NodesRegister.get_node_from_graph(self.node)
         node.setPos(self.previous_position)
 
     def redo(self):
-        node = NodesRegister.get_node(self.node)
+        node = NodesRegister.get_node_from_graph(self.node)
         node.setPos(self.node_pos)
 
 
@@ -64,9 +64,7 @@ class DeleteNodeCommand(QUndoCommand):
         self.node_info = None
 
     def undo(self):
-        node_class = NodesRegister.nodes_types.get(self.node._class)
-        node = node_class(self.scene)
-
+        node = create_node(self.scene, self.node._class)
         node.node_graphics.setPos(
             self.node_info['position']['x'],
             self.node_info['position']['y']

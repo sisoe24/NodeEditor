@@ -1,9 +1,8 @@
 import json
 from pprint import pprint
 
-from src.examples import nodes
 from src.widgets.node_edge import NodeEdge
-from src.widgets.node_graphics import NodeGraphics
+from src.widgets.node_graphics import NodeGraphics, create_node
 
 
 def _create_nodes(scene, file_data):
@@ -11,10 +10,7 @@ def _create_nodes(scene, file_data):
     node_edges = {}
     for node_type, node_attrs in file_data.items():
 
-        # Review: is there a better way?
-        create_node = getattr(nodes, node_attrs['class'])
-
-        node = create_node(scene)
+        node = create_node(scene, node_attrs['class'])
         node.set_position(node_attrs['position']['x'],
                           node_attrs['position']['y'])
         node_edges[node_type] = {'obj': node,

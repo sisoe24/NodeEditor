@@ -82,10 +82,15 @@ class NodesRegister:
     nodes = {}
 
     @classmethod
-    def register_node(cls, title):
-        node_num = cls.nodes[title] + 1 if title in cls.nodes.keys() else 1
-        cls.nodes.update({title: node_num})
-        return f'{title}.{str(node_num).zfill(3)}'
+    def register_node(cls, node):
+        node_num = cls.nodes[node] + 1 if node in cls.nodes else 1
+        cls.nodes.update({node: node_num})
+        return f'{node}.{str(node_num).zfill(3)}'
+
+    @classmethod
+    def unregister_node(cls, node):
+        node = str(node)
+        cls.nodes[node] = cls.nodes[node] - 1
 
 
 class NodeGraphics(QGraphicsItem):
@@ -96,7 +101,6 @@ class NodeGraphics(QGraphicsItem):
         super().__init__(parent)
 
         self._id = NodesRegister.register_node(str(node))
-        self.setToolTip(self._id)
 
         self.node = node
         self.content = content
@@ -111,6 +115,8 @@ class NodeGraphics(QGraphicsItem):
 
     def delete_node(self):
         """Delete the graphics node and its input edges."""
+        NodesRegister.unregister_node(self.node)
+
         for socket in self.node.input_sockets:
             socket = socket.socket_graphics
             if socket.has_edge():
@@ -136,9 +142,10 @@ class NodeGraphics(QGraphicsItem):
         # title gets created at 0,0 thats why is already inside the title box
         title_item = QGraphicsTextItem(self)
 
-        title_item.setPlainText(self.node.title)
+        title_item.setPlainText(self._id)
+        # title_item.setPlainText(self.node.title)
         title_item.setDefaultTextColor(Qt.white)
-        title_item.setFont(QFont('Menlo', 14))
+        title_item.setFont(QFont('Menlo', 12))
 
         title_sx_padding = 15.0
         title_item.setPos(title_sx_padding, 0)

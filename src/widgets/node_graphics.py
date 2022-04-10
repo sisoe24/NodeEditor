@@ -80,17 +80,41 @@ class NodeContent(QWidget):
 
 class NodesRegister:
     nodes = {}
+    node_number = {}
+
+    @classmethod
+    def nodes_list(cls):
+        return cls.nodes
+
+    @classmethod
+    def get_node(cls, node):
+        return cls.nodes[node._class].get(node._id)
 
     @classmethod
     def register_node(cls, node):
-        node_num = cls.nodes[node] + 1 if node in cls.nodes else 1
-        cls.nodes.update({node: node_num})
-        return f'{node}.{str(node_num).zfill(3)}'
+
+        node_class = node._class
+        node_data = cls.nodes.get(node_class)
+
+        node_num = 1
+        if node_data:
+            for index, key in enumerate(sorted(node_data.keys()), 1):
+                num = key.split('.')[-1]
+                if index != int(num):
+                    node_num = index
+                    break
+                node_num += 1
+        else:
+            cls.nodes.update({node_class: {}})
+
+        node_id = f'{node_class}.{str(node_num).zfill(3)}'
+        cls.nodes[node_class].update(({node_id: node}))
+
+        return node_id
 
     @classmethod
     def unregister_node(cls, node):
-        node = str(node)
-        cls.nodes[node] = cls.nodes[node] - 1
+        cls.nodes[node._class].pop(node._id)
 
 
 class NodeGraphics(QGraphicsItem):
@@ -100,10 +124,11 @@ class NodeGraphics(QGraphicsItem):
     def __init__(self, node: 'Node', content: QWidget, parent=None):
         super().__init__(parent)
 
-        self._id = NodesRegister.register_node(str(node))
-
         self.node = node
         self.content = content
+
+        self._class = str(self.node)
+        self._id = NodesRegister.register_node(self)
 
         self._height = max(self.node.layout_size.height(), 50)
 
@@ -115,7 +140,7 @@ class NodeGraphics(QGraphicsItem):
 
     def delete_node(self):
         """Delete the graphics node and its input edges."""
-        NodesRegister.unregister_node(self.node)
+        NodesRegister.unregister_node(self)
 
         for socket in self.node.input_sockets:
             socket = socket.socket_graphics
@@ -270,7 +295,7 @@ class NodeGraphics(QGraphicsItem):
 
         position = self.pos()
         return {
-            'class': str(self.node),
+            'class': self._class,
             'class_object': str(self),
             'id': self._id,
             'zValue': self.zValue(),

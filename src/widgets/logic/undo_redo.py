@@ -39,7 +39,7 @@ class AddNodeCommand(QUndoCommand):
         self.node = None
 
     def undo(self):
-        self.scene.removeItem(self.node.node_graphics)
+        self.node.node_graphics.delete_node()
 
     def redo(self):
         self.node = self._node(self.scene)

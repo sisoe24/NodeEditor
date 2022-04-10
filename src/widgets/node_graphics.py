@@ -141,6 +141,13 @@ class NodeGraphics(QGraphicsItem):
             socket = socket.socket_graphics
             if socket.has_edge():
                 socket.remove_edge()
+
+        for socket in self.node.output_sockets:
+            socket = socket.socket_graphics
+            if socket.has_edge():
+                for edge in socket.edges:
+                    socket.remove_edge(edge)
+
         self.scene().removeItem(self)
 
     def _set_colors(self):

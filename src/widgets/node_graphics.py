@@ -1,4 +1,5 @@
 import abc
+import json
 import pprint
 import logging
 
@@ -77,12 +78,25 @@ class NodeContent(QWidget):
         self.outputs.append(widget)
 
 
+class NodesRegister:
+    nodes = {}
+
+    @classmethod
+    def register_node(cls, title):
+        node_num = cls.nodes[title] + 1 if title in cls.nodes.keys() else 1
+        cls.nodes.update({title: node_num})
+        return f'{title}.{str(node_num).zfill(3)}'
+
+
 class NodeGraphics(QGraphicsItem):
     _width = 150
     _title_height = 25
 
     def __init__(self, node: 'Node', content: QWidget, parent=None):
         super().__init__(parent)
+
+        self._id = NodesRegister.register_node(str(node))
+        self.setToolTip(self._id)
 
         self.node = node
         self.content = content
@@ -231,9 +245,6 @@ class NodeGraphics(QGraphicsItem):
         """Set the bounding margins for the node."""
         return self._node_body.boundingRect()
 
-    def id(self):
-        return f'{self.node}.{id(self)}'
-
     def info(self) -> dict:
         def get_sockets(sockets_list, is_input=False):
             sockets = {}
@@ -254,7 +265,7 @@ class NodeGraphics(QGraphicsItem):
         return {
             'class': str(self.node),
             'class_object': str(self),
-            'id': self.id(),
+            'id': self._id,
             'zValue': self.zValue(),
             'position': {'x': position.x(), 'y': position.y()},
             'input_sockets': get_sockets(self.node.input_sockets, True),
@@ -263,6 +274,7 @@ class NodeGraphics(QGraphicsItem):
 
     def repr(self):
         return pprint.pformat(self.info(), 1, 100)
+        # return json.dumps(self.info(), indent=1)
 
     def __str__(self) -> str:
         return class_id('NodeGraphics', self)

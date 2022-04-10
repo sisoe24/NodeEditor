@@ -2,20 +2,25 @@ import json
 from PySide2.QtWidgets import QUndoCommand
 
 from src.utils.graph_state import load_file, load_scene, save_file, scene_state
+from src.widgets.node_graphics import NodesRegister
 
 
 class MoveNodeCommand(QUndoCommand):
     def __init__(self, node, previous_position, description):
         super().__init__(description)
         self.node = node
-        self.node_pos = self.node.pos()
+        self.node_id = node._id
+
+        self.node_pos = node.pos()
         self.previous_position = previous_position
 
     def undo(self):
-        self.node.setPos(self.previous_position)
+        node = NodesRegister.get_node(self.node)
+        node.setPos(self.previous_position)
 
     def redo(self):
-        self.node.setPos(self.node_pos)
+        node = NodesRegister.get_node(self.node)
+        node.setPos(self.node_pos)
 
 
 class ConnectEdgeCommand(QUndoCommand):

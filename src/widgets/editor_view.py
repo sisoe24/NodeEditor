@@ -4,12 +4,18 @@ from collections import namedtuple
 from PySide2.QtCore import Signal, Qt, QEvent
 from PySide2.QtGui import QPainter, QMouseEvent
 from PySide2.QtWidgets import (
-    QGraphicsView
+    QGraphicsView,
+    QUndoCommand
 )
-from src.widgets.node_edge import NodeEdge, NodeEdgeGraphics, NodeEdgeTmp
-from src.widgets.node_graphics import NodeGraphics
 
+from src.widgets.node_graphics import NodeGraphics
+from src.widgets.node_edge import NodeEdge, NodeEdgeGraphics, NodeEdgeTmp
 from src.widgets.node_socket import SocketGraphics, SocketInput, SocketOutput
+
+from src.widgets.logic.undo_redo import (
+    MoveNodeCommand,
+    ConnectEdgeCommand
+)
 
 LOGGER = logging.getLogger('nodeeditor.view')
 LOGGER.setLevel(logging.DEBUG)
@@ -22,6 +28,8 @@ class GraphicsView(QGraphicsView):
         super().__init__(graphic_scene, parent)
         LOGGER.debug('Init Graphics View')
 
+        self.top = self.topLevelWidget()
+
         self._set_flags()
 
         self.zoom_level = 10
@@ -30,7 +38,8 @@ class GraphicsView(QGraphicsView):
 
         self._debug_zoom()
 
-        self.drag_mode = None
+        self._socket_drag_mode = None
+        self._node_drag_mode = None
         self._selected_item = None
         self._edge_tmp = None
         self._clicked_socket = None
@@ -46,7 +55,10 @@ class GraphicsView(QGraphicsView):
     @selected_item.setter
     def selected_item(self, item):
         # Check if item belongs to a node class
-        if hasattr(item, 'parentItem') and isinstance(item.parentItem(), NodeGraphics):
+        if (
+            hasattr(item, 'parentItem') and
+            isinstance(item.parentItem(), NodeGraphics)
+        ):
             self._selected_item = item.parentItem()
             self._selected_item.setZValue(1)
         else:
@@ -146,7 +158,7 @@ class GraphicsView(QGraphicsView):
         if isinstance(item, SocketGraphics):
             self.setDragMode(QGraphicsView.NoDrag)
 
-            self.drag_mode = True
+            self._socket_drag_mode = True
             LOGGER.debug('Drag Mode Enabled')
 
             self._clicked_socket = item
@@ -172,6 +184,9 @@ class GraphicsView(QGraphicsView):
             self._clicked_socket.parentItem().setZValue(-1.0)
 
             self._edge_tmp = NodeEdgeTmp(self, self._clicked_socket)
+        elif isinstance(self.selected_item, NodeGraphics):
+            self._node_drag_mode = True
+            self.node_initial_position = self.selected_item.pos()
 
         super().mousePressEvent(event)
 
@@ -180,8 +195,6 @@ class GraphicsView(QGraphicsView):
         if msg:
             LOGGER.debug(msg)
         self.scene().removeItem(self._edge_tmp.edge_graphics)
-
-        # Review: dont know about this
 
     def _is_same_socket_type(self, end_socket):
         """Check if input and output socket are the same type."""
@@ -199,13 +212,20 @@ class GraphicsView(QGraphicsView):
             super().mouseReleaseEvent(event)
             return
 
+        if self._node_drag_mode:
+            command = MoveNodeCommand(self.selected_item,
+                                      self.node_initial_position,
+                                      'Move Node')
+            self.top.undo_stack.push(command)
+            self._node_drag_mode = False
+
         # move node above other nodes when selected
         if hasattr(self.selected_item, 'setZValue'):
             # BUG: there might a bug when connected from input to output
             # where the zValue does not get reset properly
             self.selected_item.setZValue(0)
 
-        if self.drag_mode:
+        if self._socket_drag_mode:
 
             if item == self._clicked_socket:
                 self._delete_tmp_edge('End socket is start socket. abort')
@@ -229,12 +249,15 @@ class GraphicsView(QGraphicsView):
                     # invert the sockets if starting point is input to output
                     end_socket, self._clicked_socket = self._clicked_socket, end_socket
 
-                NodeEdge(self._clicked_socket, end_socket)
+                # edge = NodeEdge(self._clicked_socket, end_socket)
+                command = ConnectEdgeCommand(self._clicked_socket, end_socket,
+                                             'Connect Edge')
+                self.top.undo_stack.push(command)
 
             elif self._edge_tmp:
                 self._delete_tmp_edge('Edge release was not on a socket')
 
-            self.drag_mode = False
+            self._socket_drag_mode = False
             LOGGER.debug('Drag Mode Disabled')
 
         self.setDragMode(QGraphicsView.RubberBandDrag)
@@ -243,9 +266,13 @@ class GraphicsView(QGraphicsView):
     def _rightMouseButtonPress(self, event):
         """Debug use."""
         item = self._get_graphic_item(event)
+
         if isinstance(item, (SocketGraphics, NodeEdgeGraphics)):
             print(item.repr())
-        elif hasattr(item, 'parentItem') and isinstance(item.parentItem(), NodeGraphics):
+        elif (
+            hasattr(item, 'parentItem') and
+            isinstance(item.parentItem(), NodeGraphics)
+        ):
             print(item.parentItem().repr())
 
         super().mousePressEvent(event)
@@ -280,7 +307,7 @@ class GraphicsView(QGraphicsView):
             super().mouseReleaseEvent(event)
 
     def mouseMoveEvent(self, event):
-        if self.drag_mode:
+        if self._socket_drag_mode:
             self.scene().update()
 
         self._update_mouse_position(event)

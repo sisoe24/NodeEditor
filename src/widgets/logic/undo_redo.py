@@ -40,6 +40,23 @@ class ConnectEdgeCommand(QUndoCommand):
         self.edge = NodeEdge(self.start_socket, self.end_socket)
 
 
+class DisconnectEdgeCommand(QUndoCommand):
+    def __init__(self, start_socket, end_socket, description):
+        super().__init__(description)
+
+        self.start_socket = start_socket
+        self.end_socket = end_socket
+
+        self.edge = None
+
+    def undo(self):
+        self.edge = NodeEdge(self.start_socket, self.end_socket)
+
+    def redo(self):
+        pass
+        # self.edge = NodeEdge(self.start_socket, self.end_socket)
+
+
 class AddNodeCommand(QUndoCommand):
     def __init__(self, scene, pos, node, description):
         super().__init__(description)
@@ -64,6 +81,7 @@ class DeleteNodeCommand(QUndoCommand):
         self.node_info = None
 
     def undo(self):
+        # FIXME: refactor
         node = create_node(self.scene, self.node._class)
         node.node_graphics.setPos(
             self.node_info['position']['x'],

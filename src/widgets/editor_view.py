@@ -42,6 +42,7 @@ class GraphicsView(QGraphicsView):
         self._debug_zoom()
 
         self._edge_drag_mode = None
+        self._edge_re_drag = None
         self._node_drag_mode = None
         self._selected_item = None
         self._edge_tmp = None
@@ -170,6 +171,8 @@ class GraphicsView(QGraphicsView):
             if isinstance(item, SocketInput) and item.has_edge():
                 LOGGER.debug('SocketInput has an edge connected already')
 
+                self._edge_re_drag = True
+
                 # FIXME: ugly
                 self.__start_socket = item.edge.start_socket
                 self.__end_socket = item.edge.end_socket
@@ -191,7 +194,7 @@ class GraphicsView(QGraphicsView):
             self._edge_tmp = NodeEdgeTmp(self, self._clicked_socket)
         elif isinstance(self.selected_item, NodeGraphics):
             self._node_drag_mode = True
-            self.node_initial_position = self.selected_item.pos()
+            self._node_initial_position = self.selected_item.pos()
 
         super().mousePressEvent(event)
 
@@ -219,7 +222,7 @@ class GraphicsView(QGraphicsView):
 
         if self._node_drag_mode:
             command = MoveNodeCommand(self.selected_item,
-                                      self.node_initial_position,
+                                      self._node_initial_position,
                                       'Move Node')
             self.top.undo_stack.push(command)
             self._node_drag_mode = False
@@ -259,12 +262,14 @@ class GraphicsView(QGraphicsView):
                                              'Connect Edge')
                 self.top.undo_stack.push(command)
 
+            # Review: simplify the condition
             elif self._edge_tmp:
-                start_socket = self._edge_tmp.start_socket
-                command = DisconnectEdgeCommand(
-                    self.__start_socket, self.__end_socket,
-                    'Disconnect Edge')
-                self.top.undo_stack.push(command)
+                if self._edge_re_drag:
+                    command = DisconnectEdgeCommand(
+                        self.__start_socket, self.__end_socket,
+                        'Disconnect Edge')
+                    self.top.undo_stack.push(command)
+                    self._edge_re_drag = False
                 self._delete_tmp_edge('Edge release was not on a socket')
 
             self._edge_drag_mode = False

@@ -13,6 +13,7 @@ from src.widgets.node_edge import NodeEdge, NodeEdgeGraphics, NodeEdgeTmp
 from src.widgets.node_socket import SocketGraphics, SocketInput, SocketOutput
 
 from src.widgets.logic.undo_redo import (
+    DisconnectEdgeCommand,
     MoveNodeCommand,
     ConnectEdgeCommand,
     DeleteNodeCommand,
@@ -40,7 +41,7 @@ class GraphicsView(QGraphicsView):
 
         self._debug_zoom()
 
-        self._socket_drag_mode = None
+        self._edge_drag_mode = None
         self._node_drag_mode = None
         self._selected_item = None
         self._edge_tmp = None
@@ -160,7 +161,7 @@ class GraphicsView(QGraphicsView):
         if isinstance(item, SocketGraphics):
             self.setDragMode(QGraphicsView.NoDrag)
 
-            self._socket_drag_mode = True
+            self._edge_drag_mode = True
             LOGGER.debug('Drag Mode Enabled')
 
             self._clicked_socket = item
@@ -169,13 +170,15 @@ class GraphicsView(QGraphicsView):
             if isinstance(item, SocketInput) and item.has_edge():
                 LOGGER.debug('SocketInput has an edge connected already')
 
-                start_socket = item.edge.start_socket
-                end_socket = item.edge.end_socket
+                # FIXME: ugly
+                self.__start_socket = item.edge.start_socket
+                self.__end_socket = item.edge.end_socket
 
+                # REVIEW: might not need this after re assign always start to output
                 # re assign start socket to the initial starting point
                 self._clicked_socket = (
-                    end_socket if isinstance(start_socket, SocketInput)
-                    else start_socket
+                    self.__end_socket if isinstance(self.__start_socket, SocketInput)
+                    else self.__start_socket
                 )
 
                 # delete the original edge
@@ -227,14 +230,14 @@ class GraphicsView(QGraphicsView):
             # where the zValue does not get reset properly
             self.selected_item.setZValue(0)
 
-        if self._socket_drag_mode:
+        if self._edge_drag_mode:
 
             if item == self._clicked_socket:
                 self._delete_tmp_edge('End socket is start socket. abort')
                 super().mouseReleaseEvent(event)
                 return
 
-            if isinstance(item, SocketGraphics):
+            elif isinstance(item, SocketGraphics):
                 end_socket = item
 
                 if self._is_same_socket_type(end_socket):
@@ -257,9 +260,14 @@ class GraphicsView(QGraphicsView):
                 self.top.undo_stack.push(command)
 
             elif self._edge_tmp:
+                start_socket = self._edge_tmp.start_socket
+                command = DisconnectEdgeCommand(
+                    self.__start_socket, self.__end_socket,
+                    'Disconnect Edge')
+                self.top.undo_stack.push(command)
                 self._delete_tmp_edge('Edge release was not on a socket')
 
-            self._socket_drag_mode = False
+            self._edge_drag_mode = False
             LOGGER.debug('Drag Mode Disabled')
 
         self.setDragMode(QGraphicsView.RubberBandDrag)
@@ -309,7 +317,7 @@ class GraphicsView(QGraphicsView):
             super().mouseReleaseEvent(event)
 
     def mouseMoveEvent(self, event):
-        if self._socket_drag_mode:
+        if self._edge_drag_mode:
             self.scene().update()
 
         self._update_mouse_position(event)

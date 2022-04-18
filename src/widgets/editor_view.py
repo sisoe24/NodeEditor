@@ -1,11 +1,11 @@
 import logging
 from collections import namedtuple
 
-from PySide2.QtCore import Signal, Qt, QEvent
+from PySide2.QtCore import Signal, Qt
 from PySide2.QtGui import QPainter, QMouseEvent
 from PySide2.QtWidgets import (
     QGraphicsView,
-    QUndoCommand
+    QUndoCommand,
 )
 
 from src.widgets.node_graphics import NodeGraphics
@@ -13,11 +13,12 @@ from src.widgets.node_edge import NodeEdge, NodeEdgeGraphics, NodeEdgeTmp
 from src.widgets.node_socket import SocketGraphics, SocketInput, SocketOutput
 
 from src.widgets.logic.undo_redo import (
+    BoxSelectCommand,
     DisconnectEdgeCommand,
     MoveNodeCommand,
     ConnectEdgeCommand,
     DeleteNodeCommand,
-    DeleteEdgeCommand,
+    SelectCommand,
 )
 
 LOGGER = logging.getLogger('nodeeditor.view')
@@ -47,6 +48,9 @@ class GraphicsView(QGraphicsView):
         self._selected_item = None
         self._edge_tmp = None
         self._clicked_socket = None
+
+        self._initial_selection = None
+        self._mouse_initial_position = None
 
     def _debug_zoom(self):
         z = 2.15
@@ -156,6 +160,7 @@ class GraphicsView(QGraphicsView):
     def _leftMouseButtonPress(self, event):
         item = self._get_graphic_item(event)
         LOGGER.debug('Clicked on item: %s', item)
+        self._mouse_initial_position = event.pos()
 
         self.selected_item = item
 
@@ -220,11 +225,30 @@ class GraphicsView(QGraphicsView):
             super().mouseReleaseEvent(event)
             return
 
+        scene = self.scene()
+        if (
+            self._mouse_initial_position != event.pos() and
+            not self._node_drag_mode and
+            not self._edge_drag_mode
+        ):
+            command = BoxSelectCommand(scene, 'Box Select')
+        else:
+            self.current_selection = self.selected_item
+            command = SelectCommand(scene,
+                                    self._initial_selection,
+                                    self.current_selection, 'Select')
+
+        self.top.undo_stack.push(command)
+        self._initial_selection = self.current_selection
+
         if self._node_drag_mode:
-            command = MoveNodeCommand(self.selected_item,
-                                      self._node_initial_position,
-                                      'Move Node')
-            self.top.undo_stack.push(command)
+
+            # trigger only if node was moved
+            if self.selected_item.pos() != self._node_initial_position:
+                command = MoveNodeCommand(self.selected_item,
+                                          self._node_initial_position,
+                                          'Move Node')
+                self.top.undo_stack.push(command)
             self._node_drag_mode = False
 
         # move node above other nodes when selected

@@ -1,6 +1,7 @@
 import json
 from pprint import pformat
 from PySide2.QtWidgets import QUndoCommand
+from PySide2.QtGui import QPainterPath
 
 from src.utils.graph_state import load_file, load_scene, save_file, scene_state
 from src.widgets.node_edge import NodeEdge
@@ -16,13 +17,58 @@ class MoveNodeCommand(QUndoCommand):
         self.node_pos = node.pos()
         self.previous_position = previous_position
 
+    def graph_node(self):
+        return NodesRegister.get_node_from_graph(self.node)
+
     def undo(self):
-        node = NodesRegister.get_node_from_graph(self.node)
+        node = self.graph_node()
         node.setPos(self.previous_position)
 
     def redo(self):
-        node = NodesRegister.get_node_from_graph(self.node)
+        node = self.graph_node()
         node.setPos(self.node_pos)
+
+
+class SelectCommand(QUndoCommand):
+    def __init__(self, scene, previous_selection, current_selection, description):
+        super().__init__(description)
+        self.scene = scene
+        self.previous_selection = previous_selection
+        self.current_selection = current_selection
+
+    def selection_area(self, node):
+        path = QPainterPath()
+        path.addPolygon(node.mapToScene(node.boundingRect()))
+        return path
+
+    def undo(self):
+        selection = self.previous_selection
+        selection = self.selection_area(
+            selection) if selection else QPainterPath()
+        self.scene.setSelectionArea(selection)
+
+    def redo(self):
+        self.scene.setSelectionArea(
+            self.selection_area(self.current_selection))
+
+
+class BoxSelectCommand(QUndoCommand):
+    def __init__(self, scene, description):
+        super().__init__(description)
+
+        self.scene = scene
+        self.selection = self.scene.selectionArea()
+        self.stack_previous = None
+
+    def undo(self):
+        print('box select undo')
+        # print("➡ self.stack_previous :", self.stack_previous)
+        self.scene.setSelectionArea(self.stack_previous)
+
+    def redo(self):
+        print('box select redo')
+        self.stack_previous = self.selection
+        # print("➡ self.selection :", self.selection)
 
 
 class ConnectEdgeCommand(QUndoCommand):

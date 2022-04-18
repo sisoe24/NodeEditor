@@ -46,7 +46,8 @@ class NodeEdgeGraphics(QGraphicsPathItem):
         self._pen.setWidthF(2.0)
 
     def _set_flags(self):
-        self.setFlag(QGraphicsItem.ItemIsSelectable)
+        # Review: I might not need to select the edge
+        # self.setFlag(QGraphicsItem.ItemIsSelectable)
         self.setFlag(QGraphicsItem.ItemStacksBehindParent)
 
     def paint(self, painter, option, widget=None):

@@ -47,8 +47,10 @@ class GraphicsView(QGraphicsView):
         self._edge_tmp = None
         self._clicked_socket = None
 
-        self._previous_selection = None
+        self._previous_single_selection = None
         self._previous_box_selection = None
+        self._previous_selection = None
+
         self._mouse_initial_position = None
 
     def _debug_zoom(self):
@@ -226,7 +228,7 @@ class GraphicsView(QGraphicsView):
         )
 
     def _update_selection(self, previous, current, description):
-        """Update the selection undo redo command
+        """Update the selection undo redo command.
 
         Create the undo redo command stack for the selection. Selection can be
         a single node select or a box select.
@@ -242,9 +244,11 @@ class GraphicsView(QGraphicsView):
         self.top.undo_stack.push(command)
 
         if description == 'Select':
-            self._previous_selection = current
+            self._previous_single_selection = current
         else:
             self._previous_box_selection = current
+
+        self._previous_selection = current
 
     def _leftMouseButtonRelease(self, event):
         item = self._get_graphic_item(event)
@@ -256,11 +260,12 @@ class GraphicsView(QGraphicsView):
                                    'Box Select')
 
         if isinstance(self.selected_item, NodeGraphics):
-            self._update_selection(self._previous_selection,
+            self._update_selection(self._previous_single_selection,
                                    self.selected_item,
                                    'Select')
 
-        if not item:
+        if not item and not self._is_box_selection(event):
+            self._update_selection(self._previous_selection, None, 'Select')
             super().mouseReleaseEvent(event)
             return
 

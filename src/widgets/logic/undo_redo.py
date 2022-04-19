@@ -37,6 +37,9 @@ class SelectCommand(QUndoCommand):
         self.current_selection = current_selection
 
     def selection_area(self, selection):
+        if not selection:
+            return QPainterPath()
+
         if isinstance(selection, QPainterPath):
             return selection
 

@@ -36,9 +36,12 @@ class SelectCommand(QUndoCommand):
         self.previous_selection = previous_selection
         self.current_selection = current_selection
 
-    def selection_area(self, node):
+    def selection_area(self, selection):
+        if isinstance(selection, QPainterPath):
+            return selection
+
         path = QPainterPath()
-        path.addPolygon(node.mapToScene(node.boundingRect()))
+        path.addPolygon(selection.mapToScene(selection.boundingRect()))
         return path
 
     def undo(self):
@@ -50,25 +53,6 @@ class SelectCommand(QUndoCommand):
     def redo(self):
         self.scene.setSelectionArea(
             self.selection_area(self.current_selection))
-
-
-class BoxSelectCommand(QUndoCommand):
-    def __init__(self, scene, description):
-        super().__init__(description)
-
-        self.scene = scene
-        self.selection = self.scene.selectionArea()
-        self.stack_previous = None
-
-    def undo(self):
-        print('box select undo')
-        # print("➡ self.stack_previous :", self.stack_previous)
-        self.scene.setSelectionArea(self.stack_previous)
-
-    def redo(self):
-        print('box select redo')
-        self.stack_previous = self.selection
-        # print("➡ self.selection :", self.selection)
 
 
 class ConnectEdgeCommand(QUndoCommand):

@@ -12,7 +12,6 @@ from src.widgets.node_edge import NodeEdge, NodeEdgeGraphics, NodeEdgeTmp
 from src.widgets.node_socket import SocketGraphics, SocketInput, SocketOutput
 
 from src.widgets.logic.undo_redo import (
-    BoxSelectCommand,
     DisconnectEdgeCommand,
     MoveNodeCommand,
     ConnectEdgeCommand,
@@ -49,6 +48,7 @@ class GraphicsView(QGraphicsView):
         self._clicked_socket = None
 
         self._previous_selection = None
+        self._previous_box_selection = None
         self._mouse_initial_position = None
 
     def _debug_zoom(self):
@@ -225,29 +225,44 @@ class GraphicsView(QGraphicsView):
             not self._edge_drag_mode
         )
 
-    def _select_node(self, scene):
-        current_selection = self.selected_item
-        command = SelectCommand(scene, self._previous_selection,
-                                current_selection, 'Select')
+    def _update_selection(self, previous, current, description):
+        """Update the selection undo redo command
+
+        Create the undo redo command stack for the selection. Selection can be
+        a single node select or a box select.
+
+        Args:
+            previous (any): the previous selection
+            current (any): the current selection
+            description (str): the undo redo description
+        """
+        # Review: Dont know about this. might be hard to read
+        scene = self.scene()
+        command = SelectCommand(scene, previous, current, description)
         self.top.undo_stack.push(command)
-        self._previous_selection = current_selection
+
+        if description == 'Select':
+            self._previous_selection = current
+        else:
+            self._previous_box_selection = current
 
     def _leftMouseButtonRelease(self, event):
         item = self._get_graphic_item(event)
         LOGGER.debug('Released on item: %s', item)
 
-        scene = self.scene()
-
         if self._is_box_selection(event):
-            command = BoxSelectCommand(scene, 'Box Select')
-            self.top.undo_stack.push(command)
+            self._update_selection(self._previous_box_selection,
+                                   self.scene().selectionArea(),
+                                   'Box Select')
+
+        if isinstance(self.selected_item, NodeGraphics):
+            self._update_selection(self._previous_selection,
+                                   self.selected_item,
+                                   'Select')
 
         if not item:
             super().mouseReleaseEvent(event)
             return
-
-        if isinstance(self.selected_item, NodeGraphics):
-            self._select_node(scene)
 
         if self._node_drag_mode:
 

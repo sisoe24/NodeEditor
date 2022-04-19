@@ -57,33 +57,28 @@ class NodeEditor(QWidget):
     def _debug_add_nodes(self):
 
         node_test = nodes.NodeDebug(self.scene.graphics_scene)
-        node_test.set_position(-245, 0)
+        node_test.set_position(-200, 0)
 
-        # node_test = nodes.NodeDebug(self.scene.graphics_scene)
-        # node_test.set_position(-145, 0)
-
-        node_test = nodes.NodeDebug(self.scene.graphics_scene)
-        node_test.set_position(-45, 0)
-        return
-
-        node_debug = nodes.NodeDebug(self.scene)
-        node_debug.set_position(95, 0)
+        node_debug = nodes.NodeDebug(self.scene.graphics_scene)
+        node_debug.set_position(40, -40)
 
         # node_example = nodes.NodeExample(self.scene)
         # node_example.set_position(-75, 0)
 
         # create debug edge
-        start_socket_b = node_test.output_sockets[1]
         start_socket_a = node_test.output_sockets[0]
         end_socket_a = node_debug.input_sockets[0]
-        end_socket_b = node_debug.input_sockets[1]
-        end_socket_c = node_debug.input_sockets[2]
+        # NodeEdge(start_socket_a.socket_graphics, end_socket_a.socket_graphics)
 
-        NodeEdge(start_socket_a.socket_graphics, end_socket_a.socket_graphics)
+        # start_socket_b = node_test.output_sockets[1]
+        # end_socket_b = node_debug.input_sockets[1]
+        # end_socket_c = node_debug.input_sockets[2]
 
-        NodeEdge(start_socket_a.socket_graphics, end_socket_b.socket_graphics)
 
-        NodeEdge(start_socket_b.socket_graphics, end_socket_c.socket_graphics)
+        # NodeEdge(start_socket_a.socket_graphics, end_socket_b.socket_graphics)
+
+        # NodeEdge(start_socket_b.socket_graphics, end_socket_c.socket_graphics)
+        return
 
 
 class DebugWidget(QWidget):

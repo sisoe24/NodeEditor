@@ -5,7 +5,6 @@ from PySide2.QtCore import Signal, Qt
 from PySide2.QtGui import QPainter, QMouseEvent
 from PySide2.QtWidgets import (
     QGraphicsView,
-    QUndoCommand,
 )
 
 from src.widgets.node_graphics import NodeGraphics
@@ -49,7 +48,7 @@ class GraphicsView(QGraphicsView):
         self._edge_tmp = None
         self._clicked_socket = None
 
-        self._initial_selection = None
+        self._previous_selection = None
         self._mouse_initial_position = None
 
     def _debug_zoom(self):
@@ -217,29 +216,38 @@ class GraphicsView(QGraphicsView):
                 isinstance(self._clicked_socket, SocketInput) and
                 isinstance(end_socket, SocketInput))
 
+    def _is_box_selection(self, event):
+        """Check if action is just a box selection."""
+        # FIXME: Ugly
+        return (
+            self._mouse_initial_position != event.pos() and
+            not self._node_drag_mode and
+            not self._edge_drag_mode
+        )
+
+    def _select_node(self, scene):
+        current_selection = self.selected_item
+        command = SelectCommand(scene, self._previous_selection,
+                                current_selection, 'Select')
+        self.top.undo_stack.push(command)
+        self._previous_selection = current_selection
+
     def _leftMouseButtonRelease(self, event):
         item = self._get_graphic_item(event)
         LOGGER.debug('Released on item: %s', item)
+
+        scene = self.scene()
+
+        if self._is_box_selection(event):
+            command = BoxSelectCommand(scene, 'Box Select')
+            self.top.undo_stack.push(command)
 
         if not item:
             super().mouseReleaseEvent(event)
             return
 
-        scene = self.scene()
-        if (
-            self._mouse_initial_position != event.pos() and
-            not self._node_drag_mode and
-            not self._edge_drag_mode
-        ):
-            command = BoxSelectCommand(scene, 'Box Select')
-        else:
-            self.current_selection = self.selected_item
-            command = SelectCommand(scene,
-                                    self._initial_selection,
-                                    self.current_selection, 'Select')
-
-        self.top.undo_stack.push(command)
-        self._initial_selection = self.current_selection
+        if isinstance(self.selected_item, NodeGraphics):
+            self._select_node(scene)
 
         if self._node_drag_mode:
 
@@ -264,7 +272,7 @@ class GraphicsView(QGraphicsView):
                 super().mouseReleaseEvent(event)
                 return
 
-            elif isinstance(item, SocketGraphics):
+            if isinstance(item, SocketGraphics):
                 end_socket = item
 
                 if self._is_same_socket_type(end_socket):
@@ -281,7 +289,6 @@ class GraphicsView(QGraphicsView):
                     # invert the sockets if starting point is input to output
                     end_socket, self._clicked_socket = self._clicked_socket, end_socket
 
-                # edge = NodeEdge(self._clicked_socket, end_socket)
                 command = ConnectEdgeCommand(self._clicked_socket, end_socket,
                                              'Connect Edge')
                 self.top.undo_stack.push(command)
@@ -362,9 +369,10 @@ class GraphicsView(QGraphicsView):
             def obj_list(obj):
                 return [_ for _ in selected_items if isinstance(_, obj)]
 
-            # FIXME: I have to delete the edges before deleting the nodes or
-            # it might cause some problems when delete an edge after deleting
-            # its parent node (which deletes the edge)
+            # --- FIXME: I have to delete the edges before deleting the nodes or
+            # --- it might cause some problems when delete an edge after deleting
+            # --- its parent node (which deletes the edge)
+            # XXX: I might not need anymore because the edge is not selectable
             # for edge in obj_list(NodeEdgeGraphics):
             #     command = DeleteEdgeCommand(edge, self.scene(), 'Delete edge')
             #     self.top.undo_stack.push(command)

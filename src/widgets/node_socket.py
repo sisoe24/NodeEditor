@@ -121,7 +121,12 @@ class SocketOutput(SocketGraphics):
         self._edges.append(edge)
 
     def get_edges(self):
-        return self.edges
+        """Return the socket edges.
+
+        Returns:
+            list: a shallow copy of the socket edge list.
+        """
+        return self.edges.copy()
 
     def has_edge(self):
         return bool(self._edges)

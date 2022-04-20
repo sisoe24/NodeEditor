@@ -12,7 +12,6 @@ class MoveNodeCommand(QUndoCommand):
     def __init__(self, node, previous_position, description):
         super().__init__(description)
         self.node = node
-        self.node_id = node._id
 
         self.node_pos = node.pos()
         self.previous_position = previous_position

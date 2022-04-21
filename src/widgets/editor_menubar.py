@@ -4,19 +4,15 @@ from PySide2.QtGui import (
 )
 
 from PySide2.QtWidgets import (
+    QFileDialog,
     QWidget,
     QAction,
     QMenuBar,
-    QMenu,
 )
+from src.utils.graph_state import load_file, save_file
 
-from src.widgets.logic.undo_redo import AddNodeCommand, LoadCommand, SaveCommand
+from src.widgets.logic.undo_redo import AddNodeCommand
 from src.widgets.node_graphics import NodesRegister
-
-
-class EditorActions(QWidget):
-    def __init__(self, parent=None):
-        super().__init__(parent)
 
 
 class EditorFileActions(QWidget):
@@ -36,15 +32,30 @@ class EditorFileActions(QWidget):
         self.save_file_act = QAction('Save File', self)
         self.save_file_act.triggered.connect(self.save_file)
 
+        self.save_file_as_act = QAction('Save File As...', self)
+        self.save_file_as_act.triggered.connect(self.save_file_as)
+
     def save_file(self):
-        command = SaveCommand(self.scene, 'Save File')
-        self.undo_stack.push(command)
+        save_file(self.scene, 'scripts/save_file.json')
         self.top_window.setStatusTip('File Saved')
 
+    def save_file_as(self):
+        file, _ = QFileDialog.getSaveFileName(caption='Open File',
+                                              dir='scripts',
+                                              filter='*.json')
+        if file:
+            save_file(self.scene, file)
+            self.top_window.setStatusTip('File Saved')
+
     def open_file(self):
-        command = LoadCommand(self.scene, 'Open File')
-        self.undo_stack.push(command)
-        self.top_window.setStatusTip('File Loaded')
+        # TODO: make scripts path absolute
+        file, _ = QFileDialog.getOpenFileName(caption='Open File',
+                                              dir='scripts',
+                                              filter='*.json')
+        if file:
+            load_file(self.scene, file)
+            self.top_window.setStatusTip('File Loaded')
+            self.undo_stack.clear()
 
 
 class EditorEditActions(QWidget):
@@ -111,7 +122,7 @@ class NodeMenubar(QMenuBar):
         self.file_menu.addAction(self._file_actions.open_file_act)
         self.file_menu.addSeparator()
         self.file_menu.addAction(self._file_actions.save_file_act)
-        self.file_menu.addAction('Save File As...')
+        self.file_menu.addAction(self._file_actions.save_file_as_act)
 
     def add_edit_menu(self):
         self.edit_menu.addAction(self._edit_actions.undo_act)

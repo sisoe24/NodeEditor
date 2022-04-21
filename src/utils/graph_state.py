@@ -39,9 +39,9 @@ def load_scene(scene, data):
             NodeEdge(start_socket.socket_graphics, end_socket.socket_graphics)
 
 
-def load_file(scene, file='save_file.json'):
-    with open(file, 'r', encoding='utf-8') as file:
-        load_scene(scene, json.load(file))
+def load_file(scene, file):
+    with open(file, 'r', encoding='utf-8') as f:
+        load_scene(scene, json.load(f))
 
 
 def _extract_output_edges(node: NodeGraphics):
@@ -80,7 +80,7 @@ def scene_state(scene) -> dict:
     return state
 
 
-def save_file(scene):
+def save_file(scene, file):
     """Save current graph scene."""
-    with open('save_file.json', 'w', encoding='utf-8') as file:
-        json.dump(scene_state(scene), file, indent=2)
+    with open(file, 'w', encoding='utf-8') as f:
+        json.dump(scene_state(scene), f, indent=2)

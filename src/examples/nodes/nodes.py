@@ -79,7 +79,7 @@ class _NodeTestContent(NodeContent):
         self.add_output('Output 3')
         self.add_input(QCheckBox('Random text'))
 
-
+@NodesRegister.register_type
 class NodeTest(Node):
     title_background = Qt.black
     title = "Test Node"

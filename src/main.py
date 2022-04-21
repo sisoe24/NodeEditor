@@ -1,15 +1,8 @@
 import sys
-import json
-import random
 import logging
-
-from PySide2.QtGui import (
-    QKeySequence
-)
 
 from PySide2.QtWidgets import (
     QMenu,
-    QPushButton,
     QUndoView,
     QUndoStack,
     QAction,
@@ -26,9 +19,6 @@ from src.widgets.editor_menubar import NodeMenubar
 from src.widgets.editor_scene import Scene
 from src.widgets.editor_view import GraphicsView
 from src.widgets.node_edge import NodeEdge
-from src.widgets.logic.undo_redo import (
-    AddNodeCommand, LoadCommand, SaveCommand
-)
 
 from src.examples.nodes import *
 
@@ -111,38 +101,49 @@ class MainWindow(QMainWindow):
 
         self._scene = self.node_editor.scene.graphics_scene
         self._view = self.node_editor.view
-        self._add_actions()
-        self.set_status_bar()
-
-        # load_file(self._scene)
-        # save_file(self._scene)
 
         self.menubar = NodeMenubar(self)
         self.setMenuBar(self.menubar)
 
-    def _add_actions(self):
+        self._set_toolbar()
+        self._set_status_bar()
+
+        # load_file(self._scene)
+        # save_file(self._scene)
+
+    def _set_toolbar(self):
 
         toolbar = QToolBar()
         toolbar.setStyleSheet('color: white;')
+
+        self.file_action = QAction('File', self)
+        self.file_action.setMenu(self.menubar.file_menu)
+        toolbar.addAction(self.file_action)
+
+        self.edit_action = QAction('Edit', self)
+        self.edit_action.setMenu(self.menubar.edit_menu)
+        toolbar.addAction(self.edit_action)
+
+        self.add_action = QAction('Add', self)
+        self.add_action.setMenu(self.menubar.add_menu)
+        toolbar.addAction(self.add_action)
 
         self.addToolBar(toolbar)
 
     def set_coords(self, x, y):
         self.mouse_position.setText(f'{round(x)}, {round(y)}')
 
-    def set_status_bar(self):
+    def _set_status_bar(self):
         status_bar = self.statusBar()
         status_bar.addPermanentWidget(self.mouse_position)
 
     def contextMenuEvent(self, event):
         """Right click menu."""
-
         menu = QMenu(self)
         menu.addMenu(self.menubar.file_menu)
         menu.addMenu(self.menubar.edit_menu)
         menu.addMenu(self.menubar.add_menu)
         menu.popup(event.globalPos())
-
         super().contextMenuEvent(event)
 
 

@@ -82,7 +82,10 @@ class EditorAddActions(QWidget):
             self.nodes.append(action)
 
     def add_node(self, node):
-        command = AddNodeCommand(self.scene, (0, 0), node, 'Add Node')
+        # TODO: create the node at mouse point
+        x, y = self.top_window.mouse_position.text().split(',')
+        command = AddNodeCommand(self.scene, (float(x), float(y)),
+                                 node, 'Add Node')
         self.undo_stack.push(command)
 
 
@@ -91,29 +94,29 @@ class NodeMenubar(QMenuBar):
         super().__init__(parent)
 
         self._file_actions = EditorFileActions(self)
+        self.file_menu = self.addMenu('&File')
         self.add_file_menu()
 
         self._edit_actions = EditorEditActions(self)
+        self.edit_menu = self.addMenu('&Edit')
         self.add_edit_menu()
 
         self._add_actions = EditorAddActions(self)
+        self.add_menu = self.addMenu('&Add')
         self.add_add_menu()
 
     def add_file_menu(self):
-        file_menu = self.addMenu('&File')
-        file_menu.addAction(self._file_actions.new_file_act)
-        file_menu.addSeparator()
-        file_menu.addAction(self._file_actions.open_file_act)
-        file_menu.addSeparator()
-        file_menu.addAction(self._file_actions.save_file_act)
-        file_menu.addAction('Save File As...')
+        self.file_menu.addAction(self._file_actions.new_file_act)
+        self.file_menu.addSeparator()
+        self.file_menu.addAction(self._file_actions.open_file_act)
+        self.file_menu.addSeparator()
+        self.file_menu.addAction(self._file_actions.save_file_act)
+        self.file_menu.addAction('Save File As...')
 
     def add_edit_menu(self):
-        edit_menu = self.addMenu('&Edit')
-        edit_menu.addAction(self._edit_actions.undo_act)
-        edit_menu.addAction(self._edit_actions.redo_act)
+        self.edit_menu.addAction(self._edit_actions.undo_act)
+        self.edit_menu.addAction(self._edit_actions.redo_act)
 
     def add_add_menu(self):
-        add_menu = self.addMenu('&Add')
         for node in self._add_actions.nodes:
-            add_menu.addAction(node)
+            self.add_menu.addAction(node)

@@ -101,13 +101,13 @@ class GraphicsView(QGraphicsView):
         # the viewport.
         self.setDragMode(QGraphicsView.RubberBandDrag)
 
-    def _get_graphic_item(self, event: QMouseEvent):
+    def _get_graphic_item(self, pos):
         """Get the item under the cursor.
 
         Returns:
             any: the object item under the cursor
         """
-        return self.itemAt(event.pos())
+        return self.itemAt(pos)
 
     def _update_mouse_position(self, event: QMouseEvent):
         """Emit a signal to update mouse position label status."""
@@ -171,7 +171,7 @@ class GraphicsView(QGraphicsView):
         )
 
     def _leftMouseButtonPress(self, event):
-        item = self._get_graphic_item(event)
+        item = self._get_graphic_item(event.pos())
         LOGGER.debug('Clicked on item: %s', item)
         self._mouse_initial_position = event.pos()
 
@@ -215,7 +215,6 @@ class GraphicsView(QGraphicsView):
             self._edge_tmp = NodeEdgeTmp(self, self._clicked_socket)
 
         elif isinstance(self.selected_item, NodeGraphics):
-            print('moving nodes')
             self._node_drag_mode = True
             self._nodes_initial_position = self._selected_nodes_position()
 
@@ -297,7 +296,7 @@ class GraphicsView(QGraphicsView):
         if self._mouse_initial_position == event.pos():
             self._node_drag_mode = False
 
-        item = self._get_graphic_item(event)
+        item = self._get_graphic_item(event.pos())
         LOGGER.debug('Released on item: %s', item)
 
         if self._is_box_selection(event):
@@ -368,16 +367,6 @@ class GraphicsView(QGraphicsView):
 
     def _rightMouseButtonPress(self, event):
         """Debug use."""
-        item = self._get_graphic_item(event)
-
-        if isinstance(item, (SocketGraphics, NodeEdgeGraphics)):
-            print(item.repr())
-        elif (
-            hasattr(item, 'parentItem') and
-            isinstance(item.parentItem(), NodeGraphics)
-        ):
-            print(item.parentItem().repr())
-
         super().mousePressEvent(event)
 
     def _rightMouseButtonRelease(self, event):
@@ -413,12 +402,13 @@ class GraphicsView(QGraphicsView):
         if self._edge_drag_mode:
             self.scene().update()
 
+        self.scene_pos = event.pos()
+
         self._update_mouse_position(event)
         return super().mouseMoveEvent(event)
 
     def keyPressEvent(self, event):
         key = event.key()
-
         if key == Qt.Key_Delete:
 
             # --- FIXME: I have to delete the edges before deleting the nodes or
@@ -433,6 +423,20 @@ class GraphicsView(QGraphicsView):
             if nodes:
                 command = DeleteNodeCommand(nodes, self._scene, 'Delete node')
                 self.top.undo_stack.push(command)
+
+        elif key == Qt.Key_I:
+            item = self._get_graphic_item(self.scene_pos)
+
+            if not item:
+                return
+
+            if isinstance(item, (SocketGraphics, NodeEdgeGraphics)):
+                print(item.repr())
+            elif (
+                hasattr(item, 'parentItem') and
+                isinstance(item.parentItem(), NodeGraphics)
+            ):
+                print(item.parentItem().repr())
 
         return super().keyPressEvent(event)
 

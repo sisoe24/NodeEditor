@@ -8,6 +8,7 @@ from PySide2.QtGui import (
 )
 
 from PySide2.QtWidgets import (
+    QMenu,
     QPushButton,
     QUndoView,
     QUndoStack,
@@ -85,26 +86,12 @@ class DebugWidget(QWidget):
         self.scene = self.node_editor.scene.graphics_scene
         self.undo_stack = undo_stack
 
-        btn = QPushButton('Add Node Example')
-        btn.clicked.connect(lambda: self.add_node(nodes.NodeExample))
-
-        btn1 = QPushButton('Add Node Debug')
-        btn1.clicked.connect(lambda: self.add_node(nodes.NodeDebug))
-
         _layout = QVBoxLayout()
 
         _layout.addWidget(self.node_editor)
-        _layout.addWidget(btn)
-        _layout.addWidget(btn1)
         _layout.addWidget(QUndoView(self.undo_stack))
 
         self.setLayout(_layout)
-
-    def add_node(self, node):
-        n1 = random.randint(-300, 300)
-        n2 = random.randint(-300, 300)
-        command = AddNodeCommand(self.scene, (0, 0), node, 'Add Node')
-        self.undo_stack.push(command)
 
 
 class MainWindow(QMainWindow):
@@ -123,12 +110,15 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(widget)
 
         self._scene = self.node_editor.scene.graphics_scene
+        self._view = self.node_editor.view
         self._add_actions()
         self.set_status_bar()
 
         # load_file(self._scene)
         # save_file(self._scene)
-        self.setMenuBar(NodeMenubar(self))
+
+        self.menubar = NodeMenubar(self)
+        self.setMenuBar(self.menubar)
 
     def _add_actions(self):
 
@@ -143,6 +133,17 @@ class MainWindow(QMainWindow):
     def set_status_bar(self):
         status_bar = self.statusBar()
         status_bar.addPermanentWidget(self.mouse_position)
+
+    def contextMenuEvent(self, event):
+        """Right click menu."""
+
+        menu = QMenu(self)
+        menu.addMenu(self.menubar.file_menu)
+        menu.addMenu(self.menubar.edit_menu)
+        menu.addMenu(self.menubar.add_menu)
+        menu.popup(event.globalPos())
+
+        super().contextMenuEvent(event)
 
 
 app = QApplication(sys.argv)

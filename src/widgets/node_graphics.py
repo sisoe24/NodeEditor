@@ -139,16 +139,16 @@ class NodeGraphics(QGraphicsItem):
     _width = 150
     _title_height = 25
 
-    def __init__(self, node: 'Node', content: QWidget, parent=None):
+    def __init__(self, base: 'Node', content: QWidget, parent=None):
         super().__init__(parent)
 
-        self.node = node
+        self.base = base
         self.content = content
 
-        self._class = str(self.node)
+        self._class = str(self.base)
         self._id = NodesRegister.register_node(self)
 
-        self._height = max(self.node.layout_size.height(), 50)
+        self._height = max(self.base.layout_size.height(), 50)
 
         self._set_flags()
         self._set_colors()
@@ -160,12 +160,12 @@ class NodeGraphics(QGraphicsItem):
         """Delete the graphics node and its input edges."""
         NodesRegister.unregister_node(self)
 
-        for socket in self.node.input_sockets:
+        for socket in self.base.input_sockets:
             socket = socket.socket_graphics
             if socket.has_edge():
                 socket.remove_edge()
 
-        for socket in self.node.output_sockets:
+        for socket in self.base.output_sockets:
             socket = socket.socket_graphics
             if socket.has_edge():
                 edges = socket.get_edges()
@@ -181,7 +181,7 @@ class NodeGraphics(QGraphicsItem):
         self._node_selected = QPen(QColor('#DD8600'))
 
         self._node_background = QBrush(QColor("#FF313131"))
-        self._node_title_background = QBrush(self.node.title_background)
+        self._node_title_background = QBrush(self.base.title_background)
 
     def _set_flags(self):
         """Initialize UI for the Node graphic content."""
@@ -194,7 +194,7 @@ class NodeGraphics(QGraphicsItem):
         title_item = QGraphicsTextItem(self)
 
         title_item.setPlainText(self._id)
-        # title_item.setPlainText(self.node.title)
+        # title_item.setPlainText(self.base.title)
         title_item.setDefaultTextColor(Qt.white)
         title_item.setFont(QFont('Menlo', 12))
 
@@ -318,8 +318,8 @@ class NodeGraphics(QGraphicsItem):
             'id': self._id,
             'zValue': self.zValue(),
             'position': {'x': position.x(), 'y': position.y()},
-            'input_sockets': get_sockets(self.node.input_sockets, True),
-            'output_sockets': get_sockets(self.node.output_sockets),
+            'input_sockets': get_sockets(self.base.input_sockets, True),
+            'output_sockets': get_sockets(self.base.output_sockets),
         }
 
     def repr(self):
@@ -333,7 +333,7 @@ class NodeGraphics(QGraphicsItem):
         return class_id('NodeGraphics', self)
 
     def __lt__(self, node):
-        return str(self.node) < str(node.node)
+        return str(self.base) < str(node.base)
 
 
 class NodeInterface(abc.ABC):

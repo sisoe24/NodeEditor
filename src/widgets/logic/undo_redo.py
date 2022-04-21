@@ -166,7 +166,7 @@ class DeleteNodeCommand(QUndoCommand):
 
                 if edge:
                     start_node = graph_node(edge.start_socket.node)
-                    start_socket = start_node.node.output_sockets[edge.start_socket.index]
+                    start_socket = start_node.base.output_sockets[edge.start_socket.index]
 
                     end_socket = node.input_sockets[edge.end_socket.index]
 
@@ -186,7 +186,7 @@ class DeleteNodeCommand(QUndoCommand):
                     start_socket = node.output_sockets[edge.start_socket.index]
 
                     end_node = graph_node(edge.end_socket.node)
-                    end_socket = end_node.node.input_sockets[edge.end_socket.index]
+                    end_socket = end_node.base.input_sockets[edge.end_socket.index]
 
                     NodeEdge(start_socket.socket_graphics,
                              end_socket.socket_graphics)

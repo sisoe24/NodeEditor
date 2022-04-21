@@ -47,7 +47,7 @@ def _extract_output_edges(node: NodeGraphics):
     output_edges = {}
     index = 0
 
-    for output_socket in node.node.output_sockets:
+    for output_socket in node.base.output_sockets:
         socket = output_socket.socket_graphics
 
         if socket.has_edge():

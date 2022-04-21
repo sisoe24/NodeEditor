@@ -17,10 +17,9 @@ from src.widgets.editor_menubar import NodeMenubar
 
 
 from src.widgets.editor_scene import Scene
-from src.widgets.editor_view import GraphicsView
 from src.widgets.node_edge import NodeEdge
-
-from src.examples.nodes import *
+from src.widgets.editor_view import GraphicsView
+from src.widgets.node_graphics import create_node
 
 LOGGER = logging.getLogger('nodeeditor.main')
 
@@ -44,29 +43,6 @@ class NodeEditor(QWidget):
 
         self.setLayout(_layout)
 
-        self._debug_add_nodes()
-
-    def _debug_add_nodes(self):
-
-        return
-        node_test = nodes.NodeDebug(self.scene.graphics_scene)
-        node_test.set_position(-200, 0)
-
-        # node_debug = nodes.NodeDebug(self.scene.graphics_scene)
-        # node_debug.set_position(40, -40)
-
-        node_example = nodes.NodeExample(self.scene.graphics_scene)
-        node_example.set_position(40, -40)
-
-        # create debug edge
-        start_socket_a = node_test.output_sockets[0]
-        end_socket_a = node_example.input_sockets[0]
-        NodeEdge(start_socket_a.socket_graphics, end_socket_a.socket_graphics)
-
-        start_socket_a = node_test.output_sockets[0]
-        end_socket_a = node_example.input_sockets[1]
-        # NodeEdge(start_socket_a.socket_graphics, end_socket_a.socket_graphics)
-
 
 class DebugWidget(QWidget):
     def __init__(self, node_editor, undo_stack):
@@ -82,6 +58,28 @@ class DebugWidget(QWidget):
         _layout.addWidget(QUndoView(self.undo_stack))
 
         self.setLayout(_layout)
+        self._debug_add_nodes()
+
+    def _debug_add_nodes(self):
+
+        node_test = create_node(self.scene, 'NodeTest')
+        node_test.set_position(-200, 0)
+
+        # node_debug = create_node(self.scene, 'NodeDebug')
+        # node_debug.set_position(40, -40)
+
+        node_example = create_node(self.scene, 'NodeExample')
+        node_example.set_position(40, -40)
+
+        # create debug edge
+        start_socket_a = node_test.output_sockets[0]
+        end_socket_a = node_example.input_sockets[0]
+        NodeEdge(start_socket_a.socket_graphics, end_socket_a.socket_graphics)
+        return
+
+        start_socket_a = node_test.output_sockets[0]
+        end_socket_a = node_example.input_sockets[1]
+        # NodeEdge(start_socket_a.socket_graphics, end_socket_a.socket_graphics)
 
 
 class MainWindow(QMainWindow):

@@ -14,7 +14,6 @@ from PySide2.QtWidgets import (
     QVBoxLayout,
     QWidget
 )
-from src.widgets.node_edge import NodeEdge, NodeEdgeGraphics
 
 from src.widgets.node_socket import Socket
 from src.utils import class_id
@@ -23,6 +22,7 @@ LOGGER = logging.getLogger('nodeeditor.master_node')
 
 
 def create_node(scene, node_class):
+    """create_node(scene, 'NodeTest') -> Node"""
     node = NodesRegister.get_node_class(node_class)
     return node(scene)
 

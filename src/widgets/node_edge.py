@@ -92,9 +92,6 @@ class NodeEdgeGraphics(QGraphicsPathItem):
     def repr(self):
         return json.dumps(self.info(), indent=2)
 
-    # def __del__(self):
-    #     print('Sorry to see you go bro')
-
 
 class _EdgeInterface(abc.ABC):
 

@@ -168,7 +168,8 @@ class NodeGraphics(QGraphicsItem):
         for socket in self.node.output_sockets:
             socket = socket.socket_graphics
             if socket.has_edge():
-                for edge in socket.edges:
+                edges = socket.get_edges()
+                for edge in edges:
                     socket.remove_edge(edge)
 
         self.scene().removeItem(self)

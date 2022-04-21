@@ -1,9 +1,6 @@
-import json
-from pprint import pformat
-from PySide2.QtWidgets import QFileDialog, QUndoCommand
+from PySide2.QtWidgets import QUndoCommand
 from PySide2.QtGui import QPainterPath
 
-from src.utils.graph_state import load_file, load_scene, save_file, scene_state
 from src.widgets.node_edge import NodeEdge
 from src.widgets.node_graphics import NodesRegister, create_node
 
@@ -194,39 +191,3 @@ class DeleteEdgeCommand(QUndoCommand):
             self.edge.delete_edge()
         else:
             self._edge.end_socket.remove_edge()
-
-
-class LoadCommand(QUndoCommand):
-    def __init__(self, scene, description):
-        super().__init__(description)
-        self.scene = scene
-        self.current_scene = scene_state(self.scene)
-
-    def undo(self):
-        load_scene(self.scene, self.current_scene)
-
-    def redo(self):
-        # TODO: make scripts path absolute
-        file, _ = QFileDialog.getOpenFileName(caption='Open File',
-                                              dir='scripts',
-                                              filter='*.json')
-        if file:
-            load_file(self.scene, file)
-
-
-class SaveCommand(QUndoCommand):
-    def __init__(self, scene, description):
-        super().__init__(description)
-        self.scene = scene
-
-        with open('save_file.json', 'r', encoding='utf-8') as file:
-            self.current_file = json.load(file)
-
-    def undo(self):
-        with open('save_file.json', 'w', encoding='utf-8') as file:
-            json.dump(self.current_file, file)
-
-        load_file(self.scene)
-
-    def redo(self):
-        save_file(self.scene)

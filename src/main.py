@@ -1,7 +1,11 @@
 import sys
 import logging
 
+from PySide2.QtGui import QFont
+
 from PySide2.QtWidgets import (
+    QPlainTextEdit,
+    QTabWidget,
     QMenu,
     QUndoView,
     QUndoStack,
@@ -52,10 +56,15 @@ class DebugWidget(QWidget):
         self.scene = self.node_editor.scene.graphics_scene
         self.undo_stack = undo_stack
 
-        _layout = QVBoxLayout()
+        tabs = QTabWidget()
+        self.console = QPlainTextEdit()
+        self.console.setFont(QFont('Menlo', 16))
+        tabs.addTab(self.console, 'Debug Console')
+        tabs.addTab(QUndoView(self.undo_stack), 'Undo History')
 
+        _layout = QVBoxLayout()
         _layout.addWidget(self.node_editor)
-        _layout.addWidget(QUndoView(self.undo_stack))
+        _layout.addWidget(tabs)
 
         self.setLayout(_layout)
         self._debug_add_nodes()
@@ -94,11 +103,13 @@ class MainWindow(QMainWindow):
         self.node_editor = NodeEditor(self)
         self.node_editor.view.mouse_position.connect(self.set_coords)
 
-        widget = DebugWidget(self.node_editor, self.undo_stack)
-        self.setCentralWidget(widget)
+        debug_widget = DebugWidget(self.node_editor, self.undo_stack)
+        self.setCentralWidget(debug_widget)
 
         self._scene = self.node_editor.scene.graphics_scene
+
         self._view = self.node_editor.view
+        self._view.graph_debug.connect(debug_widget.console.setPlainText)
 
         self.menubar = NodeMenubar(self)
         self.setMenuBar(self.menubar)

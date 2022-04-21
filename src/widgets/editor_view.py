@@ -25,6 +25,7 @@ LOGGER.setLevel(logging.DEBUG)
 
 class GraphicsView(QGraphicsView):
     mouse_position = Signal(float, float)
+    graph_debug = Signal(str)
 
     def __init__(self, graphic_scene, parent=None):
         super().__init__(graphic_scene, parent)
@@ -431,12 +432,14 @@ class GraphicsView(QGraphicsView):
                 return
 
             if isinstance(item, (SocketGraphics, NodeEdgeGraphics)):
-                print(item.repr())
+                # print(item.repr())
+                self.graph_debug.emit(item.repr())
             elif (
                 hasattr(item, 'parentItem') and
                 isinstance(item.parentItem(), NodeGraphics)
             ):
-                print(item.parentItem().repr())
+                self.graph_debug.emit(item.parentItem().repr())
+                # print(item.parentItem().repr())
 
         return super().keyPressEvent(event)
 

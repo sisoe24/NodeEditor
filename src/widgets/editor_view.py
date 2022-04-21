@@ -14,6 +14,7 @@ from src.widgets.node_edge import NodeEdge, NodeEdgeGraphics, NodeEdgeTmp
 from src.widgets.node_socket import SocketGraphics, SocketInput, SocketOutput
 
 from src.widgets.logic.undo_redo import (
+    DeleteEdgeCommand,
     DisconnectEdgeCommand,
     MoveNodeCommand,
     ConnectEdgeCommand,
@@ -371,7 +372,6 @@ class GraphicsView(QGraphicsView):
         if event.modifiers() == Qt.ControlModifier:
             self._edge_cut_mode = True
             QApplication.setOverrideCursor(Qt.CrossCursor)
-
             self._cut_edge = NodeEdgeCutline()
             self._scene.addItem(self._cut_edge)
             return
@@ -382,10 +382,20 @@ class GraphicsView(QGraphicsView):
         super().mouseReleaseEvent(event)
 
         if self._edge_cut_mode:
+
+            for n in self._cut_edge.line_points:
+                pos = self.mapFromScene(n.toPoint())
+                item = self._get_graphic_item(pos)
+                if isinstance(item, NodeEdgeGraphics):
+                    command = DeleteEdgeCommand(
+                        item, self._scene, 'Delete edge')
+                    self.top.undo_stack.push(command)
+
             QApplication.setOverrideCursor(Qt.ArrowCursor)
             self._cut_edge.line_points = []
             self._edge_cut_mode = False
             self._cut_edge.update()
+            self._scene.removeItem(self._cut_edge)
             return
 
     def mousePressEvent(self, event: QMouseEvent):
@@ -421,7 +431,8 @@ class GraphicsView(QGraphicsView):
             self._edge_tmp.edge_graphics.update()
 
         if self._edge_cut_mode:
-            self._cut_edge.line_points.append(self.mapToScene(event.pos()))
+            pos = self.mapToScene(event.pos())
+            self._cut_edge.line_points.append(pos)
             self._cut_edge.update()
 
         self._update_mouse_position(event)
@@ -430,14 +441,6 @@ class GraphicsView(QGraphicsView):
     def keyPressEvent(self, event):
         key = event.key()
         if key == Qt.Key_Delete:
-
-            # --- FIXME: I have to delete the edges before deleting the nodes or
-            # --- it might cause some problems when delete an edge after deleting
-            # --- its parent node (which deletes the edge)
-            # XXX: I might not need anymore because the edge is not selectable
-            # for edge in obj_list(NodeEdgeGraphics):
-            #     command = DeleteEdgeCommand(edge, self.scene(), 'Delete edge')
-            #     self.top.undo_stack.push(command)
 
             nodes = self._selected_nodes()
             if nodes:

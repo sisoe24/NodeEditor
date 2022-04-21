@@ -331,6 +331,9 @@ class NodeGraphics(QGraphicsItem):
     def __repr__(self) -> str:
         return class_id('NodeGraphics', self)
 
+    def __lt__(self, node):
+        return str(self.node) < str(node.node)
+
 
 class NodeInterface(abc.ABC):
 

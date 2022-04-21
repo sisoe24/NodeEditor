@@ -138,39 +138,73 @@ class AddNodeCommand(QUndoCommand):
 
 
 class DeleteNodeCommand(QUndoCommand):
-    def __init__(self, node, scene, description):
+    # TODO: this class has much in common with the load method from graph_state.py
+    # Should try to merge them.
+
+    def __init__(self, nodes, scene, description):
         super().__init__(description)
-        self.node = node
+        self.nodes = nodes
         self.scene = scene
-        self.node_info = None
+        self.node_info = {}
+
+    def _created_nodes(self):
+        node_edges = {}
+
+        for old_node in self.nodes:
+            node_data = self.node_info[old_node._id]
+            node = create_node(self.scene, old_node._class)
+            node.node_graphics.setPos(node_data['position']['x'],
+                                      node_data['position']['y'])
+            node_edges[old_node._id] = node
+        return node_edges
+
+    @staticmethod
+    def _create_input_edges(node, node_data):
+        for edges in node_data['input_sockets'].values():
+            for node_edges in edges.values():
+                edge = node_edges['edges']
+
+                if edge:
+                    start_node = graph_node(edge.start_socket.node)
+                    start_socket = start_node.node.output_sockets[edge.start_socket.index]
+
+                    end_socket = node.input_sockets[edge.end_socket.index]
+
+                    NodeEdge(start_socket.socket_graphics,
+                             end_socket.socket_graphics)
+
+    @staticmethod
+    def _create_output_edges(node, node_data):
+        for edges in node_data['output_sockets'].values():
+            for node_edges in edges.values():
+                edges = node_edges['edges']
+
+                if not edges:
+                    continue
+
+                for edge in edges:
+                    start_socket = node.output_sockets[edge.start_socket.index]
+
+                    end_node = graph_node(edge.end_socket.node)
+                    end_socket = end_node.node.input_sockets[edge.end_socket.index]
+
+                    NodeEdge(start_socket.socket_graphics,
+                             end_socket.socket_graphics)
 
     def undo(self):
         # FIXME: refactor
-        node = create_node(self.scene, self.node._class)
-        node.node_graphics.setPos(
-            self.node_info['position']['x'],
-            self.node_info['position']['y']
-        )
+        node_edges = self._created_nodes()
 
-        for edges in self.node_info['input_sockets'].values():
-            for edge in edges.values():
-                edge = edge['edges']
-                if edge:
-                    end_socket = node.input_sockets[edge.end_socket.index]
-                    NodeEdge(edge.start_socket, end_socket.socket_graphics)
-
-        for edges in self.node_info['output_sockets'].values():
-            for edge in edges.values():
-                edge = edge['edges']
-                if edge:
-                    for n in edge:
-                        start_socket = node.output_sockets[n.start_socket.index]
-                        NodeEdge(start_socket.socket_graphics, n.end_socket)
+        for node in node_edges.values():
+            node_data = self.node_info[node.node_graphics._id]
+            self._create_output_edges(node, node_data)
+            self._create_input_edges(node, node_data)
 
     def redo(self):
-        self.node_info = self.node.info()
-        node = graph_node(self.node)
-        node.delete_node()
+        for node in self.nodes:
+            self.node_info.update({node._id: node.info()})
+            node = graph_node(node)
+            node.delete_node()
 
 
 class DeleteEdgeCommand(QUndoCommand):

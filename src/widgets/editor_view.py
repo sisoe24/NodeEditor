@@ -280,8 +280,8 @@ class GraphicsView(QGraphicsView):
 
     def _selected_nodes(self):
         """Return the selected nodes inside the scene."""
-        return [node for node in self.scene().selectedItems()
-                if isinstance(node, NodeGraphics)]
+        return sorted([node for node in self.scene().selectedItems()
+                       if isinstance(node, NodeGraphics)])
 
     def _selected_nodes_position(self):
         """Get a the selected nodes position.
@@ -419,12 +419,7 @@ class GraphicsView(QGraphicsView):
     def keyPressEvent(self, event):
         key = event.key()
 
-        selected_items = self.scene().selectedItems()
-
-        if key == Qt.Key_Delete and selected_items:
-
-            def obj_list(obj):
-                return [_ for _ in selected_items if isinstance(_, obj)]
+        if key == Qt.Key_Delete:
 
             # --- FIXME: I have to delete the edges before deleting the nodes or
             # --- it might cause some problems when delete an edge after deleting
@@ -434,11 +429,10 @@ class GraphicsView(QGraphicsView):
             #     command = DeleteEdgeCommand(edge, self.scene(), 'Delete edge')
             #     self.top.undo_stack.push(command)
 
-            self.top.undo_stack.beginMacro('Delete Node')
-            for node in obj_list(NodeGraphics):
-                command = DeleteNodeCommand(node, self.scene(), 'Delete node')
+            nodes = self._selected_nodes()
+            if nodes:
+                command = DeleteNodeCommand(nodes, self._scene, 'Delete node')
                 self.top.undo_stack.push(command)
-            self.top.undo_stack.endMacro()
 
         return super().keyPressEvent(event)
 

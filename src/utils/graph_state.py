@@ -26,6 +26,7 @@ def _extract_end_socket(node_edges, edge):
 
 
 def load_scene(scene, data):
+    scene.clear()
     node_edges = _create_nodes(scene, data)
 
     for connections in node_edges.values():
@@ -38,8 +39,8 @@ def load_scene(scene, data):
             NodeEdge(start_socket.socket_graphics, end_socket.socket_graphics)
 
 
-def load_file(scene):
-    with open('save_file.json', 'r', encoding='utf-8') as file:
+def load_file(scene, file='save_file.json'):
+    with open(file, 'r', encoding='utf-8') as file:
         load_scene(scene, json.load(file))
 
 

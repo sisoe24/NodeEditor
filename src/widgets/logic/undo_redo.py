@@ -1,6 +1,6 @@
 import json
 from pprint import pformat
-from PySide2.QtWidgets import QUndoCommand
+from PySide2.QtWidgets import QFileDialog, QUndoCommand
 from PySide2.QtGui import QPainterPath
 
 from src.utils.graph_state import load_file, load_scene, save_file, scene_state
@@ -49,36 +49,6 @@ class SelectCommand(QUndoCommand):
         return path
 
     def undo(self):
-        selection = self.previous_selection
-        selection = self.selection_area(
-            selection) if selection else QPainterPath()
-        self.scene.setSelectionArea(selection)
-
-    def redo(self):
-        self.scene.setSelectionArea(
-            self.selection_area(self.current_selection))
-
-
-class BoxSelectCommand(QUndoCommand):
-    def __init__(self, scene, previous_selection, current_selection, description):
-        super().__init__(description)
-        self.scene = scene
-        self.previous_selection = previous_selection
-        self.current_selection = current_selection
-
-    def selection_area(self, selection):
-        if not selection:
-            return QPainterPath()
-
-        if isinstance(selection, QPainterPath):
-            return selection
-
-        path = QPainterPath()
-        path.addPolygon(selection.mapToScene(selection.boundingRect()))
-        return path
-
-    def undo(self):
-        print('undo box select')
         selection = self.previous_selection
         selection = self.selection_area(
             selection) if selection else QPainterPath()
@@ -233,11 +203,15 @@ class LoadCommand(QUndoCommand):
         self.current_scene = scene_state(self.scene)
 
     def undo(self):
-        self.scene.clear()
         load_scene(self.scene, self.current_scene)
 
     def redo(self):
-        load_file(self.scene)
+        # TODO: make scripts path absolute
+        file, _ = QFileDialog.getOpenFileName(caption='Open File',
+                                              dir='scripts',
+                                              filter='*.json')
+        if file:
+            load_file(self.scene, file)
 
 
 class SaveCommand(QUndoCommand):

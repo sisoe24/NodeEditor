@@ -1,6 +1,7 @@
 import sys
 import logging
 
+from PySide2.QtCore import Qt
 from PySide2.QtGui import QFont
 
 from PySide2.QtWidgets import (
@@ -148,6 +149,9 @@ class MainWindow(QMainWindow):
 
     def contextMenuEvent(self, event):
         """Right click menu."""
+        if event.modifiers() == Qt.ControlModifier:
+            return
+
         menu = QMenu(self)
         menu.addMenu(self.menubar.file_menu)
         menu.addMenu(self.menubar.edit_menu)

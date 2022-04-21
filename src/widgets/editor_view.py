@@ -4,8 +4,10 @@ from collections import namedtuple
 from PySide2.QtCore import Signal, Qt
 from PySide2.QtGui import QPainter, QMouseEvent, QPainterPath
 from PySide2.QtWidgets import (
+    QApplication,
     QGraphicsView,
 )
+from src.widgets.node_edge_cutline import NodeEdgeCutline
 
 from src.widgets.node_graphics import NodeGraphics
 from src.widgets.node_edge import NodeEdge, NodeEdgeGraphics, NodeEdgeTmp
@@ -42,20 +44,19 @@ class GraphicsView(QGraphicsView):
         self._debug_zoom()
 
         self._edge_drag_mode = None
-        self._edge_readjust = None
+        self._edge_cut_mode = None
+        self._edge_readjust_mode = None
         self._node_drag_mode = None
+        self._box_selection_mode = None
+
         self._selected_item = None
         self._edge_tmp = None
         self._clicked_socket = None
 
-        self._previous_single_selection = None
-        self._previous_box_selection = None
         self._previous_selection = None
-        self._node_initial_position = None
-
-        self._box_selection = False
 
         self._mouse_initial_position = None
+
         self._scene = self.scene()
         self._scene.selectionChanged.connect(self._update_selection)
 
@@ -168,7 +169,7 @@ class GraphicsView(QGraphicsView):
         return (
             isinstance(self.selected_item, NodeGraphics) and
             not self._node_drag_mode and
-            not self._box_selection
+            not self._box_selection_mode
         )
 
     def _leftMouseButtonPress(self, event):
@@ -193,7 +194,7 @@ class GraphicsView(QGraphicsView):
             if isinstance(item, SocketInput) and item.has_edge():
                 LOGGER.debug('SocketInput has an edge connected already')
 
-                self._edge_readjust = True
+                self._edge_readjust_mode = True
 
                 # FIXME: ugly
                 self.__start_socket = item.edge.start_socket
@@ -272,11 +273,11 @@ class GraphicsView(QGraphicsView):
         """When scene selection changes do something.
 
         Currently, when selection is less than 1, it does set the flag
-        `_box_selection` to `False`.
+        `_box_selection_mode` to `False`.
         """
         nodes = self._selected_nodes()
         if len(nodes) <= 1:
-            self._box_selection = False
+            self._box_selection_mode = False
 
     def _selected_nodes(self):
         """Return the selected nodes inside the scene."""
@@ -304,7 +305,7 @@ class GraphicsView(QGraphicsView):
             self._create_selection_command(self._previous_selection,
                                            self.scene().selectionArea(),
                                            'Box Select')
-            self._box_selection = True
+            self._box_selection_mode = True
 
         if not item and not self._is_box_selection(event):
             self._create_selection_command(
@@ -353,12 +354,12 @@ class GraphicsView(QGraphicsView):
 
             # Review: simplify the condition
             elif self._edge_tmp:
-                if self._edge_readjust:
+                if self._edge_readjust_mode:
                     command = DisconnectEdgeCommand(
                         self.__start_socket, self.__end_socket,
                         'Disconnect Edge')
                     self.top.undo_stack.push(command)
-                    self._edge_readjust = False
+                    self._edge_readjust_mode = False
                 self._delete_tmp_edge('Edge release was not on a socket')
 
             self._edge_drag_mode = False
@@ -367,11 +368,25 @@ class GraphicsView(QGraphicsView):
         self.setDragMode(QGraphicsView.RubberBandDrag)
 
     def _rightMouseButtonPress(self, event):
-        """Debug use."""
+        if event.modifiers() == Qt.ControlModifier:
+            self._edge_cut_mode = True
+            QApplication.setOverrideCursor(Qt.CrossCursor)
+
+            self._cut_edge = NodeEdgeCutline()
+            self._scene.addItem(self._cut_edge)
+            return
+
         super().mousePressEvent(event)
 
     def _rightMouseButtonRelease(self, event):
         super().mouseReleaseEvent(event)
+
+        if self._edge_cut_mode:
+            QApplication.setOverrideCursor(Qt.ArrowCursor)
+            self._cut_edge.line_points = []
+            self._edge_cut_mode = False
+            self._cut_edge.update()
+            return
 
     def mousePressEvent(self, event: QMouseEvent):
         """Override the mousePressEvent event."""
@@ -400,10 +415,14 @@ class GraphicsView(QGraphicsView):
             super().mouseReleaseEvent(event)
 
     def mouseMoveEvent(self, event):
-        if self._edge_drag_mode:
-            self.scene().update()
-
         self.scene_pos = event.pos()
+
+        if self._edge_drag_mode:
+            self._edge_tmp.edge_graphics.update()
+
+        if self._edge_cut_mode:
+            self._cut_edge.line_points.append(self.mapToScene(event.pos()))
+            self._cut_edge.update()
 
         self._update_mouse_position(event)
         return super().mouseMoveEvent(event)
@@ -432,14 +451,12 @@ class GraphicsView(QGraphicsView):
                 return
 
             if isinstance(item, (SocketGraphics, NodeEdgeGraphics)):
-                # print(item.repr())
                 self.graph_debug.emit(item.repr())
             elif (
                 hasattr(item, 'parentItem') and
                 isinstance(item.parentItem(), NodeGraphics)
             ):
                 self.graph_debug.emit(item.parentItem().repr())
-                # print(item.parentItem().repr())
 
         return super().keyPressEvent(event)
 

@@ -1,40 +1,18 @@
 {
-  "NodeDebug.4458829856": {
+  "NodeDebug.002": {
     "class": "NodeDebug",
     "position": {
-      "x": 37.790697674418595,
-      "y": -1.8604651162791583
+      "x": -44.627906976744185,
+      "y": -59.906976744186046
     },
     "output_edges": {}
   },
-  "NodeTest.4458793312": {
-    "class": "NodeTest",
+  "NodeDebug.001": {
+    "class": "NodeDebug",
     "position": {
-      "x": -215.6976744186046,
-      "y": 25.116279069767444
+      "x": -245.0,
+      "y": 0.0
     },
-    "output_edges": {
-      "edge.0": {
-        "start_socket_index": 0,
-        "end_socket": {
-          "node": "NodeDebug.4458829856",
-          "index": 0
-        }
-      },
-      "edge.1": {
-        "start_socket_index": 1,
-        "end_socket": {
-          "node": "NodeDebug.4458829856",
-          "index": 1
-        }
-      },
-      "edge.2": {
-        "start_socket_index": 2,
-        "end_socket": {
-          "node": "NodeDebug.4458829856",
-          "index": 2
-        }
-      }
-    }
+    "output_edges": {}
   }
 }

@@ -9,23 +9,24 @@ from src.widgets.node_graphics import NodesRegister, create_node
 
 
 class MoveNodeCommand(QUndoCommand):
-    def __init__(self, node, previous_position, description):
+    def __init__(self, nodes, previous_position, description):
         super().__init__(description)
-        self.node = node
 
-        self.node_pos = node.pos()
+        self.nodes = nodes
         self.previous_position = previous_position
 
-    def graph_node(self):
-        return NodesRegister.get_node_from_graph(self.node)
+    def graph_node(self, node):
+        return NodesRegister.get_node_from_graph(node)
 
     def undo(self):
-        node = self.graph_node()
-        node.setPos(self.previous_position)
+        for node, pos in self.previous_position.items():
+            node = self.graph_node(node)
+            node.setPos(pos)
 
     def redo(self):
-        node = self.graph_node()
-        node.setPos(self.node_pos)
+        for node, pos in self.nodes.items():
+            node = self.graph_node(node)
+            node.setPos(pos)
 
 
 class SelectCommand(QUndoCommand):
@@ -47,6 +48,36 @@ class SelectCommand(QUndoCommand):
         return path
 
     def undo(self):
+        selection = self.previous_selection
+        selection = self.selection_area(
+            selection) if selection else QPainterPath()
+        self.scene.setSelectionArea(selection)
+
+    def redo(self):
+        self.scene.setSelectionArea(
+            self.selection_area(self.current_selection))
+
+
+class BoxSelectCommand(QUndoCommand):
+    def __init__(self, scene, previous_selection, current_selection, description):
+        super().__init__(description)
+        self.scene = scene
+        self.previous_selection = previous_selection
+        self.current_selection = current_selection
+
+    def selection_area(self, selection):
+        if not selection:
+            return QPainterPath()
+
+        if isinstance(selection, QPainterPath):
+            return selection
+
+        path = QPainterPath()
+        path.addPolygon(selection.mapToScene(selection.boundingRect()))
+        return path
+
+    def undo(self):
+        print('undo box select')
         selection = self.previous_selection
         selection = self.selection_area(
             selection) if selection else QPainterPath()

@@ -2,7 +2,7 @@ import logging
 from collections import namedtuple
 
 from PySide2.QtCore import Signal, Qt
-from PySide2.QtGui import QPainter, QMouseEvent
+from PySide2.QtGui import QPainter, QMouseEvent, QPainterPath
 from PySide2.QtWidgets import (
     QGraphicsView,
 )
@@ -41,7 +41,7 @@ class GraphicsView(QGraphicsView):
         self._debug_zoom()
 
         self._edge_drag_mode = None
-        self._edge_re_drag = None
+        self._edge_readjust = None
         self._node_drag_mode = None
         self._selected_item = None
         self._edge_tmp = None
@@ -174,7 +174,7 @@ class GraphicsView(QGraphicsView):
             not self._node_drag_mode and
             not self._box_selection
         ):
-            self._create_selection_command(self._previous_single_selection,
+            self._create_selection_command(self._previous_selection,
                                            self.selected_item,
                                            'Select')
 
@@ -190,7 +190,7 @@ class GraphicsView(QGraphicsView):
             if isinstance(item, SocketInput) and item.has_edge():
                 LOGGER.debug('SocketInput has an edge connected already')
 
-                self._edge_re_drag = True
+                self._edge_readjust = True
 
                 # FIXME: ugly
                 self.__start_socket = item.edge.start_socket
@@ -211,13 +211,11 @@ class GraphicsView(QGraphicsView):
             self._clicked_socket.parentItem().setZValue(-1.0)
 
             self._edge_tmp = NodeEdgeTmp(self, self._clicked_socket)
-        elif isinstance(self.selected_item, NodeGraphics) and self._box_selection:
-            print('box moving')
-            self._node_drag_mode = True
+
         elif isinstance(self.selected_item, NodeGraphics):
-            print('single moving')
+            print('moving nodes')
             self._node_drag_mode = True
-            self._node_initial_position = self.selected_item.pos()
+            self._nodes_initial_position = self._selected_nodes_position()
 
         super().mousePressEvent(event)
 
@@ -244,6 +242,17 @@ class GraphicsView(QGraphicsView):
             not self._edge_drag_mode
         )
 
+    def _set_previous_selection(self, selection):
+        if not selection:
+            return QPainterPath()
+
+        if isinstance(selection, QPainterPath):
+            return selection
+
+        path = QPainterPath()
+        path.addPolygon(selection.mapToScene(selection.boundingRect()))
+        return path
+
     def _create_selection_command(self, previous, current, description):
         """Update the selection undo redo command.
 
@@ -256,25 +265,32 @@ class GraphicsView(QGraphicsView):
             description (str): the undo redo description
         """
         # Review: Dont know about this. might be hard to read
-        scene = self.scene()
-        command = SelectCommand(scene, previous, current, description)
+        command = SelectCommand(self._scene, previous, current, description)
         self.top.undo_stack.push(command)
-
-        if description == 'Select':
-            self._previous_single_selection = current
-        else:
-            self._previous_box_selection = current
-
-        self._previous_selection = current
+        self._previous_selection = self._set_previous_selection(current)
 
     def _update_selection(self):
+        """When scene selection changes do something.
+
+        Currently, when selection is less than 1, it does set the flag
+        `_box_selection` to `False`.
+        """
         nodes = self._selected_nodes()
         if len(nodes) <= 1:
             self._box_selection = False
 
     def _selected_nodes(self):
+        """Return the selected nodes inside the scene."""
         return [node for node in self.scene().selectedItems()
                 if isinstance(node, NodeGraphics)]
+
+    def _selected_nodes_position(self):
+        """Get a the selected nodes position.
+
+        Returns:
+            (dict) - the key is the node object and the value is the position.
+        """
+        return {node: node.pos() for node in self._selected_nodes()}
 
     def _leftMouseButtonRelease(self, event):
         super().mouseReleaseEvent(event)
@@ -286,39 +302,22 @@ class GraphicsView(QGraphicsView):
         LOGGER.debug('Released on item: %s', item)
 
         if self._is_box_selection(event):
-            self._create_selection_command(self._previous_box_selection,
+            self._create_selection_command(self._previous_selection,
                                            self.scene().selectionArea(),
                                            'Box Select')
             self._box_selection = True
 
-        # if (
-        #     isinstance(self.selected_item, NodeGraphics) and
-        #     not self._node_drag_mode and
-        #     not self._box_selection
-        # ):
-        #     self._create_selection_command(self._previous_single_selection,
-        #                            self.selected_item,
-        #                            'Select')
-
         if not item and not self._is_box_selection(event):
             self._create_selection_command(
                 self._previous_selection, None, 'Select')
-            # super().mouseReleaseEvent(event)
             return
 
         if self._node_drag_mode:
-            nodes = self._selected_nodes()
-
-            if len(nodes) >= 2:
-                print('dragging multiple selection')
-
-            # trigger only if node was moved
-            elif self.selected_item.pos() != self._node_initial_position:
-                command = MoveNodeCommand(self.selected_item,
-                                          self._node_initial_position,
-                                          'Move Node')
-                self.top.undo_stack.push(command)
-
+            # TODO?: trigger only if node was moved
+            command = MoveNodeCommand(self._selected_nodes_position(),
+                                      self._nodes_initial_position,
+                                      'Move Node')
+            self.top.undo_stack.push(command)
             self._node_drag_mode = False
 
         # move node above other nodes when selected
@@ -331,7 +330,6 @@ class GraphicsView(QGraphicsView):
 
             if item == self._clicked_socket:
                 self._delete_tmp_edge('End socket is start socket. abort')
-                # super().mouseReleaseEvent(event)
                 return
 
             if isinstance(item, SocketGraphics):
@@ -340,7 +338,6 @@ class GraphicsView(QGraphicsView):
                 if self._is_same_socket_type(end_socket):
                     self._delete_tmp_edge(
                         'Start and End socket are both same type sockets.')
-                    # super().mouseReleaseEvent(event)
                     return
 
                 self._delete_tmp_edge()
@@ -357,19 +354,18 @@ class GraphicsView(QGraphicsView):
 
             # Review: simplify the condition
             elif self._edge_tmp:
-                if self._edge_re_drag:
+                if self._edge_readjust:
                     command = DisconnectEdgeCommand(
                         self.__start_socket, self.__end_socket,
                         'Disconnect Edge')
                     self.top.undo_stack.push(command)
-                    self._edge_re_drag = False
+                    self._edge_readjust = False
                 self._delete_tmp_edge('Edge release was not on a socket')
 
             self._edge_drag_mode = False
             LOGGER.debug('Drag Mode Disabled')
 
         self.setDragMode(QGraphicsView.RubberBandDrag)
-        # super().mouseReleaseEvent(event)
 
     def _rightMouseButtonPress(self, event):
         """Debug use."""

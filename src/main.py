@@ -19,6 +19,7 @@ from PySide2.QtWidgets import (
     QMainWindow,
     QVBoxLayout,
 )
+from src.widgets.editor_menubar import NodeMenubar
 
 
 from src.widgets.editor_scene import Scene
@@ -56,6 +57,7 @@ class NodeEditor(QWidget):
 
     def _debug_add_nodes(self):
 
+        return
         node_test = nodes.NodeDebug(self.scene.graphics_scene)
         node_test.set_position(-200, 0)
 
@@ -73,8 +75,6 @@ class NodeEditor(QWidget):
         start_socket_a = node_test.output_sockets[0]
         end_socket_a = node_example.input_sockets[1]
         # NodeEdge(start_socket_a.socket_graphics, end_socket_a.socket_graphics)
-
-        return
 
 
 class DebugWidget(QWidget):
@@ -128,37 +128,12 @@ class MainWindow(QMainWindow):
 
         # load_file(self._scene)
         # save_file(self._scene)
-
-    def load_file(self):
-        command = LoadCommand(self._scene, 'Load File')
-        self.undo_stack.push(command)
-
-    def save_file(self):
-        command = SaveCommand(self._scene, 'Save File')
-        self.undo_stack.push(command)
+        self.setMenuBar(NodeMenubar(self))
 
     def _add_actions(self):
-        new = QAction('New File', self)
-        new.triggered.connect(self._scene.clear)
-
-        save = QAction('Save File', self)
-        save.triggered.connect(self.save_file)
-
-        load = QAction('Load File', self)
-        load.triggered.connect(self.load_file)
-
-        undo = self.undo_stack.createUndoAction(self, 'Undo')
-        undo.setShortcut(QKeySequence.Undo)
-        redo = self.undo_stack.createRedoAction(self, 'Redo')
-        redo.setShortcut(QKeySequence.Redo)
 
         toolbar = QToolBar()
         toolbar.setStyleSheet('color: white;')
-        toolbar.addAction(undo)
-        toolbar.addAction(redo)
-        toolbar.addAction(new)
-        toolbar.addAction(save)
-        toolbar.addAction(load)
 
         self.addToolBar(toolbar)
 

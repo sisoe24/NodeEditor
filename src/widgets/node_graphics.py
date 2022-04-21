@@ -96,6 +96,10 @@ class NodesRegister:
         return wrapper
 
     @classmethod
+    def get_avaliable_nodes(cls):
+        return cls.nodes_classes
+
+    @classmethod
     def get_node_class(cls, node):
 
         node_class = cls.nodes_classes.get(node)

@@ -8,6 +8,10 @@ from src.widgets.node_edge import NodeEdge
 from src.widgets.node_graphics import NodesRegister, create_node
 
 
+def graph_node(node):
+    return NodesRegister.get_node_from_graph(node)
+
+
 class MoveNodeCommand(QUndoCommand):
     def __init__(self, nodes, previous_position, description):
         super().__init__(description)
@@ -15,17 +19,14 @@ class MoveNodeCommand(QUndoCommand):
         self.nodes = nodes
         self.previous_position = previous_position
 
-    def graph_node(self, node):
-        return NodesRegister.get_node_from_graph(node)
-
     def undo(self):
         for node, pos in self.previous_position.items():
-            node = self.graph_node(node)
+            node = graph_node(node)
             node.setPos(pos)
 
     def redo(self):
         for node, pos in self.nodes.items():
-            node = self.graph_node(node)
+            node = graph_node(node)
             node.setPos(pos)
 
 
@@ -150,6 +151,7 @@ class DeleteNodeCommand(QUndoCommand):
             self.node_info['position']['x'],
             self.node_info['position']['y']
         )
+
         for edges in self.node_info['input_sockets'].values():
             for edge in edges.values():
                 edge = edge['edges']
@@ -167,7 +169,8 @@ class DeleteNodeCommand(QUndoCommand):
 
     def redo(self):
         self.node_info = self.node.info()
-        self.node.delete_node()
+        node = graph_node(self.node)
+        node.delete_node()
 
 
 class DeleteEdgeCommand(QUndoCommand):

@@ -163,20 +163,22 @@ class GraphicsView(QGraphicsView):
         super().mouseReleaseEvent(self._drag_mouse_event(event))
         self.setDragMode(QGraphicsView.RubberBandDrag)
 
+    def _item_is_node(self):
+        return (
+            isinstance(self.selected_item, NodeGraphics) and
+            not self._node_drag_mode and
+            not self._box_selection
+        )
+
     def _leftMouseButtonPress(self, event):
         item = self._get_graphic_item(event)
         LOGGER.debug('Clicked on item: %s', item)
         self._mouse_initial_position = event.pos()
 
         self.selected_item = item
-        if (
-            isinstance(self.selected_item, NodeGraphics) and
-            not self._node_drag_mode and
-            not self._box_selection
-        ):
+        if self._item_is_node():
             self._create_selection_command(self._previous_selection,
-                                           self.selected_item,
-                                           'Select')
+                                           self.selected_item, 'Select')
 
         if isinstance(item, SocketGraphics):
             self.setDragMode(QGraphicsView.NoDrag)
@@ -227,7 +229,6 @@ class GraphicsView(QGraphicsView):
 
     def _is_same_socket_type(self, end_socket):
         """Check if input and output socket are the same type."""
-        # FIXME: ugly
         return (isinstance(self._clicked_socket, SocketOutput) and
                 isinstance(end_socket, SocketOutput) or
                 isinstance(self._clicked_socket, SocketInput) and
@@ -235,23 +236,11 @@ class GraphicsView(QGraphicsView):
 
     def _is_box_selection(self, event):
         """Check if action is just a box selection."""
-        # FIXME: Ugly
         return (
             self._mouse_initial_position != event.pos() and
             not self._node_drag_mode and
             not self._edge_drag_mode
         )
-
-    def _set_previous_selection(self, selection):
-        if not selection:
-            return QPainterPath()
-
-        if isinstance(selection, QPainterPath):
-            return selection
-
-        path = QPainterPath()
-        path.addPolygon(selection.mapToScene(selection.boundingRect()))
-        return path
 
     def _create_selection_command(self, previous, current, description):
         """Update the selection undo redo command.
@@ -264,10 +253,20 @@ class GraphicsView(QGraphicsView):
             current (any): the current selection
             description (str): the undo redo description
         """
-        # Review: Dont know about this. might be hard to read
+        def _set_previous_selection(selection):
+            if not selection:
+                return QPainterPath()
+
+            if isinstance(selection, QPainterPath):
+                return selection
+
+            path = QPainterPath()
+            path.addPolygon(selection.mapToScene(selection.boundingRect()))
+            return path
+
         command = SelectCommand(self._scene, previous, current, description)
         self.top.undo_stack.push(command)
-        self._previous_selection = self._set_previous_selection(current)
+        self._previous_selection = _set_previous_selection(current)
 
     def _update_selection(self):
         """When scene selection changes do something.
@@ -435,9 +434,11 @@ class GraphicsView(QGraphicsView):
             #     command = DeleteEdgeCommand(edge, self.scene(), 'Delete edge')
             #     self.top.undo_stack.push(command)
 
+            self.top.undo_stack.beginMacro('Delete Node')
             for node in obj_list(NodeGraphics):
                 command = DeleteNodeCommand(node, self.scene(), 'Delete node')
                 self.top.undo_stack.push(command)
+            self.top.undo_stack.endMacro()
 
         return super().keyPressEvent(event)
 

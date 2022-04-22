@@ -1,9 +1,12 @@
+import os
 from functools import partial
+
 from PySide2.QtGui import (
     QKeySequence
 )
 
 from PySide2.QtWidgets import (
+    QMessageBox,
     QFileDialog,
     QWidget,
     QAction,
@@ -23,8 +26,10 @@ class EditorFileActions(QWidget):
         self.undo_stack = self.top_window.undo_stack
         self.scene = self.top_window._scene
 
+        self.editor_file = None
+
         self.new_file_act = QAction('New File', self)
-        self.new_file_act.triggered.connect(self.scene.clear)
+        self.new_file_act.triggered.connect(self.new_file)
 
         self.open_file_act = QAction('Open File...', self)
         self.open_file_act.triggered.connect(self.open_file)
@@ -36,25 +41,65 @@ class EditorFileActions(QWidget):
         self.save_file_as_act.triggered.connect(self.save_file_as)
 
     def save_file(self):
-        save_file(self.scene, 'scripts/save_file.json')
-        self.top_window.setStatusTip('File Saved')
+        if self.editor_file:
+            save_file(self.scene, self.editor_file)
+            self.top_window.show_status_message('File Saved')
+        else:
+            self.save_file_as()
 
     def save_file_as(self):
-        file, _ = QFileDialog.getSaveFileName(caption='Open File',
+        # TODO: make scripts path absolute
+        file, _ = QFileDialog.getSaveFileName(caption='Save File as...',
                                               dir='scripts',
                                               filter='*.json')
         if file:
             save_file(self.scene, file)
-            self.top_window.setStatusTip('File Saved')
+            self.editor_file = file
+            self.top_window.show_status_message('File Saved')
+            self.top_window.setWindowTitle(os.path.basename(file))
+
+    def _document_modified_dialog(self):
+        dialog = QMessageBox()
+        dialog.setText('The document has been modified.')
+        dialog.setIcon(QMessageBox.Question)
+        dialog.setInformativeText('Do you want to save your changes?')
+        dialog.setStandardButtons(QMessageBox.Save | QMessageBox.Discard |
+                                  QMessageBox.Cancel)
+        dialog.setDefaultButton(QMessageBox.Save)
+        return dialog.exec_()
+
+    def _cancel_action(self):
+        if not self.undo_stack.isClean():
+            user_choice = self._document_modified_dialog()
+
+            if user_choice == QMessageBox.Cancel:
+                return True
+
+            if user_choice == QMessageBox.Save:
+                self.save_file_as()
+
+        return False
+
+    def new_file(self):
+        if self._cancel_action():
+            return
+
+        self.scene.clear()
+        self.undo_stack.clear()
 
     def open_file(self):
+        if self._cancel_action():
+            return
+
         # TODO: make scripts path absolute
-        file, _ = QFileDialog.getOpenFileName(caption='Open File',
+        file, _ = QFileDialog.getOpenFileName(caption='Open File...',
                                               dir='scripts',
                                               filter='*.json')
         if file:
             load_file(self.scene, file)
-            self.top_window.setStatusTip('File Loaded')
+            self.editor_file = file
+            self.top_window.setWindowTitle(os.path.basename(file))
+            self.top_window.show_status_message('File Loaded')
             self.undo_stack.clear()
 
 

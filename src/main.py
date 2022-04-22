@@ -60,8 +60,8 @@ class DebugWidget(QWidget):
         tabs = QTabWidget()
         self.console = QPlainTextEdit()
         self.console.setFont(QFont('Menlo', 16))
-        tabs.addTab(self.console, 'Debug Console')
         tabs.addTab(QUndoView(self.undo_stack), 'Undo History')
+        tabs.addTab(self.console, 'Debug Console')
 
         _layout = QVBoxLayout()
         _layout.addWidget(self.node_editor)
@@ -144,8 +144,10 @@ class MainWindow(QMainWindow):
         self.mouse_position.setText(f'{round(x)}, {round(y)}')
 
     def _set_status_bar(self):
-        status_bar = self.statusBar()
-        status_bar.addPermanentWidget(self.mouse_position)
+        self.statusBar().addPermanentWidget(self.mouse_position)
+
+    def show_status_message(self, msg, timeout=5000):
+        self.statusBar().showMessage(msg, timeout)
 
     def contextMenuEvent(self, event):
         """Right click menu."""

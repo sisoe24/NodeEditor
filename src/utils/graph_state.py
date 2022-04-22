@@ -1,6 +1,8 @@
 import json
 from pprint import pprint
 
+from PySide2.QtCore import QRectF, QRect, Qt
+
 from src.widgets.node_edge import NodeEdge
 from src.widgets.node_graphics import NodeGraphics, create_node
 
@@ -8,7 +10,7 @@ from src.widgets.node_graphics import NodeGraphics, create_node
 def _create_nodes(scene, file_data):
 
     node_edges = {}
-    for node_type, node_attrs in file_data.items():
+    for node_type, node_attrs in file_data['nodes'].items():
 
         node = create_node(scene, node_attrs['class'])
         node.set_position(node_attrs['position']['x'],
@@ -26,6 +28,9 @@ def _extract_end_socket(node_edges, edge):
 
 
 def load_scene(scene, data):
+    # center the view
+    scene._set_view_center(data['viewport']['x'], data['viewport']['y'])
+
     scene.clear()
     node_edges = _create_nodes(scene, data)
 
@@ -64,14 +69,28 @@ def _extract_output_edges(node: NodeGraphics):
     return output_edges
 
 
+def _visible_viewport(scene):
+    """Get the center of the viewport visible area."""
+    view = scene.views()[0]
+    scene_view = view.viewport()
+    viewport = QRect(0, 0, scene_view.width(), scene_view.height())
+    viewport_rect: QRectF = view.mapToScene(viewport).boundingRect().center()
+    return {
+        'x': viewport_rect.x(), 'y': viewport_rect.y(),
+    }
+
+
 def scene_state(scene) -> dict:
     """Generate the graph state."""
-    state = {}
+    state = {
+        'viewport': _visible_viewport(scene),
+        'nodes': {}
+    }
 
     graph_nodes = [n for n in scene.items() if isinstance(n, NodeGraphics)]
     for node in graph_nodes:
         node_data = node.info()
-        state[node_data.get('id')] = {
+        state['nodes'][node_data.get('id')] = {
             'class': node_data.get('class'),
             'position': node_data.get('position'),
             'output_edges': _extract_output_edges(node)

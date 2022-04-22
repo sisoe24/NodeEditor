@@ -1,10 +1,12 @@
+import os
 import sys
 import logging
 
-from PySide2.QtCore import Qt
+from PySide2.QtCore import QRect, Qt
 from PySide2.QtGui import QFont
 
 from PySide2.QtWidgets import (
+    QPushButton,
     QPlainTextEdit,
     QTabWidget,
     QMenu,
@@ -18,6 +20,7 @@ from PySide2.QtWidgets import (
     QMainWindow,
     QVBoxLayout,
 )
+from src.utils.graph_state import load_file, save_file
 from src.widgets.editor_menubar import NodeMenubar
 
 
@@ -63,8 +66,11 @@ class DebugWidget(QWidget):
         tabs.addTab(QUndoView(self.undo_stack), 'Undo History')
         tabs.addTab(self.console, 'Debug Console')
 
+        self._btn_debug = QPushButton('Test')
+
         _layout = QVBoxLayout()
         _layout.addWidget(self.node_editor)
+        _layout.addWidget(self._btn_debug)
         _layout.addWidget(tabs)
 
         self.setLayout(_layout)
@@ -105,6 +111,7 @@ class MainWindow(QMainWindow):
         self.node_editor.view.mouse_position.connect(self.set_coords)
 
         debug_widget = DebugWidget(self.node_editor, self.undo_stack)
+        debug_widget._btn_debug.clicked.connect(self._show_viewport)
         self.setCentralWidget(debug_widget)
 
         self._scene = self.node_editor.scene.graphics_scene
@@ -118,8 +125,18 @@ class MainWindow(QMainWindow):
         self._set_toolbar()
         self._set_status_bar()
 
-        # load_file(self._scene)
-        # save_file(self._scene)
+        # save_file(self._scene, 'scripts/save_file.json')
+        self._load_file()
+
+    def _load_file(self):
+        file = 'scripts/save_file.json'
+        load_file(self._scene, file)
+        self.menubar._file_actions.editor_file = file
+        self.setWindowTitle(os.path.basename(file))
+
+    def _show_viewport(self):
+        center = self._view.viewport().rect().center()
+        self._view.centerOn(-1, 718)
 
     def _set_toolbar(self):
 

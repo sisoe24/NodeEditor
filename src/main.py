@@ -63,8 +63,8 @@ class DebugWidget(QWidget):
         tabs = QTabWidget()
         self.console = QPlainTextEdit()
         self.console.setFont(QFont('Menlo', 16))
-        tabs.addTab(QUndoView(self.undo_stack), 'Undo History')
         tabs.addTab(self.console, 'Debug Console')
+        tabs.addTab(QUndoView(self.undo_stack), 'Undo History')
 
         self._btn_debug = QPushButton('Test')
 
@@ -79,18 +79,18 @@ class DebugWidget(QWidget):
     def _debug_add_nodes(self):
 
         node_test = create_node(self.scene, 'NodeTest')
-        node_test.set_position(-200, 0)
+        node_test.set_position(-50, 0)
 
         # node_debug = create_node(self.scene, 'NodeDebug')
         # node_debug.set_position(40, -40)
 
         node_example = create_node(self.scene, 'NodeExample')
-        node_example.set_position(40, -40)
+        node_example.set_position(0, 0)
 
         # create debug edge
         start_socket_a = node_test.output_sockets[0]
         end_socket_a = node_example.input_sockets[0]
-        NodeEdge(start_socket_a.socket_graphics, end_socket_a.socket_graphics)
+        # NodeEdge(start_socket_a.socket_graphics, end_socket_a.socket_graphics)
         return
 
         start_socket_a = node_test.output_sockets[0]
@@ -126,7 +126,7 @@ class MainWindow(QMainWindow):
         self._set_status_bar()
 
         # save_file(self._scene, 'scripts/save_file.json')
-        self._load_file()
+        # self._load_file()
 
     def _load_file(self):
         file = 'scripts/save_file.json'

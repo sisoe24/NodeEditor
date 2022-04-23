@@ -56,6 +56,8 @@ class GraphicsView(QGraphicsView):
 
         self._previous_selection = None
 
+        self._mouse_pos_view = None
+        self._mouse_pos_scene = None
         self._mouse_initial_position = None
 
         self._scene = self.scene()
@@ -111,11 +113,6 @@ class GraphicsView(QGraphicsView):
             any: the object item under the cursor
         """
         return self.itemAt(pos)
-
-    def _update_mouse_position(self, event: QMouseEvent):
-        """Emit a signal to update mouse position label status."""
-        pos = self.mapToScene(event.pos())
-        self.mouse_position.emit(pos.x(), pos.y())
 
     @staticmethod
     def _drag_mouse_event(event: QMouseEvent):
@@ -425,7 +422,11 @@ class GraphicsView(QGraphicsView):
             super().mouseReleaseEvent(event)
 
     def mouseMoveEvent(self, event):
-        self.scene_pos = event.pos()
+        self._mouse_pos_view = event.pos()
+
+        self._mouse_pos_scene = self.mapToScene(event.pos())
+        self.mouse_position.emit(self._mouse_pos_scene.x(),
+                                 self._mouse_pos_scene.y())
 
         if self._edge_drag_mode:
             self._edge_tmp.edge_graphics.update()
@@ -435,7 +436,6 @@ class GraphicsView(QGraphicsView):
             self._cut_edge.line_points.append(pos)
             self._cut_edge.update()
 
-        self._update_mouse_position(event)
         return super().mouseMoveEvent(event)
 
     def keyPressEvent(self, event):
@@ -448,7 +448,7 @@ class GraphicsView(QGraphicsView):
                 self.top.undo_stack.push(command)
 
         elif key == Qt.Key_I:
-            item = self._get_graphic_item(self.scene_pos)
+            item = self._get_graphic_item(self._mouse_pos_view)
 
             if not item:
                 return

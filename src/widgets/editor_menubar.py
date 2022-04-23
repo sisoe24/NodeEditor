@@ -139,8 +139,8 @@ class EditorAddActions(QWidget):
 
     def add_node(self, node):
         # TODO: create the node at mouse point
-        x, y = self.top_window.mouse_position.text().split(',')
-        command = AddNodeCommand(self.scene, (float(x), float(y)),
+        pos = self.top_window._view._mouse_pos_scene
+        command = AddNodeCommand(self.scene, (float(pos.x()), float(pos.y())),
                                  node, 'Add Node')
         self.undo_stack.push(command)
 

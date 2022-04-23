@@ -1,4 +1,5 @@
 from PySide2.QtWidgets import QUndoCommand
+from PySide2.QtCore import Qt
 from PySide2.QtGui import QPainterPath
 
 from src.widgets.node_edge import NodeEdge
@@ -45,15 +46,17 @@ class SelectCommand(QUndoCommand):
         path.addPolygon(selection.mapToScene(selection.boundingRect()))
         return path
 
+    def _set_selection(self, selection):
+        self.scene.setSelectionArea(selection, Qt.ContainsItemBoundingRect)
+
     def undo(self):
         selection = self.previous_selection
         selection = self.selection_area(
             selection) if selection else QPainterPath()
-        self.scene.setSelectionArea(selection)
+        self._set_selection(selection)
 
     def redo(self):
-        self.scene.setSelectionArea(
-            self.selection_area(self.current_selection))
+        self._set_selection(self.selection_area(self.current_selection))
 
 
 class ConnectEdgeCommand(QUndoCommand):

@@ -7,7 +7,7 @@ from PySide2.QtWidgets import (
     QApplication,
     QGraphicsView,
 )
-from src.widgets.logic.left_click import LeftClickPress, LeftClickRelease
+from src.widgets.logic.left_click import LeftClick, LeftClickPress, LeftClickRelease
 from src.widgets.node_edge_cutline import NodeEdgeCutline
 
 from src.widgets.node_graphics import NodeGraphics
@@ -16,11 +16,7 @@ from src.widgets.node_socket import SocketGraphics, SocketInput, SocketOutput
 
 from src.widgets.logic.undo_redo import (
     DeleteEdgeCommand,
-    DisconnectEdgeCommand,
-    MoveNodeCommand,
-    ConnectEdgeCommand,
     DeleteNodeCommand,
-    SelectCommand,
 )
 
 LOGGER = logging.getLogger('nodeeditor.view')
@@ -164,116 +160,26 @@ class GraphicsView(QGraphicsView):
         super().mouseReleaseEvent(self._drag_mouse_event(event))
         self.setDragMode(QGraphicsView.RubberBandDrag)
 
-    def _item_is_node(self):
-        return (
-            isinstance(self.selected_item, NodeGraphics) and
-            not self._node_drag_mode and
-            not self._box_selection_mode
-        )
-
     def _leftMouseButtonPress(self, event):
         item = self._get_graphic_item(event.pos())
-        self.selected_item = item
-        click = LeftClickPress(self, self.selected_item, event)
-        # return
-
         LOGGER.debug('Clicked on item: %s', item)
-        # self._mouse_initial_position = event.pos()
 
-        # if self._item_is_node():
-        #     self._create_selection_command(self._previous_selection,
-        #                                    self.selected_item, 'Select')
+        self.selected_item = item
+
+        self.left_click = LeftClickPress(self, self.selected_item, event)
 
         if isinstance(item, SocketGraphics):
             self.setDragMode(QGraphicsView.NoDrag)
-            click.on_socket(item)
 
-            # self._edge_drag_mode = True
-            # LOGGER.debug('Drag Mode Enabled')
+            # REVIEW: dont like this here
+            self._edge_drag_mode = True
 
-            # self._clicked_socket = item
+            self.left_click.on_socket(item)
 
-            # # input socket should only have 1 edge connected
-            # if isinstance(item, SocketInput) and item.has_edge():
-            #     LOGGER.debug('SocketInput has an edge connected already')
-
-            #     self._edge_readjust_mode = True
-
-            #     # FIXME: ugly
-            #     self.__start_socket = item.edge.start_socket
-            #     self.__end_socket = item.edge.end_socket
-
-            #     # REVIEW: might not need this after re assign always start to output
-            #     # re assign start socket to the initial starting point
-            #     self._clicked_socket = (
-            #         self.__end_socket if isinstance(self.__start_socket, SocketInput)
-            #         else self.__start_socket
-            #     )
-
-            #     # delete the original edge
-            #     item.remove_edge()
-
-            # self._edge_tmp = NodeEdgeTmp(self, self._clicked_socket)
-            # self._scene.addItem(self._edge_tmp.edge_graphics)
-
-        if isinstance(self.selected_item, NodeGraphics):
-            click.on_node()
-            # self._node_drag_mode = True
-            # self._nodes_initial_position = self._selected_nodes_position()
-
-            # self.selected_item.setZValue(1)
-            # if hasattr(self._previous_node_selection, 'setZValue'):
-            #     self._previous_node_selection.setZValue(0)
-            # self._previous_node_selection = self.selected_item
+        elif isinstance(self.selected_item, NodeGraphics):
+            self.left_click.on_node()
 
         super().mousePressEvent(event)
-
-    def _delete_tmp_edge(self, msg=None):
-        LOGGER.debug('Delete temporary edge')
-        if msg:
-            LOGGER.debug(msg)
-        self.scene().removeItem(self._edge_tmp.edge_graphics)
-
-    def _is_same_socket_type(self, end_socket):
-        """Check if input and output socket are the same type."""
-        return (isinstance(self._clicked_socket, SocketOutput) and
-                isinstance(end_socket, SocketOutput) or
-                isinstance(self._clicked_socket, SocketInput) and
-                isinstance(end_socket, SocketInput))
-
-    def _is_box_selection(self, event):
-        """Check if action is just a box selection."""
-        return (
-            self._mouse_initial_position != event.pos() and
-            not self._node_drag_mode and
-            not self._edge_drag_mode
-        )
-
-    def _create_selection_command(self, previous, current, description):
-        """Update the selection undo redo command.
-
-        Create the undo redo command stack for the selection. Selection can be
-        a single node select or a box select.
-
-        Args:
-            previous (any): the previous selection
-            current (any): the current selection
-            description (str): the undo redo description
-        """
-        def _set_previous_selection(selection):
-            if not selection:
-                return QPainterPath()
-
-            if isinstance(selection, QPainterPath):
-                return selection
-
-            path = QPainterPath()
-            path.addPolygon(selection.mapToScene(selection.boundingRect()))
-            return path
-
-        command = SelectCommand(self._scene, previous, current, description)
-        self.top.undo_stack.push(command)
-        self._previous_selection = _set_previous_selection(current)
 
     def _update_selection(self):
         """When scene selection changes do something.
@@ -283,20 +189,12 @@ class GraphicsView(QGraphicsView):
         """
         nodes = self._selected_nodes()
         if len(nodes) <= 1:
-            self._box_selection_mode = False
+            LeftClick._box_selection_mode = False
 
     def _selected_nodes(self):
         """Return the selected nodes inside the scene."""
         return sorted([node for node in self.scene().selectedItems()
                        if isinstance(node, NodeGraphics)])
-
-    def _selected_nodes_position(self):
-        """Get a the selected nodes position.
-
-        Returns:
-            (dict) - the key is the node object and the value is the position.
-        """
-        return {node: node.pos() for node in self._selected_nodes()}
 
     def _leftMouseButtonRelease(self, event):
         super().mouseReleaseEvent(event)
@@ -434,7 +332,8 @@ class GraphicsView(QGraphicsView):
                                  self._mouse_pos_scene.y())
 
         if self._edge_drag_mode:
-            self._edge_tmp.edge_graphics.update()
+            self.left_click.update_view()
+            # self._edge_tmp.edge_graphics.update()
 
         if self._edge_cut_mode:
             pos = self.mapToScene(event.pos())

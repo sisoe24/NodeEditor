@@ -63,8 +63,8 @@ class DebugWidget(QWidget):
         tabs = QTabWidget()
         self.console = QPlainTextEdit()
         self.console.setFont(QFont('Menlo', 16))
-        tabs.addTab(self.console, 'Debug Console')
         tabs.addTab(QUndoView(self.undo_stack), 'Undo History')
+        tabs.addTab(self.console, 'Debug Console')
 
         self._btn_debug = QPushButton('Test')
 
@@ -79,13 +79,13 @@ class DebugWidget(QWidget):
     def _debug_add_nodes(self):
 
         node_test = create_node(self.scene, 'NodeTest')
-        node_test.set_position(-50, 0)
+        node_test.set_position(-150, 150)
 
         # node_debug = create_node(self.scene, 'NodeDebug')
         # node_debug.set_position(40, -40)
 
         node_example = create_node(self.scene, 'NodeExample')
-        node_example.set_position(0, 0)
+        node_example.set_position(50, 0)
 
         # create debug edge
         start_socket_a = node_test.output_sockets[0]

@@ -60,8 +60,10 @@ class SelectCommand(QUndoCommand):
 
 
 class ConnectEdgeCommand(QUndoCommand):
-    def __init__(self, start_socket, end_socket, description):
+    def __init__(self, scene, start_socket, end_socket, description):
         super().__init__(description)
+
+        self.scene = scene
         self.start_socket = start_socket
         self.end_socket = end_socket
 
@@ -72,6 +74,7 @@ class ConnectEdgeCommand(QUndoCommand):
 
     def redo(self):
         self.edge = NodeEdge(self.start_socket, self.end_socket)
+        self.scene.addItem(self.edge.edge_graphics)
 
 
 class DisconnectEdgeCommand(QUndoCommand):

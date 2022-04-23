@@ -55,6 +55,7 @@ class GraphicsView(QGraphicsView):
         self._clicked_socket = None
 
         self._previous_selection = None
+        self._previous_node_selection = None
 
         self._mouse_pos_view = None
         self._mouse_pos_scene = None
@@ -79,7 +80,6 @@ class GraphicsView(QGraphicsView):
             isinstance(item.parentItem(), NodeGraphics)
         ):
             self._selected_item = item.parentItem()
-            self._selected_item.setZValue(1)
         else:
             self._selected_item = item
 
@@ -208,15 +208,17 @@ class GraphicsView(QGraphicsView):
                 # delete the original edge
                 item.remove_edge()
 
-            # FIXME: when drawing the edge, need to set the node zValue to stay
-            # behind the socket otherwise will not able to recognize it
-            self._clicked_socket.parentItem().setZValue(-1.0)
-
             self._edge_tmp = NodeEdgeTmp(self, self._clicked_socket)
+            self._scene.addItem(self._edge_tmp.edge_graphics)
 
-        elif isinstance(self.selected_item, NodeGraphics):
+        if isinstance(self.selected_item, NodeGraphics):
             self._node_drag_mode = True
             self._nodes_initial_position = self._selected_nodes_position()
+
+            self.selected_item.setZValue(1)
+            if hasattr(self._previous_node_selection, 'setZValue'):
+                self._previous_node_selection.setZValue(0)
+            self._previous_node_selection = self.selected_item
 
         super().mousePressEvent(event)
 
@@ -318,12 +320,6 @@ class GraphicsView(QGraphicsView):
             self.top.undo_stack.push(command)
             self._node_drag_mode = False
 
-        # move node above other nodes when selected
-        if hasattr(self.selected_item, 'setZValue'):
-            # BUG: there might a bug when connected from input to output
-            # where the zValue does not get reset properly
-            self.selected_item.setZValue(0)
-
         if self._edge_drag_mode:
 
             if item == self._clicked_socket:
@@ -346,8 +342,8 @@ class GraphicsView(QGraphicsView):
                     # invert the sockets if starting point is input to output
                     end_socket, self._clicked_socket = self._clicked_socket, end_socket
 
-                command = ConnectEdgeCommand(self._clicked_socket, end_socket,
-                                             'Connect Edge')
+                command = ConnectEdgeCommand(self._scene, self._clicked_socket,
+                                             end_socket, 'Connect Edge')
                 self.top.undo_stack.push(command)
 
             # Review: simplify the condition

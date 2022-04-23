@@ -19,8 +19,8 @@ LOGGER.setLevel(logging.DEBUG)
 
 class NodeEdgeGraphics(QGraphicsPathItem):
 
-    def __init__(self, edge):
-        super().__init__(edge.start_socket)
+    def __init__(self, edge, parent=None):
+        super().__init__(parent)
 
         self.edge = edge
 
@@ -49,10 +49,11 @@ class NodeEdgeGraphics(QGraphicsPathItem):
         # Review: I might not need to select the edge
         # self.setFlag(QGraphicsItem.ItemIsSelectable)
         self.setFlag(QGraphicsItem.ItemStacksBehindParent)
+        self.setZValue(-5.0)
 
     def paint(self, painter, option, widget=None):
         """Paint the edge between the nodes."""
-        path = QPainterPath(QPointF(0, 0))
+        path = QPainterPath(self.edge.start_socket.get_position())
         path.lineTo(self.mapFromScene(self.edge.end_point_loc))
 
         stroke = QPainterPathStroker()

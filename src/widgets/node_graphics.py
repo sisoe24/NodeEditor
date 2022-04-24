@@ -6,6 +6,7 @@ import logging
 from PySide2.QtCore import Qt
 from PySide2.QtGui import QFont, QPen, QColor, QPainterPath, QBrush
 from PySide2.QtWidgets import (
+    QGraphicsScene,
     QSpacerItem,
     QLabel,
     QGraphicsItem,
@@ -15,15 +16,16 @@ from PySide2.QtWidgets import (
     QWidget
 )
 
+# from src.widgets.node_graphics import Node
 from src.widgets.node_socket import Socket
 from src.utils import class_id
 
 LOGGER = logging.getLogger('nodeeditor.master_node')
 
 
-def create_node(scene, node_class):
+def create_node(scene: QGraphicsScene, node_class: str) -> 'Node':
     """create_node(scene, 'NodeTest') -> Node"""
-    node = NodesRegister.get_node_class(node_class)
+    node = NodesRegister.get_node_from_class(node_class)
     return node(scene)
 
 
@@ -100,7 +102,7 @@ class NodesRegister:
         return cls.nodes_classes
 
     @classmethod
-    def get_node_class(cls, node):
+    def get_node_from_class(cls, node):
 
         node_class = cls.nodes_classes.get(node)
         if node_class:

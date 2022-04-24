@@ -1,3 +1,4 @@
+import contextlib
 import logging
 
 
@@ -28,6 +29,8 @@ class LeftClick:
     selection_node_previous = None
     selection_group_previous = None
 
+    selection_previous = None
+
     edge_tmp = None
 
     socket_clicked = None
@@ -44,8 +47,6 @@ class LeftClick:
         Returns:
             (dict) - the key is the node object and the value is the position.
         """
-
-        print("➡ self.view._selected_nodes() :", self.view._selected_nodes())
         return {node: node.pos() for node in self.view._selected_nodes()}
 
     def _click_is_node(self):
@@ -66,7 +67,7 @@ class LeftClick:
             current (any): the current selection
             description (str): the undo redo description
         """
-        def _set_previous_selection(selection):
+        def _create_selection_area(selection):
             if not selection:
                 return QPainterPath()
 
@@ -77,10 +78,22 @@ class LeftClick:
             path.addPolygon(selection.mapToScene(selection.boundingRect()))
             return path
 
+        # print("➡ previous :", previous)
+        # print("➡ current :", current)
+
+        current = _create_selection_area(current)
+        previous = _create_selection_area(previous)
+
         command = SelectCommand(
             self.view._scene, previous, current, description)
         self.view.top.undo_stack.push(command)
-        self.selection_group_previous = _set_previous_selection(current)
+
+        # self._update_previous_selection(current)
+        LeftClick.selection_previous = current
+
+    @classmethod
+    def _update_previous_selection(cls, current):
+        cls.selection_previous = current
 
 
 class LeftClickPress(LeftClick):
@@ -94,8 +107,8 @@ class LeftClickPress(LeftClick):
 
         self.item = item
         if self._click_is_node():
-            self._create_selection_command(LeftClick.selection_group_previous,
-                                           self.item, 'Select')
+            self._create_selection_command(previous=LeftClick.selection_previous,
+                                           current=self.item, description='Select')
 
     @staticmethod
     def _re_connect_edge(socket):
@@ -134,13 +147,12 @@ class LeftClickPress(LeftClick):
 
         LeftClick.mode_drag_node = True
         LeftClick.nodes_initial_position = self._selected_nodes_position()
-        print("➡ LeftClick.nodes_initial_position :",
-              LeftClick.nodes_initial_position)
 
         self._update_node_zValue()
 
     def update_view(self):
-        LeftClick.edge_tmp.edge_graphics.update()
+        with contextlib.suppress(AttributeError):
+            LeftClick.edge_tmp.edge_graphics.update()
 
 
 class LeftClickRelease(LeftClick):
@@ -160,7 +172,6 @@ class LeftClickRelease(LeftClick):
 
     def _end_node_move(self):
         if LeftClick.mode_drag_node:
-            print("➡ end node move :", LeftClick.nodes_initial_position)
             command = MoveNodeCommand(self._selected_nodes_position(),
                                       LeftClick.nodes_initial_position,
                                       'Move Node')
@@ -177,7 +188,7 @@ class LeftClickRelease(LeftClick):
 
     def _end_box_selection(self):
         if self._is_box_selection():
-            self._create_selection_command(LeftClick.selection_group_previous,
+            self._create_selection_command(LeftClick.selection_previous,
                                            self.view._scene.selectionArea(),
                                            'Box Select')
             LeftClick.mode_selection_box = True
@@ -185,6 +196,7 @@ class LeftClickRelease(LeftClick):
     def _delete_tmp_edge(self, msg=None):
         LOGGER.debug('Delete temporary edge. ' + (msg or ''))
         self.view._scene.removeItem(LeftClick.edge_tmp.edge_graphics)
+        LeftClick.edge_tmp = None
 
     def _socket_is_invalid(self):
         return self.item == LeftClick.socket_clicked
@@ -227,7 +239,7 @@ class LeftClickRelease(LeftClick):
         self._end_box_selection()
 
         if self._click_is_void():
-            self._create_selection_command(LeftClick.selection_group_previous,
+            self._create_selection_command(LeftClick.selection_previous,
                                            None, 'Select')
             return
 

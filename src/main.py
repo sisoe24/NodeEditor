@@ -27,7 +27,7 @@ from src.widgets.editor_menubar import NodeMenubar
 from src.widgets.editor_scene import Scene
 from src.widgets.node_edge import NodeEdge
 from src.widgets.editor_view import GraphicsView
-from src.widgets.node_graphics import create_node
+from src.widgets.node_graphics import NodesRegister, create_node
 
 LOGGER = logging.getLogger('nodeeditor.main')
 
@@ -85,8 +85,8 @@ class DebugWidget(QWidget):
         node_test = create_node(self.scene, 'NodeTest')
         node_test.set_position(-150, 150)
 
-        # node_debug = create_node(self.scene, 'NodeDebug')
-        # node_debug.set_position(40, -40)
+        node_debug = create_node(self.scene, 'NodeDebug')
+        node_debug.set_position(250, -40)
 
         node_example = create_node(self.scene, 'NodeExample')
         node_example.set_position(50, 0)
@@ -96,11 +96,12 @@ class DebugWidget(QWidget):
         end_socket_a = node_example.input_sockets[0]
         NodeEdge(self.scene, start_socket_a.socket_graphics,
                  end_socket_a.socket_graphics)
-        return
 
-        start_socket_a = node_test.output_sockets[0]
-        end_socket_a = node_example.input_sockets[1]
-        # NodeEdge(start_socket_a.socket_graphics, end_socket_a.socket_graphics)
+        start_socket_b = node_example.output_sockets[0]
+        end_socket_b = node_debug.input_sockets[1]
+        NodeEdge(self.scene, start_socket_b.socket_graphics,
+                 end_socket_b.socket_graphics)
+        return
 
 
 class MainWindow(QMainWindow):
@@ -141,7 +142,7 @@ class MainWindow(QMainWindow):
 
     def _debug_function(self):
         """Debug function"""
-        self._scene.clearSelection()
+        node = NodesRegister.get_node_from_id('NodeExample.001')
 
     def _set_toolbar(self):
 

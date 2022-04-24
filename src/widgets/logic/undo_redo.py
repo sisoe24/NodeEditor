@@ -1,4 +1,6 @@
-from PySide2.QtCore import Qt
+import contextlib
+from PySide2.QtGui import QPainterPath
+from PySide2.QtCore import QMarginsF, Qt
 from PySide2.QtWidgets import QUndoCommand
 
 from src.widgets.node_edge import NodeEdge
@@ -35,9 +37,29 @@ class SelectCommand(QUndoCommand):
         self.current_selection = current_selection
 
     def _set_selection(self, selection):
-        # BUG: if flag is enabled, then the selection does not happen
+        self.scene.clearSelection()
 
-        self.scene.setSelectionArea(selection, Qt.ContainsItemBoundingRect)
+        with contextlib.suppress(AttributeError):
+            selection.setSelected(True)
+
+    def undo(self):
+        self._set_selection(self.previous_selection)
+
+    def redo(self):
+        self._set_selection(self.current_selection)
+
+
+class BoxSelectCommand(QUndoCommand):
+    def __init__(self, scene, previous_selection, current_selection, description):
+        super().__init__(description)
+        self.scene = scene
+        self.previous_selection = previous_selection
+        self.current_selection = current_selection
+
+    def _set_selection(self, selection):
+        if not selection:
+            selection = QPainterPath()
+        self.scene.setSelectionArea(selection)
 
     def undo(self):
         self._set_selection(self.previous_selection)

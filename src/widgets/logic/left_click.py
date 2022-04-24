@@ -6,7 +6,7 @@ from PySide2.QtGui import QPainterPath
 from PySide2.QtWidgets import (
     QGraphicsView,
 )
-from src.widgets.logic.undo_redo import ConnectEdgeCommand, DisconnectEdgeCommand, MoveNodeCommand, SelectCommand
+from src.widgets.logic.undo_redo import BoxSelectCommand, ConnectEdgeCommand, DisconnectEdgeCommand, MoveNodeCommand, SelectCommand
 from src.widgets.node_edge import NodeEdgeTmp
 
 from src.widgets.node_graphics import NodeGraphics
@@ -29,7 +29,8 @@ class LeftClick:
     selection_node_previous = None
     selection_group_previous = None
 
-    selection_previous = None
+    selection_previous_node = None
+    selection_previous_box = None
 
     edge_tmp = None
 
@@ -67,33 +68,10 @@ class LeftClick:
             current (any): the current selection
             description (str): the undo redo description
         """
-        def _create_selection_area(selection):
-            if not selection:
-                return QPainterPath()
-
-            if isinstance(selection, QPainterPath):
-                return selection
-
-            path = QPainterPath()
-            path.addPolygon(selection.mapToScene(selection.boundingRect()))
-            return path
-
-        # print("➡ previous :", previous)
-        # print("➡ current :", current)
-
-        current = _create_selection_area(current)
-        previous = _create_selection_area(previous)
-
         command = SelectCommand(
             self.view._scene, previous, current, description)
         self.view.top.undo_stack.push(command)
-
-        # self._update_previous_selection(current)
-        LeftClick.selection_previous = current
-
-    @classmethod
-    def _update_previous_selection(cls, current):
-        cls.selection_previous = current
+        LeftClick.selection_previous_node = current
 
 
 class LeftClickPress(LeftClick):
@@ -107,8 +85,8 @@ class LeftClickPress(LeftClick):
 
         self.item = item
         if self._click_is_node():
-            self._create_selection_command(previous=LeftClick.selection_previous,
-                                           current=self.item, description='Select')
+            self._create_selection_command(LeftClick.selection_previous_node,
+                                           self.item, 'Select')
 
     @staticmethod
     def _re_connect_edge(socket):
@@ -186,12 +164,17 @@ class LeftClickRelease(LeftClick):
             not LeftClick.mode_drag_edge
         )
 
+    def _create_box_select_command(self):
+        scene = self.view.scene()
+        command = BoxSelectCommand(scene, LeftClick.selection_previous_box,
+                                   scene.selectionArea(), 'Box Select')
+        self.view.top.undo_stack.push(command)
+        LeftClick.selection_previous_box = scene.selectionArea()
+        LeftClick.mode_selection_box = True
+
     def _end_box_selection(self):
         if self._is_box_selection():
-            self._create_selection_command(LeftClick.selection_previous,
-                                           self.view._scene.selectionArea(),
-                                           'Box Select')
-            LeftClick.mode_selection_box = True
+            self._create_box_select_command()
 
     def _delete_tmp_edge(self, msg=None):
         LOGGER.debug('Delete temporary edge. ' + (msg or ''))
@@ -239,7 +222,7 @@ class LeftClickRelease(LeftClick):
         self._end_box_selection()
 
         if self._click_is_void():
-            self._create_selection_command(LeftClick.selection_previous,
+            self._create_selection_command(LeftClick.selection_previous_node,
                                            None, 'Select')
             return
 

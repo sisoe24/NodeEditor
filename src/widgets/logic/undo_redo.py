@@ -76,31 +76,28 @@ class ConnectEdgeCommand(QUndoCommand):
         self.start_socket = start_socket
         self.end_socket = end_socket
 
-        self.edge = None
-
     def undo(self):
         self.end_socket.remove_edge()
 
     def redo(self):
-        self.edge = NodeEdge(self.start_socket, self.end_socket)
-        self.scene.addItem(self.edge.edge_graphics)
+        NodeEdge(self.scene, self.start_socket, self.end_socket)
 
 
 class DisconnectEdgeCommand(QUndoCommand):
-    def __init__(self, start_socket, end_socket, description):
+    def __init__(self, scene, start_socket, end_socket, description):
         super().__init__(description)
 
+        self.scene = scene
         self.start_socket = start_socket
         self.end_socket = end_socket
 
         self.edge = None
 
     def undo(self):
-        self.edge = NodeEdge(self.start_socket, self.end_socket)
+        NodeEdge(self.scene, self.start_socket, self.end_socket)
 
     def redo(self):
         pass
-        # self.edge = NodeEdge(self.start_socket, self.end_socket)
 
 
 class AddNodeCommand(QUndoCommand):
@@ -117,6 +114,8 @@ class AddNodeCommand(QUndoCommand):
     def redo(self):
         self.node = self._node(self.scene)
         self.node.set_position(*self.node_pos)
+        self.node.node_graphics.setSelected(True)
+        self.node.node_graphics.setZValue(1)
 
 
 class DeleteNodeCommand(QUndoCommand):
@@ -199,7 +198,7 @@ class DeleteEdgeCommand(QUndoCommand):
     def undo(self):
         start_socket = self.edge.edge.start_socket
         end_socket = self.edge.edge.end_socket
-        self._edge = NodeEdge(start_socket, end_socket)
+        self._edge = NodeEdge(self.scene, start_socket, end_socket)
 
     def redo(self):
         if not self._edge:

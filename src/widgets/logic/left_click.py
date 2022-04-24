@@ -111,8 +111,8 @@ class LeftClickPress(LeftClick):
         if isinstance(socket, SocketInput) and socket.has_edge():
             self._re_connect_edge(socket)
 
-        LeftClick.edge_tmp = NodeEdgeTmp(self.view, LeftClick.socket_clicked)
-        self.view.scene().addItem(LeftClick.edge_tmp.edge_graphics)
+        LeftClick.edge_tmp = NodeEdgeTmp(self.view.scene(), self.view,
+                                         LeftClick.socket_clicked)
 
     def _update_node_zValue(self):
         self.item.setZValue(1)
@@ -209,7 +209,8 @@ class LeftClickRelease(LeftClick):
 
     def _readjust_edge(self):
         if LeftClick.mode_drag_tmp_edge:
-            command = DisconnectEdgeCommand(LeftClick.socket_start,
+            command = DisconnectEdgeCommand(self.view.scene(),
+                                            LeftClick.socket_start,
                                             LeftClick.socket_end,
                                             'Disconnect Edge')
             self.view.top.undo_stack.push(command)

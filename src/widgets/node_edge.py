@@ -113,7 +113,7 @@ class _EdgeInterface(abc.ABC):
 
 
 class NodeEdge(_EdgeInterface):
-    def __init__(self, start_socket: SocketInput, end_socket: SocketOutput):
+    def __init__(self, scene, start_socket: SocketInput, end_socket: SocketOutput):
 
         LOGGER.debug('Create connected edge')
 
@@ -121,6 +121,7 @@ class NodeEdge(_EdgeInterface):
         self._end_socket = end_socket
 
         self.edge_graphics = NodeEdgeGraphics(self)
+        scene.addItem(self.edge_graphics)
         self._add_reference()
 
     @property
@@ -140,16 +141,12 @@ class NodeEdge(_EdgeInterface):
         self.start_socket.add_edge(self)
         self.end_socket.add_edge(self)
 
-    # def __del__(self):
-    #     # Review: how to make it work
-    #     print('Delete NodeEdge')
-
     def __str__(self) -> str:
         return class_id('NodeEdge', self)
 
 
 class NodeEdgeTmp(_EdgeInterface):
-    def __init__(self, view, start_socket: Socket):
+    def __init__(self, scene, view, start_socket: Socket):
         LOGGER.debug('Create temporary edge')
 
         self._mouse_position = QPointF(start_socket.get_position().x(),
@@ -158,6 +155,7 @@ class NodeEdgeTmp(_EdgeInterface):
 
         self._start_socket = start_socket
         self.edge_graphics = NodeEdgeGraphics(self)
+        scene.addItem(self.edge_graphics)
 
     @property
     def start_socket(self):

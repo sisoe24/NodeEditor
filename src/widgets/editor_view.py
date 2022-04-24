@@ -160,7 +160,23 @@ class GraphicsView(QGraphicsView):
         super().mouseReleaseEvent(self._drag_mouse_event(event))
         self.setDragMode(QGraphicsView.RubberBandDrag)
 
+    def _update_selection(self):
+        """When scene selection changes do something.
+
+        Currently, when selection is less than 1, it does set the flag
+        `_box_selection_mode` to `False`.
+        """
+        nodes = self._selected_nodes()
+        if len(nodes) <= 1:
+            LeftClick._box_selection_mode = False
+
+    def _selected_nodes(self):
+        """Return the selected nodes inside the scene."""
+        return sorted([node for node in self.scene().selectedItems()
+                       if isinstance(node, NodeGraphics)])
+
     def _leftMouseButtonPress(self, event):
+        # super().mousePressEvent(event)
         item = self._get_graphic_item(event.pos())
         LOGGER.debug('Clicked on item: %s', item)
 
@@ -177,94 +193,19 @@ class GraphicsView(QGraphicsView):
             self.left_click.on_socket(item)
 
         elif isinstance(self.selected_item, NodeGraphics):
+            super().mousePressEvent(event)
             self.left_click.on_node()
+            return
 
         super().mousePressEvent(event)
 
-    def _update_selection(self):
-        """When scene selection changes do something.
-
-        Currently, when selection is less than 1, it does set the flag
-        `_box_selection_mode` to `False`.
-        """
-        nodes = self._selected_nodes()
-        if len(nodes) <= 1:
-            LeftClick._box_selection_mode = False
-
-    def _selected_nodes(self):
-        """Return the selected nodes inside the scene."""
-        return sorted([node for node in self.scene().selectedItems()
-                       if isinstance(node, NodeGraphics)])
-
     def _leftMouseButtonRelease(self, event):
         super().mouseReleaseEvent(event)
+
         item = self._get_graphic_item(event.pos())
+
         click = LeftClickRelease(self, item, event)
         click.release()
-
-        # if self._mouse_initial_position == event.pos():
-        #     self._node_drag_mode = False
-
-        # item = self._get_graphic_item(event.pos())
-        # LOGGER.debug('Released on item: %s', item)
-
-        # if self._is_box_selection(event):
-        #     self._create_selection_command(self._previous_selection,
-        #                                    self.scene().selectionArea(),
-        #                                    'Box Select')
-        #     self._box_selection_mode = True
-
-        # if not item and not self._is_box_selection(event):
-        #     self._create_selection_command(
-        #         self._previous_selection, None, 'Select')
-        #     return
-
-        # if self._node_drag_mode:
-        #     # TODO?: trigger only if node was moved
-        #     command = MoveNodeCommand(self._selected_nodes_position(),
-        #                               self._nodes_initial_position,
-        #                               'Move Node')
-        #     self.top.undo_stack.push(command)
-        #     self._node_drag_mode = False
-
-        # if self._edge_drag_mode:
-
-        #     if item == self._clicked_socket:
-        #         self._delete_tmp_edge('End socket is start socket. abort')
-        #         return
-
-        #     if isinstance(item, SocketGraphics):
-        #         end_socket = item
-
-        #         if self._is_same_socket_type(end_socket):
-        #             self._delete_tmp_edge(
-        #                 'Start and End socket are both same type sockets.')
-        #             return
-
-        #         self._delete_tmp_edge()
-
-        #         if isinstance(end_socket, SocketInput) and end_socket.has_edge():
-        #             end_socket.remove_edge()
-        #         elif isinstance(end_socket, SocketOutput):
-        #             # invert the sockets if starting point is input to output
-        #             end_socket, self._clicked_socket = self._clicked_socket, end_socket
-
-        #         command = ConnectEdgeCommand(self._scene, self._clicked_socket,
-        #                                      end_socket, 'Connect Edge')
-        #         self.top.undo_stack.push(command)
-
-        #     # Review: simplify the condition
-        #     elif self._edge_tmp:
-        #         if self._edge_readjust_mode:
-        #             command = DisconnectEdgeCommand(
-        #                 self.__start_socket, self.__end_socket,
-        #                 'Disconnect Edge')
-        #             self.top.undo_stack.push(command)
-        #             self._edge_readjust_mode = False
-        #         self._delete_tmp_edge('Edge release was not on a socket')
-
-        #     self._edge_drag_mode = False
-        #     LOGGER.debug('Drag Mode Disabled')
 
         self.setDragMode(QGraphicsView.RubberBandDrag)
 

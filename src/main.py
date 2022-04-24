@@ -60,26 +60,30 @@ class DebugWidget(QWidget):
         self.scene = self.node_editor.scene.graphics_scene
         self.undo_stack = undo_stack
 
-        tabs = QTabWidget()
+        self.tabs = QTabWidget()
         self.console = QPlainTextEdit()
         self.console.setFont(QFont('Menlo', 16))
-        tabs.addTab(QUndoView(self.undo_stack), 'Undo History')
-        tabs.addTab(self.console, 'Debug Console')
+        self.tabs.addTab(QUndoView(self.undo_stack), 'Undo History')
+        self.tabs.addTab(self.console, 'Debug Console')
 
         self._btn_debug = QPushButton('Test')
 
         _layout = QVBoxLayout()
         _layout.addWidget(self.node_editor)
         _layout.addWidget(self._btn_debug)
-        _layout.addWidget(tabs)
+        _layout.addWidget(self.tabs)
 
         self.setLayout(_layout)
         self._debug_add_nodes()
 
+    def _write_to_console(self, text):
+        self.tabs.setCurrentIndex(1)
+        self.console.setPlainText(text)
+
     def _debug_add_nodes(self):
 
-        # node_test = create_node(self.scene, 'NodeTest')
-        # node_test.set_position(-150, 150)
+        node_test = create_node(self.scene, 'NodeTest')
+        node_test.set_position(-150, 150)
 
         # node_debug = create_node(self.scene, 'NodeDebug')
         # node_debug.set_position(40, -40)
@@ -88,9 +92,10 @@ class DebugWidget(QWidget):
         node_example.set_position(50, 0)
 
         # create debug edge
-        # start_socket_a = node_test.output_sockets[0]
-        # end_socket_a = node_example.input_sockets[0]
-        # NodeEdge(start_socket_a.socket_graphics, end_socket_a.socket_graphics)
+        start_socket_a = node_test.output_sockets[0]
+        end_socket_a = node_example.input_sockets[0]
+        NodeEdge(self.scene, start_socket_a.socket_graphics,
+                 end_socket_a.socket_graphics)
         return
 
         start_socket_a = node_test.output_sockets[0]
@@ -117,7 +122,7 @@ class MainWindow(QMainWindow):
         self._scene = self.node_editor.scene.graphics_scene
 
         self._view = self.node_editor.view
-        self._view.graph_debug.connect(debug_widget.console.setPlainText)
+        self._view.graph_debug.connect(debug_widget._write_to_console)
 
         self.menubar = NodeMenubar(self)
         self.setMenuBar(self.menubar)

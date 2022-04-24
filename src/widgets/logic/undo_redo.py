@@ -139,8 +139,7 @@ class DeleteNodeCommand(QUndoCommand):
             node_edges[old_node._id] = node
         return node_edges
 
-    @staticmethod
-    def _create_input_edges(node, node_data):
+    def _create_input_edges(self, node, node_data):
         for edges in node_data['input_sockets'].values():
             for node_edges in edges.values():
                 edge = node_edges['edges']
@@ -151,11 +150,10 @@ class DeleteNodeCommand(QUndoCommand):
 
                     end_socket = node.input_sockets[edge.end_socket.index]
 
-                    NodeEdge(start_socket.socket_graphics,
+                    NodeEdge(self.scene, start_socket.socket_graphics,
                              end_socket.socket_graphics)
 
-    @staticmethod
-    def _create_output_edges(node, node_data):
+    def _create_output_edges(self, node, node_data):
         for edges in node_data['output_sockets'].values():
             for node_edges in edges.values():
                 edges = node_edges['edges']
@@ -169,7 +167,7 @@ class DeleteNodeCommand(QUndoCommand):
                     end_node = graph_node(edge.end_socket.node)
                     end_socket = end_node.base.input_sockets[edge.end_socket.index]
 
-                    NodeEdge(start_socket.socket_graphics,
+                    NodeEdge(self.scene, start_socket.socket_graphics,
                              end_socket.socket_graphics)
 
     def undo(self):

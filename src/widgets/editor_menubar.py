@@ -1,5 +1,6 @@
 import os
 from functools import partial
+from pprint import pformat
 
 from PySide2.QtGui import (
     QKeySequence
@@ -14,7 +15,8 @@ from PySide2.QtWidgets import (
 )
 from src.utils.graph_state import load_file, save_file
 
-from src.widgets.logic.undo_redo import AddNodeCommand, DeleteNodeCommand
+from src.widgets.logic.undo_redo import AddNodeCommand, DeleteNodeCommand, graph_node
+from src.widgets.node_edge import NodeEdge
 from src.widgets.node_graphics import NodesRegister
 
 
@@ -143,7 +145,6 @@ class EditorEditActions(QWidget):
     def _cut_nodes(self):
         self.copy_stack.clear()
         for node in self.view.selected_nodes():
-            print('cut node', node)
             self.copy_stack.append(node)
             node.delete_node()
 
@@ -151,19 +152,51 @@ class EditorEditActions(QWidget):
         self.copy_stack.clear()
         for item in self.view.selected_nodes():
             self.copy_stack.append(item)
-            print('copy node:', item)
 
     def _paste_nodes(self):
+        # Review: Refactor
         self.scene.clearSelection()
+
+        node_edges = {}
+
         for node in self.copy_stack:
             node_info = node.info()
+
             x = node_info['position']['x']
             y = node_info['position']['y']
 
-            node = NodesRegister.get_node_from_class(node_info['class'])
-            command = AddNodeCommand(
-                self.scene, (x, y), node, 'Add Node')
+            node = NodesRegister.get_class_object(node_info['class'])
+            command = AddNodeCommand(self.scene, (x, y), node, 'Add Node')
             self.undo_stack.push(command)
+
+            node_edges[command.node] = node_info
+
+        if len(node_edges) <= 1:
+            return
+
+        for node, data in node_edges.items():
+            output_sockets = data['output_sockets']
+            for edges in output_sockets.values():
+                for node_edge in edges.values():
+                    edges = node_edge['edges']
+
+                    if not edges:
+                        continue
+
+                    for edge in edges:
+                        start_socket = node.output_sockets[edge.start_socket.index]
+
+                        # HACK: UGLY! FIX ASAP
+                        # increment the id by one because the node got copied
+                        _node, _id = edge.end_socket.node._id.split('.')
+                        _node = f'{_node}.{str(int(_id) + 1).zfill(3)}'
+
+                        end_node = NodesRegister.get_node_from_id(_node)
+                        end_socket = end_node.base.input_sockets[edge.end_socket.index]
+
+                        NodeEdge(self.scene,
+                                 start_socket.socket_graphics,
+                                 end_socket.socket_graphics)
 
     def _delete_nodes(self):
         nodes = self.view.selected_nodes()

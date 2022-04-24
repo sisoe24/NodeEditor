@@ -29,15 +29,19 @@ class EditorFileActions(QWidget):
         self.editor_file = None
 
         self.new_file_act = QAction('New File', self)
+        self.new_file_act.setShortcut(QKeySequence.New)
         self.new_file_act.triggered.connect(self.new_file)
 
         self.open_file_act = QAction('Open File...', self)
+        self.open_file_act.setShortcut(QKeySequence.Open)
         self.open_file_act.triggered.connect(self.open_file)
 
         self.save_file_act = QAction('Save File', self)
+        self.save_file_act.setShortcut(QKeySequence.Save)
         self.save_file_act.triggered.connect(self.save_file)
 
         self.save_file_as_act = QAction('Save File As...', self)
+        self.save_file_as_act.setShortcut(QKeySequence.SaveAs)
         self.save_file_as_act.triggered.connect(self.save_file_as)
 
     def save_file(self):
@@ -117,6 +121,34 @@ class EditorEditActions(QWidget):
         self.redo_act = self.undo_stack.createRedoAction(self, 'Redo')
         self.redo_act.setShortcut(QKeySequence.Redo)
 
+        self.cut_act = QAction('Cut', self)
+        self.cut_act.setShortcut(QKeySequence.Cut)
+        self.cut_act.triggered.connect(self._cut_nodes)
+
+        self.copy_act = QAction('Copy', self)
+        self.copy_act.setShortcut(QKeySequence.Copy)
+        self.copy_act.triggered.connect(self._copy_nodes)
+
+        self.paste_act = QAction('Paste', self)
+        self.paste_act.setShortcut(QKeySequence.Paste)
+        self.paste_act.triggered.connect(self._paste_nodes)
+
+        self.delete_act = QAction('Delete', self)
+        self.delete_act.setShortcut(QKeySequence.Delete)
+        self.delete_act.triggered.connect(self._delete_nodes)
+
+    def _cut_nodes(self):
+        print('cut')
+
+    def _copy_nodes(self):
+        print('copy')
+
+    def _paste_nodes(self):
+        print('paste')
+
+    def _delete_nodes(self):
+        print('delete')
+
 
 class EditorAddActions(QWidget):
     def __init__(self, parent=None):
@@ -172,6 +204,12 @@ class NodeMenubar(QMenuBar):
     def add_edit_menu(self):
         self.edit_menu.addAction(self._edit_actions.undo_act)
         self.edit_menu.addAction(self._edit_actions.redo_act)
+        self.edit_menu.addSeparator()
+        self.edit_menu.addAction(self._edit_actions.cut_act)
+        self.edit_menu.addAction(self._edit_actions.copy_act)
+        self.edit_menu.addAction(self._edit_actions.paste_act)
+        self.edit_menu.addAction(self._edit_actions.delete_act)
+        self.edit_menu.addSeparator()
 
     def add_add_menu(self):
         for node in self._add_actions.nodes:

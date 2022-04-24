@@ -14,7 +14,7 @@ from PySide2.QtWidgets import (
 )
 from src.utils.graph_state import load_file, save_file
 
-from src.widgets.logic.undo_redo import AddNodeCommand
+from src.widgets.logic.undo_redo import AddNodeCommand, DeleteNodeCommand
 from src.widgets.node_graphics import NodesRegister
 
 
@@ -114,12 +114,15 @@ class EditorEditActions(QWidget):
         self.top_window = self.topLevelWidget()
         self.undo_stack = self.top_window.undo_stack
         self.scene = self.top_window._scene
+        self.view = self.scene.views()[0]
 
         self.undo_act = self.undo_stack.createUndoAction(self, 'Undo')
         self.undo_act.setShortcut(QKeySequence.Undo)
 
         self.redo_act = self.undo_stack.createRedoAction(self, 'Redo')
         self.redo_act.setShortcut(QKeySequence.Redo)
+
+        self.copy_stack = []
 
         self.cut_act = QAction('Cut', self)
         self.cut_act.setShortcut(QKeySequence.Cut)
@@ -138,16 +141,36 @@ class EditorEditActions(QWidget):
         self.delete_act.triggered.connect(self._delete_nodes)
 
     def _cut_nodes(self):
-        print('cut')
+        self.copy_stack.clear()
+        for node in self.view.selected_nodes():
+            print('cut node', node)
+            self.copy_stack.append(node)
+            node.delete_node()
 
     def _copy_nodes(self):
-        print('copy')
+        self.copy_stack.clear()
+        for item in self.view.selected_nodes():
+            self.copy_stack.append(item)
+            print('copy node:', item)
 
     def _paste_nodes(self):
-        print('paste')
+        self.scene.clearSelection()
+        for node in self.copy_stack:
+            node_info = node.info()
+            x = node_info['position']['x']
+            y = node_info['position']['y']
+
+            node = NodesRegister.get_node_from_class(node_info['class'])
+            command = AddNodeCommand(
+                self.scene, (x, y), node, 'Add Node')
+            self.undo_stack.push(command)
 
     def _delete_nodes(self):
         print('delete')
+        nodes = self.view.selected_nodes()
+        if nodes:
+            command = DeleteNodeCommand(nodes, self.scene, 'Delete node')
+            self.undo_stack.push(command)
 
 
 class EditorAddActions(QWidget):

@@ -166,11 +166,11 @@ class GraphicsView(QGraphicsView):
         Currently, when selection is less than 1, it does set the flag
         `_box_selection_mode` to `False`.
         """
-        nodes = self._selected_nodes()
+        nodes = self.selected_nodes()
         if len(nodes) <= 1:
             LeftClick._box_selection_mode = False
 
-    def _selected_nodes(self):
+    def selected_nodes(self):
         """Return the selected nodes inside the scene."""
         return sorted([node for node in self.scene().selectedItems()
                        if isinstance(node, NodeGraphics)])
@@ -287,7 +287,7 @@ class GraphicsView(QGraphicsView):
         key = event.key()
         if key == Qt.Key_Delete:
 
-            nodes = self._selected_nodes()
+            nodes = self.selected_nodes()
             if nodes:
                 command = DeleteNodeCommand(nodes, self._scene, 'Delete node')
                 self.top.undo_stack.push(command)

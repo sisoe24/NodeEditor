@@ -48,7 +48,7 @@ class LeftClick:
         Returns:
             (dict) - the key is the node object and the value is the position.
         """
-        return {node: node.pos() for node in self.view._selected_nodes()}
+        return {node: node.pos() for node in self.view.selected_nodes()}
 
     def _click_is_node(self):
         return (

@@ -25,7 +25,7 @@ LOGGER = logging.getLogger('nodeeditor.master_node')
 
 def create_node(scene: QGraphicsScene, node_class: str) -> 'Node':
     """create_node(scene, 'NodeTest') -> Node"""
-    node = NodesRegister.get_node_from_class(node_class)
+    node = NodesRegister.get_class_object(node_class)
     return node(scene)
 
 
@@ -102,8 +102,11 @@ class NodesRegister:
         return cls.nodes_classes
 
     @classmethod
-    def get_node_from_class(cls, node):
+    def get_class_object(cls, node: str):
+        """Get a class reference object.
 
+        `NodeRegister.get_class_object('NodeExample')`
+        """
         node_class = cls.nodes_classes.get(node)
         if node_class:
             return node_class
@@ -111,8 +114,24 @@ class NodesRegister:
         raise RuntimeError(f'Node class not found: {node}')
 
     @classmethod
-    def get_node_from_graph(cls, node):
+    def get_node_from_graph(cls, node: 'NodeGraphics'):
+        """Get a node from the graph by the class id.
+
+        `NodeRegister.get_node_from_graph(node_graphics_obj)`
+        """
         return cls.nodes[node._class].get(node._id)
+
+    @classmethod
+    def get_node_from_id(cls, _id: str):
+        """Get a node from the graph by the class id.
+
+        `NodeRegister.get_node_from_graph(node_graphics_obj)`
+        """
+        for node in cls.nodes.values():
+            for node_id in node:
+                if node_id == _id:
+                    return node[node_id]
+        return None
 
     @classmethod
     def register_node(cls, node):

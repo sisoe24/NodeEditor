@@ -78,8 +78,8 @@ class DebugWidget(QWidget):
 
     def _debug_add_nodes(self):
 
-        node_test = create_node(self.scene, 'NodeTest')
-        node_test.set_position(-150, 150)
+        # node_test = create_node(self.scene, 'NodeTest')
+        # node_test.set_position(-150, 150)
 
         # node_debug = create_node(self.scene, 'NodeDebug')
         # node_debug.set_position(40, -40)
@@ -88,8 +88,8 @@ class DebugWidget(QWidget):
         node_example.set_position(50, 0)
 
         # create debug edge
-        start_socket_a = node_test.output_sockets[0]
-        end_socket_a = node_example.input_sockets[0]
+        # start_socket_a = node_test.output_sockets[0]
+        # end_socket_a = node_example.input_sockets[0]
         # NodeEdge(start_socket_a.socket_graphics, end_socket_a.socket_graphics)
         return
 
@@ -111,7 +111,7 @@ class MainWindow(QMainWindow):
         self.node_editor.view.mouse_position.connect(self.set_coords)
 
         debug_widget = DebugWidget(self.node_editor, self.undo_stack)
-        debug_widget._btn_debug.clicked.connect(self._show_viewport)
+        debug_widget._btn_debug.clicked.connect(self._debug_function)
         self.setCentralWidget(debug_widget)
 
         self._scene = self.node_editor.scene.graphics_scene
@@ -134,9 +134,9 @@ class MainWindow(QMainWindow):
         self.menubar._file_actions.editor_file = file
         self.setWindowTitle(os.path.basename(file))
 
-    def _show_viewport(self):
-        center = self._view.viewport().rect().center()
-        self._view.centerOn(-1, 718)
+    def _debug_function(self):
+        """Debug function"""
+        self._scene.clearSelection()
 
     def _set_toolbar(self):
 

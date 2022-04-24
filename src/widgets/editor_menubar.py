@@ -166,7 +166,6 @@ class EditorEditActions(QWidget):
             self.undo_stack.push(command)
 
     def _delete_nodes(self):
-        print('delete')
         nodes = self.view.selected_nodes()
         if nodes:
             command = DeleteNodeCommand(nodes, self.scene, 'Delete node')

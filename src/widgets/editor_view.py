@@ -285,14 +285,7 @@ class GraphicsView(QGraphicsView):
 
     def keyPressEvent(self, event):
         key = event.key()
-        if key == Qt.Key_Delete:
-
-            nodes = self.selected_nodes()
-            if nodes:
-                command = DeleteNodeCommand(nodes, self._scene, 'Delete node')
-                self.top.undo_stack.push(command)
-
-        elif key == Qt.Key_I:
+        if key == Qt.Key_I:
             item = self._get_graphic_item(self._mouse_pos_view)
 
             if not item:

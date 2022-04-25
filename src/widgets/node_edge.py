@@ -60,7 +60,7 @@ class NodeEdgeGraphics(QGraphicsPathItem):
     def __str__(self) -> str:
         return class_id('NodeEdgeGraphics', self)
 
-    def info(self) -> str:
+    def data(self) -> str:
         return {
             'id': str(self),
             'class_id': str(self.edge),
@@ -80,7 +80,7 @@ class NodeEdgeGraphics(QGraphicsPathItem):
         return str(self)
 
     def repr(self):
-        return json.dumps(self.info(), indent=2)
+        return json.dumps(self.data(), indent=2)
 
 
 class _EdgeInterface(abc.ABC):

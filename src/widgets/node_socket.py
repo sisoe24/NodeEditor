@@ -60,7 +60,7 @@ class SocketGraphics(QGraphicsItem):
     def __repr__(self) -> str:
         return class_id('SocketGraphics', self)
 
-    def info(self) -> str:
+    def data(self) -> str:
         edges = str(self.edge) if isinstance(self, SocketInput) else [
             str(edge) for edge in self.edges]
 
@@ -72,8 +72,8 @@ class SocketGraphics(QGraphicsItem):
         }
 
     def repr(self):
-        # return pprint.pformat(self.info(), 1, 100)
-        return json.dumps(self.info(), indent=1)
+        # return pprint.pformat(self.data(), 1, 100)
+        return json.dumps(self.data(), indent=1)
 
 
 class SocketInput(SocketGraphics):

@@ -88,7 +88,7 @@ def scene_state(scene) -> dict:
 
     graph_nodes = [n for n in scene.items() if isinstance(n, NodeGraphics)]
     for node in graph_nodes:
-        node_data = node.info()
+        node_data = node.data()
         state['nodes'][node_data.get('id')] = {
             'class': node_data.get('class'),
             'position': node_data.get('position'),

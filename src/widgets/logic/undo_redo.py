@@ -182,7 +182,7 @@ class DeleteNodeCommand(QUndoCommand):
 
     def redo(self):
         for node in self.nodes:
-            self.node_info.update({node._id: node.info()})
+            self.node_info.update({node._id: node.data()})
             node = graph_node(node)
             node.delete_node()
 

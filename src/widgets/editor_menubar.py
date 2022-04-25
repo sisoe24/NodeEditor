@@ -174,7 +174,7 @@ class EditorEditActions(EditorActions):
 
         for node in self.nodes_copy_stack:
 
-            node_info = node.info()
+            node_info = node.data()
             x = node_info['position']['x']
             y = node_info['position']['y']
 

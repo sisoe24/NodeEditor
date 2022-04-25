@@ -356,7 +356,7 @@ class NodeGraphics(QGraphicsItem):
         """Set the bounding margins for the node."""
         return self._node_body.boundingRect()
 
-    def info(self) -> dict:
+    def data(self) -> dict:
         def get_sockets(sockets_list, is_input=False):
             sockets = {}
             for index, socket in enumerate(sockets_list):
@@ -376,8 +376,8 @@ class NodeGraphics(QGraphicsItem):
         }
 
     def repr(self):
-        return pprint.pformat(self.info(), 1, 100)
-        # return json.dumps(self.info(), indent=1)
+        return pprint.pformat(self.data(), 1, 100)
+        # return json.dumps(self.data(), indent=1)
 
     def __str__(self) -> str:
         return class_id('NodeGraphics', self)

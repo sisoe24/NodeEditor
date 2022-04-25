@@ -13,19 +13,25 @@ from PySide2.QtWidgets import (
     QAction,
     QMenuBar,
 )
+
+from src.widgets.node_graphics import NodesRegister
+from src.widgets.logic.undo_redo import AddNodeCommand, DeleteNodeCommand
 from src.utils.graph_state import connect_output_edges, load_file, save_file
 
-from src.widgets.logic.undo_redo import AddNodeCommand, DeleteNodeCommand
-from src.widgets.node_graphics import NodesRegister
 
-
-class EditorFileActions(QWidget):
-    def __init__(self, parent=None):
+class EditorActions(QWidget):
+    def __init__(self, parent):
         super().__init__(parent)
 
         self.top_window = self.topLevelWidget()
         self.undo_stack = self.top_window.undo_stack
         self.scene = self.top_window._scene
+        self.view = self.scene.views()[0]
+
+
+class EditorFileActions(EditorActions):
+    def __init__(self, parent):
+        super().__init__(parent)
 
         self.editor_file = None
 
@@ -108,14 +114,9 @@ class EditorFileActions(QWidget):
             self.undo_stack.clear()
 
 
-class EditorEditActions(QWidget):
-    def __init__(self, parent=None):
+class EditorEditActions(EditorActions):
+    def __init__(self, parent):
         super().__init__(parent)
-
-        self.top_window = self.topLevelWidget()
-        self.undo_stack = self.top_window.undo_stack
-        self.scene = self.top_window._scene
-        self.view = self.scene.views()[0]
 
         self.undo_act = self.undo_stack.createUndoAction(self, 'Undo')
         self.undo_act.setShortcut(QKeySequence.Undo)
@@ -202,13 +203,9 @@ class EditorEditActions(QWidget):
             self.undo_stack.push(command)
 
 
-class EditorAddActions(QWidget):
-    def __init__(self, parent=None):
+class EditorAddActions(EditorActions):
+    def __init__(self, parent):
         super().__init__(parent)
-
-        self.top_window = self.topLevelWidget()
-        self.undo_stack = self.top_window.undo_stack
-        self.scene = self.top_window._scene
 
         self.nodes = []
 
@@ -230,7 +227,7 @@ class EditorAddActions(QWidget):
 
 
 class NodeMenubar(QMenuBar):
-    def __init__(self, parent=None):
+    def __init__(self, parent):
         super().__init__(parent)
 
         self._file_actions = EditorFileActions(self)

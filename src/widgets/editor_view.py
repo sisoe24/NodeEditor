@@ -138,13 +138,6 @@ class GraphicsView(QGraphicsView):
         Args:
             event (QEvent): the mouse event.
         """
-        # the release event is for the select box
-        # release_event = QMouseEvent(
-        #     QEvent.MouseButtonRelease, event.localPos(), event.screenPos(),
-        #     Qt.LeftButton, Qt.NoButton, event.modifiers()
-        # )
-        # super().mousePressEvent(release_event)
-
         self.setDragMode(QGraphicsView.ScrollHandDrag)
         super().mousePressEvent(self._drag_mouse_event(event))
 
@@ -176,7 +169,6 @@ class GraphicsView(QGraphicsView):
                        if isinstance(node, NodeGraphics)])
 
     def _leftMouseButtonPress(self, event):
-        # super().mousePressEvent(event)
         item = self._get_graphic_item(event.pos())
         LOGGER.debug('Clicked on item: %s', item)
 

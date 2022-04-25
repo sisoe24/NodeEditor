@@ -123,44 +123,55 @@ class EditorEditActions(QWidget):
         self.redo_act = self.undo_stack.createRedoAction(self, 'Redo')
         self.redo_act.setShortcut(QKeySequence.Redo)
 
-        self.copy_stack = []
+        self.nodes_copy_stack = []
 
         self.cut_act = QAction('Cut', self)
         self.cut_act.setShortcut(QKeySequence.Cut)
-        self.cut_act.triggered.connect(self._cut_nodes)
+        self.cut_act.triggered.connect(self.cut_nodes)
 
         self.copy_act = QAction('Copy', self)
         self.copy_act.setShortcut(QKeySequence.Copy)
-        self.copy_act.triggered.connect(self._copy_nodes)
+        self.copy_act.triggered.connect(self.copy_nodes)
 
         self.paste_act = QAction('Paste', self)
         self.paste_act.setShortcut(QKeySequence.Paste)
-        self.paste_act.triggered.connect(self._paste_nodes)
+        self.paste_act.triggered.connect(self.paste_nodes)
 
         self.delete_act = QAction('Delete', self)
         self.delete_act.setShortcut(QKeySequence.Delete)
-        self.delete_act.triggered.connect(self._delete_nodes)
+        self.delete_act.triggered.connect(self.delete_nodes)
 
-    def _cut_nodes(self):
-        self.copy_stack.clear()
+    def cut_nodes(self):
+        # BUG: does not work when pasting nodes
+        self.nodes_copy_stack.clear()
         for node in self.view.selected_nodes():
-            self.copy_stack.append(node)
+            self.nodes_copy_stack.append(node)
             node.delete_node()
 
-    def _copy_nodes(self):
-        self.copy_stack.clear()
+    def copy_nodes(self):
+        self.nodes_copy_stack.clear()
         for item in self.view.selected_nodes():
-            self.copy_stack.append(item)
+            self.nodes_copy_stack.append(item)
 
-    def _paste_nodes(self):
+    def _increment_node_reference(self, connections):
+        # HACK: after copying a node, increment its reference id so to be able
+        # to connect the edge to the newly copied version.
+        for edges in connections.values():
+            for edge in edges.values():
+                node_id = edge['end_socket']['node']
+                node_class, _ = node_id.split('.')
+                edge['end_socket']['node'] = NodesRegister.get_node_last_id(
+                    node_class)
+
+    def paste_nodes(self):
         # Review: Refactor
         self.scene.clearSelection()
 
         connections = {}
 
-        copy_stack_ids = [node._id for node in self.copy_stack]
+        copy_stack_ids = [node._id for node in self.nodes_copy_stack]
 
-        for node in self.copy_stack:
+        for node in self.nodes_copy_stack:
 
             node_info = node.info()
             x = node_info['position']['x']
@@ -181,18 +192,10 @@ class EditorEditActions(QWidget):
         if not connections:
             return
 
-        # HACK: after copying a node, increment its reference id so to be able
-        # to connect the edge
-        for node, edges in connections.items():
-            for edge in edges.values():
-                node_id = edge['end_socket']['node']
-                node_class, _ = node_id.split('.')
-                edge['end_socket']['node'] = NodesRegister.get_node_last_id(
-                    node_class)
-
+        self._increment_node_reference(connections)
         connect_output_edges(self.scene, connections)
 
-    def _delete_nodes(self):
+    def delete_nodes(self):
         nodes = self.view.selected_nodes()
         if nodes:
             command = DeleteNodeCommand(nodes, self.scene, 'Delete node')

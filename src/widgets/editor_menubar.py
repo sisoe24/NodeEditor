@@ -170,7 +170,7 @@ class EditorEditActions(EditorActions):
 
         connections = {}
 
-        copy_stack_ids = [node._id for node in self.nodes_copy_stack]
+        copy_stack_ids = [node.node_id for node in self.nodes_copy_stack]
 
         for node in self.nodes_copy_stack:
 

@@ -60,7 +60,7 @@ def _extract_output_edges(node: NodeGraphics):
                 output_edges[f'edge.{index}'] = {
                     'start_socket_index': edge.start_socket.index,
                     'end_socket': {
-                        'node': edge.end_socket.node._id,
+                        'node': edge.end_socket.node.node_id,
                         'index': edge.end_socket.index
                     }}
 

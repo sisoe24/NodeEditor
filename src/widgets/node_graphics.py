@@ -39,7 +39,7 @@ def _extract_output_edges(node):
                 output_edges[f'edge.{index}'] = {
                     'start_socket_index': edge.start_socket.index,
                     'end_socket': {
-                        'node': edge.end_socket.node._id,
+                        'node': edge.end_socket.node.node_id,
                         'index': edge.end_socket.index
                     }}
 
@@ -108,11 +108,11 @@ class NodesRegister:
     nodes_classes = {}
 
     @classmethod
-    def register_type(cls, _class):
-        cls.nodes_classes[_class.__name__] = _class
+    def register_type(cls, node_class):
+        cls.nodes_classes[node_class.__name__] = node_class
 
         def wrapper(*args):
-            return _class(args[0])
+            return node_class(args[0])
         return wrapper
 
     @classmethod
@@ -141,7 +141,7 @@ class NodesRegister:
 
         `NodeRegister.get_node_from_graph(node_graphics_obj)`
         """
-        return cls.nodes[node._class].get(node._id)
+        return cls.nodes[node.node_class].get(node.node_id)
 
     @classmethod
     def get_node_from_id(cls, _id: str):
@@ -156,17 +156,17 @@ class NodesRegister:
         return None
 
     @classmethod
-    def get_node_last_id(cls, _class: str):
+    def get_node_last_id(cls, node_class: str):
         """Get a node from the graph by the class id.
 
         `NodeRegister.get_node_from_graph('NodeExample')`
         """
-        return max(cls.nodes[_class])
+        return max(cls.nodes[node_class])
 
     @classmethod
     def register_node(cls, node):
 
-        node_class = node._class
+        node_class = node.node_class
         node_data = cls.nodes.get(node_class)
 
         node_num = 1
@@ -187,7 +187,7 @@ class NodesRegister:
 
     @classmethod
     def unregister_node(cls, node):
-        cls.nodes[node._class].pop(node._id)
+        cls.nodes[node.node_class].pop(node.node_id)
 
 
 class NodeGraphics(QGraphicsItem):
@@ -200,8 +200,8 @@ class NodeGraphics(QGraphicsItem):
         self.base = base
         self.content = content
 
-        self._class = str(self.base)
-        self._id = NodesRegister.register_node(self)
+        self.node_class = str(self.base)
+        self.node_id = NodesRegister.register_node(self)
 
         self._height = max(self.base.layout_size.height(), 50)
 
@@ -246,7 +246,7 @@ class NodeGraphics(QGraphicsItem):
         # title gets created at 0,0 thats why is already inside the title box
         title_item = QGraphicsTextItem(self)
 
-        title_item.setPlainText(self._id)
+        title_item.setPlainText(self.node_id)
         # title_item.setPlainText(self.base.title)
         title_item.setDefaultTextColor(Qt.white)
         title_item.setFont(QFont('Menlo', 12))
@@ -365,9 +365,9 @@ class NodeGraphics(QGraphicsItem):
 
         position = self.pos()
         return {
-            'class': self._class,
+            'class': self.node_class,
             'class_object': str(self),
-            'id': self._id,
+            'id': self.node_id,
             'zValue': self.zValue(),
             'position': {'x': position.x(), 'y': position.y()},
             'input_sockets': get_sockets(self.base.input_sockets, True),

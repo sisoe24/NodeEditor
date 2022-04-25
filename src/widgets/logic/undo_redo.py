@@ -134,8 +134,8 @@ class DeleteNodeCommand(QUndoCommand):
         connections = {}
 
         for old_node in self.nodes:
-            node_data = self.node_info[old_node._id]
-            node = create_node(self.scene, old_node._class)
+            node_data = self.node_info[old_node.node_id]
+            node = create_node(self.scene, old_node.node_class)
             node.node_graphics.setPos(node_data['position']['x'],
                                       node_data['position']['y'])
             connections[node] = node_data.get('output_edges', {})
@@ -177,13 +177,13 @@ class DeleteNodeCommand(QUndoCommand):
 
         # TODO: currently not connecting input edges
         # for node in connections.values():
-        #     node_data = self.node_info[node.node_graphics._id]
+        #     node_data = self.node_info[node.node_graphics.node_id]
         #     # self._create_output_edges(node, node_data)
         #     self._create_input_edges(node, node_data)
 
     def redo(self):
         for node in self.nodes:
-            self.node_info.update({node._id: node.data()})
+            self.node_info.update({node.node_id: node.data()})
             node = graph_node(node)
             node.delete_node()
 

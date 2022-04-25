@@ -161,6 +161,7 @@ class GraphicsView(QGraphicsView):
         """
         nodes = self.selected_nodes()
         if len(nodes) <= 1:
+            # Review: don't link this
             LeftClick._box_selection_mode = False
 
     def selected_nodes(self):
@@ -179,7 +180,7 @@ class GraphicsView(QGraphicsView):
         if isinstance(item, SocketGraphics):
             self.setDragMode(QGraphicsView.NoDrag)
 
-            # REVIEW: dont like this here
+            # REVIEW: this is also created inside the left click class
             self._edge_drag_mode = True
 
             self.left_click.on_socket(item)
@@ -266,7 +267,6 @@ class GraphicsView(QGraphicsView):
 
         if self._edge_drag_mode:
             self.left_click.update_view()
-            # self._edge_tmp.edge_graphics.update()
 
         if self._edge_cut_mode:
             pos = self.mapToScene(event.pos())

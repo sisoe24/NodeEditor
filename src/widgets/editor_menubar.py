@@ -13,10 +13,9 @@ from PySide2.QtWidgets import (
     QAction,
     QMenuBar,
 )
-from src.utils.graph_state import load_file, save_file
+from src.utils.graph_state import connect_output_edges, load_file, save_file
 
-from src.widgets.logic.undo_redo import AddNodeCommand, DeleteNodeCommand, graph_node
-from src.widgets.node_edge import NodeEdge
+from src.widgets.logic.undo_redo import AddNodeCommand, DeleteNodeCommand
 from src.widgets.node_graphics import NodesRegister
 
 
@@ -157,7 +156,9 @@ class EditorEditActions(QWidget):
         # Review: Refactor
         self.scene.clearSelection()
 
-        connected_nodes = {}
+        connections = {}
+
+        copy_stack_ids = [node._id for node in self.copy_stack]
 
         for node in self.copy_stack:
 
@@ -174,34 +175,22 @@ class EditorEditActions(QWidget):
             for connection in output_edges.values():
                 end_node = connection['end_socket']['node']
 
-                if end_node in [node._id for node in self.copy_stack]:
-                    connected_nodes[command.node] = output_edges
+                if end_node in copy_stack_ids:
+                    connections[command.node] = output_edges
 
-        if not connected_nodes:
+        if not connections:
             return
 
-        # Review: try to merge this from graph state
-
-        # update the node id receiver
-        for node, edges in connected_nodes.items():
+        # HACK: after copying a node, increment its reference id so to be able
+        # to connect the edge
+        for node, edges in connections.items():
             for edge in edges.values():
                 node_id = edge['end_socket']['node']
                 node_class, _ = node_id.split('.')
                 edge['end_socket']['node'] = NodesRegister.get_node_last_id(
                     node_class)
 
-        # connect the edges
-        for node, edges in connected_nodes.items():
-            for edge in edges.values():
-                start_socket = node.output_sockets[edge['start_socket_index']]
-
-                end_connection = edge['end_socket']
-                end_node_id = end_connection['node']
-                end_node = NodesRegister.get_node_from_id(end_node_id)
-                end_socket = end_node.base.input_sockets[end_connection['index']]
-
-                NodeEdge(self.scene, start_socket.socket_graphics,
-                         end_socket.socket_graphics)
+        connect_output_edges(self.scene, connections)
 
     def _delete_nodes(self):
         nodes = self.view.selected_nodes()

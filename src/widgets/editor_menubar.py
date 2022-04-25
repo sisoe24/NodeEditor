@@ -161,7 +161,7 @@ class EditorEditActions(EditorActions):
             for edge in edges.values():
                 node_id = edge['end_socket']['node']
                 node_class, _ = node_id.split('.')
-                edge['end_socket']['node'] = NodesRegister.get_node_last_id(
+                edge['end_socket']['node'] = NodesRegister.get_last_node_id(
                     node_class)
 
     def paste_nodes(self):
@@ -178,7 +178,7 @@ class EditorEditActions(EditorActions):
             x = node_info['position']['x']
             y = node_info['position']['y']
 
-            node = NodesRegister.get_class_object(node_info['class'])
+            node = NodesRegister.get_node_class_object(node_info['class'])
             command = AddNodeCommand(self.scene, (x, y), node, 'Add Node')
             self.undo_stack.push(command)
 
@@ -209,7 +209,7 @@ class EditorAddActions(EditorActions):
 
         self.nodes = []
 
-        nodes = NodesRegister.get_avaliable_nodes().items()
+        nodes = NodesRegister.nodes_classes.items()
         for node, obj in nodes:
             action = QAction(node, self)
 

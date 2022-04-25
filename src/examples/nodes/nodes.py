@@ -29,7 +29,7 @@ class _NodeExampleContent(NodeContent):
         self.add_input(QLabel('Input 2'))
 
 
-@NodesRegister.register_type
+@NodesRegister.register_class
 class NodeExample(Node):
     title_background = Qt.red
     title = "Example Node"
@@ -54,7 +54,8 @@ class _NodeDebugContent(NodeContent):
         self.add_input(QLabel('Debug Input 2'))
         self.add_input(QLabel('Debug Input 3'))
 
-@NodesRegister.register_type
+
+@NodesRegister.register_class
 class NodeDebug(Node):
     title_background = Qt.green
     title = "Debug Node"
@@ -79,7 +80,8 @@ class _NodeTestContent(NodeContent):
         self.add_output('Output 3')
         self.add_input(QCheckBox('Random text'))
 
-@NodesRegister.register_type
+
+@NodesRegister.register_class
 class NodeTest(Node):
     title_background = Qt.black
     title = "Test Node"

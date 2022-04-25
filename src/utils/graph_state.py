@@ -43,6 +43,7 @@ def load_scene(scene: 'QGraphicsScene', data: dict) -> None:
 
 
 def load_file(scene: 'QGraphicsScene', file: str) -> None:
+    NodesRegister.clean_register()
     with open(file, 'r', encoding='utf-8') as f:
         load_scene(scene, json.load(f))
 

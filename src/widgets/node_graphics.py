@@ -116,6 +116,10 @@ class NodesRegister:
         return wrapper
 
     @classmethod
+    def clean_register(cls):
+        cls.nodes.clear()
+
+    @classmethod
     def get_avaliable_nodes(cls):
         return cls.nodes_classes
 

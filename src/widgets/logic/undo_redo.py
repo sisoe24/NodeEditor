@@ -195,12 +195,12 @@ class DeleteEdgeCommand(QUndoCommand):
         self._edge = None
 
     def undo(self):
-        start_socket = self.edge.edge.start_socket
-        end_socket = self.edge.edge.end_socket
+        start_socket = self.edge.base.start_socket
+        end_socket = self.edge.base.end_socket
         self._edge = NodeEdge(self.scene, start_socket, end_socket)
 
     def redo(self):
         if not self._edge:
-            self.edge.delete_edge()
+            self.edge.base.delete_edge()
         else:
             self._edge.end_socket.remove_edge()

@@ -19,10 +19,10 @@ LOGGER.setLevel(logging.DEBUG)
 
 class NodeEdgeGraphics(QGraphicsPathItem):
 
-    def __init__(self, edge, parent=None):
+    def __init__(self, base, parent=None):
         super().__init__(parent)
 
-        self.edge = edge
+        self.base = base
 
         self._set_colors()
         self._set_flags()
@@ -42,8 +42,8 @@ class NodeEdgeGraphics(QGraphicsPathItem):
 
     def paint(self, painter, option, widget=None):
         """Paint the edge between the nodes."""
-        path = QPainterPath(self.edge.start_socket.get_position())
-        path.lineTo(self.mapFromScene(self.edge.end_point_loc))
+        path = QPainterPath(self.base.start_socket.get_position())
+        path.lineTo(self.mapFromScene(self.base.end_point_loc))
 
         stroke = QPainterPathStroker()
         stroke.setJoinStyle(Qt.RoundJoin)
@@ -63,16 +63,16 @@ class NodeEdgeGraphics(QGraphicsPathItem):
     def data(self) -> str:
         return {
             'id': str(self),
-            'class_id': str(self.edge),
+            'class_id': str(self.base),
             'start_socket': {
-                'node': str(self.edge.start_socket.node),
-                'socket': str(self.edge.start_socket),
-                'index': str(self.edge.start_socket.index)
+                'node': str(self.base.start_socket.node),
+                'socket': str(self.base.start_socket),
+                'index': str(self.base.start_socket.index)
             },
             'end_socket': {
-                'node': str(self.edge.end_socket.node),
-                'socket': str(self.edge.end_socket),
-                'index': str(self.edge.end_socket.index)
+                'node': str(self.base.end_socket.node),
+                'socket': str(self.base.end_socket),
+                'index': str(self.base.end_socket.index)
             },
         }
 

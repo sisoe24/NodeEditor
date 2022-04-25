@@ -154,6 +154,14 @@ class NodesRegister:
         return None
 
     @classmethod
+    def get_node_last_id(cls, _class: str):
+        """Get a node from the graph by the class id.
+
+        `NodeRegister.get_node_from_graph('NodeExample')`
+        """
+        return max(cls.nodes[_class])
+
+    @classmethod
     def register_node(cls, node):
 
         node_class = node._class

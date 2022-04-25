@@ -1,10 +1,11 @@
 import contextlib
-from PySide2.QtGui import QPainterPath
-from PySide2.QtCore import QMarginsF, Qt
-from PySide2.QtWidgets import QUndoCommand
-from src.utils.graph_state import connect_output_edges
 
-from src.widgets.node_edge import NodeEdge
+from PySide2.QtGui import QPainterPath
+from PySide2.QtWidgets import QUndoCommand, QGraphicsScene
+
+
+from src.utils.graph_state import connect_output_edges
+from src.widgets.node_edge import NodeEdge, NodeEdgeGraphics
 from src.widgets.node_graphics import NodesRegister, create_node
 
 
@@ -188,19 +189,19 @@ class DeleteNodeCommand(QUndoCommand):
 
 
 class DeleteEdgeCommand(QUndoCommand):
-    def __init__(self, edge, scene, description):
+    def __init__(self, edge: 'NodeEdgeGraphics', scene: 'QGraphicsScene', description: str):
         super().__init__(description)
-        self.edge = edge
+        self.edge = edge.base
         self.scene = scene
         self._edge = None
 
     def undo(self):
-        start_socket = self.edge.base.start_socket
-        end_socket = self.edge.base.end_socket
+        start_socket = self.edge.start_socket
+        end_socket = self.edge.end_socket
         self._edge = NodeEdge(self.scene, start_socket, end_socket)
 
     def redo(self):
         if not self._edge:
-            self.edge.base.delete_edge()
+            self.edge.delete_edge()
         else:
             self._edge.end_socket.remove_edge()

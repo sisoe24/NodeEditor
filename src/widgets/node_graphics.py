@@ -366,7 +366,7 @@ class NodeGraphics(QGraphicsItem):
         position = self.pos()
         return {
             'class': self.node_class,
-            'class_object': str(self),
+            'object': str(self),
             'id': self.node_id,
             'zValue': self.zValue(),
             'position': {'x': position.x(), 'y': position.y()},

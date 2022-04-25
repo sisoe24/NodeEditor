@@ -29,6 +29,26 @@ def create_node(scene: QGraphicsScene, node_class: str) -> 'Node':
     return node(scene)
 
 
+def _extract_output_edges(node):
+    output_edges = {}
+    index = 0
+
+    for output_socket in node.base.output_sockets:
+        socket = output_socket.socket_graphics
+
+        if socket.has_edge():
+            for edge in socket.edges:
+                output_edges[f'edge.{index}'] = {
+                    'start_socket_index': edge.start_socket.index,
+                    'end_socket': {
+                        'node': edge.end_socket.node._id,
+                        'index': edge.end_socket.index
+                    }}
+
+                index += 1
+    return output_edges
+
+
 class NodeContent(QWidget):
 
     def __init__(self, parent=None):
@@ -345,6 +365,7 @@ class NodeGraphics(QGraphicsItem):
             'position': {'x': position.x(), 'y': position.y()},
             'input_sockets': get_sockets(self.base.input_sockets, True),
             'output_sockets': get_sockets(self.base.output_sockets),
+            'output_edges': _extract_output_edges(self)
         }
 
     def repr(self):

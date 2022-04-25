@@ -33,8 +33,7 @@ def connect_output_edges(scene: 'QGraphicsScene', connections: dict) -> None:
             end_node = NodesRegister.get_node_from_id(end_node_id)
             end_socket = end_node.base.input_sockets[end_connection['index']]
 
-            NodeEdge(scene, start_socket.socket_graphics,
-                     end_socket.socket_graphics)
+            NodeEdge(scene, start_socket, end_socket)
 
 
 def load_scene(scene: 'QGraphicsScene', data: dict) -> None:
@@ -53,7 +52,7 @@ def _extract_output_edges(node: NodeGraphics):
     index = 0
 
     for output_socket in node.base.output_sockets:
-        socket = output_socket.socket_graphics
+        socket = output_socket
 
         if socket.has_edge():
             for edge in socket.edges:

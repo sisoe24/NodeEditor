@@ -94,13 +94,13 @@ class DebugWidget(QWidget):
         # create debug edge
         start_socket_a = node_test.output_sockets[0]
         end_socket_a = node_example.input_sockets[0]
-        NodeEdge(self.scene, start_socket_a.socket_graphics,
-                 end_socket_a.socket_graphics)
+        
+        print("➡ start_socket_a :", start_socket_a)
+        NodeEdge(self.scene, start_socket_a, end_socket_a)
 
-        start_socket_b = node_example.output_sockets[0]
-        end_socket_b = node_debug.input_sockets[1]
-        NodeEdge(self.scene, start_socket_b.socket_graphics,
-                 end_socket_b.socket_graphics)
+        # start_socket_b = node_example.output_sockets[0]
+        # end_socket_b = node_debug.input_sockets[1]
+        # NodeEdge(self.scene, start_socket_b, end_socket_b)
         return
 
 
@@ -132,7 +132,7 @@ class MainWindow(QMainWindow):
         self._set_status_bar()
 
         # save_file(self._scene, 'scripts/save_file.json')
-        self._load_file()
+        # self._load_file()
 
     def _load_file(self):
         file = 'scripts/save_file.json'

@@ -34,10 +34,8 @@ def _extract_output_edges(node):
     index = 0
 
     for output_socket in node.base.output_sockets:
-        socket = output_socket.socket_graphics
-
-        if socket.has_edge():
-            for edge in socket.edges:
+        if output_socket.has_edge():
+            for edge in output_socket.edges:
                 output_edges[f'edge.{index}'] = {
                     'start_socket_index': edge.start_socket.index,
                     'end_socket': {
@@ -214,12 +212,10 @@ class NodeGraphics(QGraphicsItem):
         NodesRegister.unregister_node(self)
 
         for socket in self.base.input_sockets:
-            socket = socket.socket_graphics
             if socket.has_edge():
                 socket.remove_edge()
 
         for socket in self.base.output_sockets:
-            socket = socket.socket_graphics
             if socket.has_edge():
                 edges = socket.get_edges()
                 for edge in edges:
@@ -360,7 +356,6 @@ class NodeGraphics(QGraphicsItem):
         def get_sockets(sockets_list, is_input=False):
             sockets = {}
             for index, socket in enumerate(sockets_list):
-                socket = socket.socket_graphics
                 sockets[index] = {str(socket): {'edges': socket.get_edges()}}
             return sockets
 
@@ -438,7 +433,7 @@ class Node(NodeInterface):
             y = self.node_graphics._title_height + widget.pos().y() + offset
 
             socket = Socket(self.node_graphics, index, is_input)
-            socket.socket_graphics.setPos(0 if is_input else width, y)
+            socket.setPos(0 if is_input else width, y)
 
             yield socket
 

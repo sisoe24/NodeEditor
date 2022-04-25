@@ -143,8 +143,11 @@ class SocketOutput(SocketGraphics):
 
 
 class Socket:
-    def __init__(self, node, index, is_input):
-        if is_input:
-            self.socket_graphics = SocketInput(node, index)
-        else:
-            self.socket_graphics = SocketOutput(node, index)
+    def __new__(self, node, index, is_input):
+        return SocketInput(node, index) if is_input else SocketOutput(node, index)
+
+    # def __init__(self, node, index, is_input):
+    #     if is_input:
+    #         self.socket_graphics = SocketInput(node, index)
+    #     else:
+    #         self.socket_graphics = SocketOutput(node, index)

@@ -117,6 +117,7 @@ class LeftClickPress(LeftClick):
     def _update_node_zValue(self):
         self.item.setZValue(1)
         if hasattr(LeftClick.selection_node_previous, 'setZValue'):
+            # BUG: RuntimeError: Internal C++ object (NodeGraphics) already deleted
             LeftClick.selection_node_previous.setZValue(0)
         LeftClick.selection_node_previous = self.item
 

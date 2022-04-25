@@ -157,11 +157,11 @@ class EditorEditActions(QWidget):
         # Review: Refactor
         self.scene.clearSelection()
 
-        node_edges = {}
+        connected_nodes = {}
 
         for node in self.copy_stack:
-            node_info = node.info()
 
+            node_info = node.info()
             x = node_info['position']['x']
             y = node_info['position']['y']
 
@@ -169,34 +169,39 @@ class EditorEditActions(QWidget):
             command = AddNodeCommand(self.scene, (x, y), node, 'Add Node')
             self.undo_stack.push(command)
 
-            node_edges[command.node] = node_info
+            output_edges = node_info['output_edges']
 
-        if len(node_edges) <= 1:
+            for connection in output_edges.values():
+                end_node = connection['end_socket']['node']
+
+                if end_node in [node._id for node in self.copy_stack]:
+                    connected_nodes[command.node] = output_edges
+
+        if not connected_nodes:
             return
 
-        for node, data in node_edges.items():
-            output_sockets = data['output_sockets']
-            for edges in output_sockets.values():
-                for node_edge in edges.values():
-                    edges = node_edge['edges']
+        # Review: try to merge this from graph state
 
-                    if not edges:
-                        continue
+        # update the node id receiver
+        for node, edges in connected_nodes.items():
+            for edge in edges.values():
+                node_id = edge['end_socket']['node']
+                node_class, _ = node_id.split('.')
+                edge['end_socket']['node'] = NodesRegister.get_node_last_id(
+                    node_class)
 
-                    for edge in edges:
-                        start_socket = node.output_sockets[edge.start_socket.index]
+        # connect the edges
+        for node, edges in connected_nodes.items():
+            for edge in edges.values():
+                start_socket = node.output_sockets[edge['start_socket_index']]
 
-                        # HACK: UGLY! FIX ASAP
-                        # increment the id by one because the node got copied
-                        _node, _id = edge.end_socket.node._id.split('.')
-                        _node = f'{_node}.{str(int(_id) + 1).zfill(3)}'
+                end_connection = edge['end_socket']
+                end_node_id = end_connection['node']
+                end_node = NodesRegister.get_node_from_id(end_node_id)
+                end_socket = end_node.base.input_sockets[end_connection['index']]
 
-                        end_node = NodesRegister.get_node_from_id(_node)
-                        end_socket = end_node.base.input_sockets[edge.end_socket.index]
-
-                        NodeEdge(self.scene,
-                                 start_socket.socket_graphics,
-                                 end_socket.socket_graphics)
+                NodeEdge(self.scene, start_socket.socket_graphics,
+                         end_socket.socket_graphics)
 
     def _delete_nodes(self):
         nodes = self.view.selected_nodes()

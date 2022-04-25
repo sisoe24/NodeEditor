@@ -41,7 +41,8 @@ def load_scene(scene, data):
             start_socket = obj.output_sockets[edge['start_socket_index']]
             end_socket = _extract_end_socket(node_edges, edge)
 
-            NodeEdge(start_socket.socket_graphics, end_socket.socket_graphics)
+            NodeEdge(scene, start_socket.socket_graphics,
+                     end_socket.socket_graphics)
 
 
 def load_file(scene, file):

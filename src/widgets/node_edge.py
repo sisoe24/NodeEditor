@@ -27,17 +27,6 @@ class NodeEdgeGraphics(QGraphicsPathItem):
         self._set_colors()
         self._set_flags()
 
-    def delete_edge(self):
-        """Delete the graphic edge.
-
-        Remove the edge graphics from the scene and delete its reference from
-        its connected sockets.
-        """
-        self.edge.start_socket.clear_reference(self.edge)
-        self.edge.end_socket.clear_reference()
-        self.scene().removeItem(self)
-        # del self.edge
-
     def _set_colors(self):
         self._pen_selected = QPen(QColor('#DD8600'))
         self._pen_selected.setWidthF(2.0)
@@ -111,6 +100,10 @@ class _EdgeInterface(abc.ABC):
     def end_point_loc(self):
         """End point scene location."""
 
+    @abc.abstractmethod
+    def delete_edge(self):
+        """End point scene location."""
+
 
 class NodeEdge(_EdgeInterface):
     def __init__(self, scene, start_socket: SocketInput, end_socket: SocketOutput):
@@ -120,8 +113,11 @@ class NodeEdge(_EdgeInterface):
         self._start_socket = start_socket
         self._end_socket = end_socket
 
+        self.scene = scene
+
         self.edge_graphics = NodeEdgeGraphics(self)
-        scene.addItem(self.edge_graphics)
+        self.scene.addItem(self.edge_graphics)
+
         self._add_reference()
 
     @property
@@ -135,6 +131,16 @@ class NodeEdge(_EdgeInterface):
     @property
     def end_point_loc(self):
         return self.end_socket.get_position()
+
+    def delete_edge(self):
+        """Delete the graphic edge.
+
+        Remove the edge graphics from the scene and delete its reference from
+        its connected sockets.
+        """
+        self.start_socket.clear_reference(self)
+        self.end_socket.clear_reference()
+        self.scene.removeItem(self.edge_graphics)
 
     def _add_reference(self):
         """Add the edge reference to socket list."""
@@ -154,8 +160,11 @@ class NodeEdgeTmp(_EdgeInterface):
         view.mouse_position.connect(self._set_end_point_loc)
 
         self._start_socket = start_socket
+
+        self.scene = scene
+
         self.edge_graphics = NodeEdgeGraphics(self)
-        scene.addItem(self.edge_graphics)
+        self.scene.addItem(self.edge_graphics)
 
     @property
     def start_socket(self):
@@ -167,6 +176,10 @@ class NodeEdgeTmp(_EdgeInterface):
 
     def _set_end_point_loc(self, x, y):
         self._mouse_position = QPointF(x, y)
+
+    def delete_edge(self):
+        """Delete the graphic edge."""
+        self.scene.removeItem(self.edge_graphics)
 
     def __str__(self) -> str:
         return class_id('NodeEdgeTmp', self)

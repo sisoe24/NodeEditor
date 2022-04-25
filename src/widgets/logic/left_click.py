@@ -179,7 +179,7 @@ class LeftClickRelease(LeftClick):
 
     def _delete_tmp_edge(self, msg=None):
         LOGGER.debug('Delete temporary edge. ' + (msg or ''))
-        self.view._scene.removeItem(LeftClick.edge_tmp.edge_graphics)
+        LeftClick.edge_tmp.delete_edge()
         LeftClick.edge_tmp = None
 
     def _socket_is_invalid(self):

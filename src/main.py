@@ -94,8 +94,7 @@ class DebugWidget(QWidget):
         # create debug edge
         start_socket_a = node_test.output_sockets[0]
         end_socket_a = node_example.input_sockets[0]
-        
-        print("➡ start_socket_a :", start_socket_a)
+
         NodeEdge(self.scene, start_socket_a, end_socket_a)
 
         # start_socket_b = node_example.output_sockets[0]

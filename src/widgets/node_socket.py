@@ -100,7 +100,7 @@ class SocketInput(SocketGraphics):
         self._edge = None
 
     def remove_edge(self):
-        self.edge.edge_graphics.delete_edge()
+        self.edge.delete_edge()
 
     def __str__(self) -> str:
         return class_id('SocketInput', self)
@@ -133,7 +133,7 @@ class SocketOutput(SocketGraphics):
 
     def remove_edge(self, edge):
         edge = self.edges.index(edge)
-        self.edges[edge].edge_graphics.delete_edge()
+        self.edges[edge].delete_edge()
 
     def clear_reference(self, edge):
         self._edges.remove(edge)

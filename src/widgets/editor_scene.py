@@ -35,7 +35,7 @@ class GraphicScene(QGraphicsScene):
         rect = self.addRect(0, 0, 100, 100, border, fill)
         rect.setFlag(QGraphicsItem.ItemIsMovable)
 
-    def _set_view_center(self, x, y):
+    def set_view_center(self, x, y):
         # FIXME: dont like the list index
         self.views()[0].centerOn(x, y)
 

@@ -2,50 +2,48 @@ import json
 from pprint import pprint
 
 from PySide2.QtCore import QRectF, QRect, Qt
+from PySide2.QtWidgets import (
+    QGraphicsScene
+)
 
 from src.widgets.node_edge import NodeEdge
-from src.widgets.node_graphics import NodeGraphics, create_node
+from src.widgets.node_graphics import NodeGraphics, NodesRegister, create_node
 
 
-def _create_nodes(scene, file_data):
+def create_nodes_from_save_file(scene, file_data) -> dict:
 
-    node_edges = {}
-    for node_type, node_attrs in file_data['nodes'].items():
+    connections = {}
+    for node_attrs in file_data['nodes'].values():
 
         node = create_node(scene, node_attrs['class'])
         node.set_position(node_attrs['position']['x'],
                           node_attrs['position']['y'])
-        node_edges[node_type] = {'obj': node,
-                                 'edges': node_attrs.get('output_edges', {})}
+        connections[node] = node_attrs.get('output_edges', {})
 
-    return node_edges
-
-
-def _extract_end_socket(node_edges, edge):
-    end_connection = edge['end_socket']
-    end_socket_obj = node_edges[end_connection['node']]['obj']
-    return end_socket_obj.input_sockets[end_connection['index']]
+    return connections
 
 
-def load_scene(scene, data):
-    # center the view
-    scene._set_view_center(data['viewport']['x'], data['viewport']['y'])
+def connect_output_edges(scene: 'QGraphicsScene', connections: dict) -> None:
+    for node, edges in connections.items():
+        for edge in edges.values():
+            start_socket = node.output_sockets[edge['start_socket_index']]
 
-    scene.clear()
-    node_edges = _create_nodes(scene, data)
-
-    for connections in node_edges.values():
-        obj = connections['obj']
-
-        for edge in connections['edges'].values():
-            start_socket = obj.output_sockets[edge['start_socket_index']]
-            end_socket = _extract_end_socket(node_edges, edge)
+            end_connection = edge['end_socket']
+            end_node_id = end_connection['node']
+            end_node = NodesRegister.get_node_from_id(end_node_id)
+            end_socket = end_node.base.input_sockets[end_connection['index']]
 
             NodeEdge(scene, start_socket.socket_graphics,
                      end_socket.socket_graphics)
 
 
-def load_file(scene, file):
+def load_scene(scene: 'QGraphicsScene', data: dict) -> None:
+    scene.clear()
+    scene.set_view_center(data['viewport']['x'], data['viewport']['y'])
+    connect_output_edges(scene, create_nodes_from_save_file(scene, data))
+
+
+def load_file(scene: 'QGraphicsScene', file: str) -> None:
     with open(file, 'r', encoding='utf-8') as f:
         load_scene(scene, json.load(f))
 

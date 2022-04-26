@@ -199,7 +199,7 @@ class EditorEditActions(EditorActions):
     def delete_nodes(self):
         nodes = self.view.selected_nodes()
         if nodes:
-            command = DeleteNodeCommand(nodes, self.scene, 'Delete node')
+            command = DeleteNodeCommand(self.scene, nodes, 'Delete node')
             self.undo_stack.push(command)
 
 

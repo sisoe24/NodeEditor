@@ -25,7 +25,9 @@ def create_nodes_from_save_file(scene, file_data) -> dict:
         node = create_node(scene, node_attrs['class'])
         node.set_position(node_attrs['position']['x'],
                           node_attrs['position']['y'])
-        connections[node] = node_attrs.get('output_edges', {})
+
+        node_id = node.node_graphics.node_id
+        connections[node_id] = node_attrs.get('output_edges', {})
 
     return connections
 

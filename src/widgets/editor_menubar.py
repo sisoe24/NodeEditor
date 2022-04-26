@@ -189,7 +189,8 @@ class EditorEditActions(EditorActions):
                 end_node = connection['end_socket']['node']
 
                 if end_node in copy_stack_ids:
-                    connections[command.node] = output_edges
+                    node_id = command.node.node_graphics.node_id
+                    connections[node_id] = output_edges
 
         if not connections:
             return

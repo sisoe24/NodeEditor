@@ -1,5 +1,4 @@
 import contextlib
-from pprint import pformat
 
 from PySide2.QtGui import QPainterPath
 from PySide2.QtWidgets import QUndoCommand, QGraphicsScene
@@ -141,8 +140,9 @@ class DeleteNodeCommand(QUndoCommand):
             node.node_graphics.setPos(node_data['position']['x'],
                                       node_data['position']['y'])
 
-            self.input_edges[node] = node_data.get('input_edges', {})
-            self.output_edges[node] = node_data.get('output_edges', {})
+            node_id = node.node_graphics.node_id
+            self.input_edges[node_id] = node_data.get('input_edges', {})
+            self.output_edges[node_id] = node_data.get('output_edges', {})
 
     def undo(self):
         def connected_edges(node_list):
@@ -160,9 +160,9 @@ class DeleteNodeCommand(QUndoCommand):
         """Append the node data into a class attribute and delete them."""
         for node in self.selected_nodes:
 
+            node = graph_node(node)
             self.nodes_data[node.node_id] = node.data()
 
-            node = graph_node(node)
             node.delete_node()
 
 

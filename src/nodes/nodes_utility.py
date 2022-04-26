@@ -18,7 +18,7 @@ def create_node(scene: QGraphicsScene, node_class: str) -> 'Node':
 def connect_output_edges(scene: 'QGraphicsScene', connections: dict) -> None:
     for node, edges in connections.items():
         for edge in edges.values():
-            start_socket = node.output_sockets[edge['start_socket_index']]
+            start_socket = node.output_sockets[edge['start_socket']['index']]
 
             end_connection = edge['end_socket']
             end_node_id = end_connection['node']
@@ -28,38 +28,52 @@ def connect_output_edges(scene: 'QGraphicsScene', connections: dict) -> None:
             NodeEdge(scene, start_socket, end_socket)
 
 
-def extract_output_edges(node):
-    output_edges = {}
+def _create_edge_connection_data(edges: dict, index: int, edge: NodeEdge):
+    edges[f'edge.{index}'] = {
+        'end_socket': {
+            'node': edge.end_socket.node.node_id,
+            'index': edge.end_socket.index
+        },
+        'start_socket': {
+            'node': edge.start_socket.node.node_id,
+            'index': edge.end_socket.index
+        }}
+
+
+def extract_output_edges(node) -> dict:
+    """Extract the output edges from a node.
+
+    Args:
+        node (Node): The node object.
+
+    Returns:
+        (dict): A dictionary with all of the output edges data.
+    """
+    edges = {}
     index = 0
-
     for socket in node.base.output_sockets:
-
         if socket.has_edge():
             for edge in socket.edges:
-                output_edges[f'edge.{index}'] = {
-                    'start_socket_index': edge.start_socket.index,
-                    'end_socket': {
-                        'node': edge.end_socket.node.node_id,
-                        'index': edge.end_socket.index
-                    }}
-
+                _create_edge_connection_data(edges, index, edge)
                 index += 1
-    return output_edges
+    return edges
 
 
-def extract_input_edges(node):
-    input_edges = {}
+def extract_input_edges(node) -> dict:
+    """Extract the input edges from a node.
+
+    Args:
+        node (Node): The node object.
+
+    Returns:
+        (dict): A dictionary with all of the input edges data.
+    """
+    edges = {}
     index = 0
-
     for socket in node.base.input_sockets:
         if socket.has_edge():
             edge = socket.get_edges()
-            input_edges[f'edge.{index}'] = {
-                'end_socket_index': edge.end_socket.index,
-                'start_socket': {
-                    'node': edge.start_socket.node.node_id,
-                    'index': edge.start_socket.index
-                }}
+            _create_edge_connection_data(edges, index, edge)
             index += 1
 
-    return input_edges
+    return edges

@@ -16,7 +16,7 @@ from PySide2.QtWidgets import (
     QWidget
 )
 
-from src.nodes import NodesRegister, extract_output_edges
+from src.nodes import NodesRegister, extract_output_edges, extract_input_edges
 from src.widgets.node_socket import Socket
 from src.utils import class_id
 
@@ -206,7 +206,7 @@ class NodeGraphics(QGraphicsItem):
             # 'input_sockets': get_sockets(self.base.input_sockets, True),
             # 'output_sockets': get_sockets(self.base.output_sockets),
             'output_edges': extract_output_edges(self),
-            'input_edges': {}
+            'input_edges': extract_input_edges(self)
         }
 
     def repr(self):

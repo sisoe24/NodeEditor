@@ -32,8 +32,7 @@ def extract_output_edges(node):
     output_edges = {}
     index = 0
 
-    for output_socket in node.base.output_sockets:
-        socket = output_socket
+    for socket in node.base.output_sockets:
 
         if socket.has_edge():
             for edge in socket.edges:
@@ -46,3 +45,21 @@ def extract_output_edges(node):
 
                 index += 1
     return output_edges
+
+
+def extract_input_edges(node):
+    input_edges = {}
+    index = 0
+
+    for socket in node.base.input_sockets:
+        if socket.has_edge():
+            edge = socket.get_edges()
+            input_edges[f'edge.{index}'] = {
+                'end_socket_index': edge.end_socket.index,
+                'start_socket': {
+                    'node': edge.start_socket.node.node_id,
+                    'index': edge.start_socket.index
+                }}
+            index += 1
+
+    return input_edges

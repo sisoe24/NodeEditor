@@ -1,14 +1,16 @@
-import contextlib
 import logging
+import contextlib
 
 
-from PySide2.QtGui import QPainterPath
-from PySide2.QtWidgets import (
-    QGraphicsView,
+from src.widgets.logic.undo_redo import (
+    BoxSelectCommand,
+    ConnectEdgeCommand,
+    DisconnectEdgeCommand,
+    MoveNodeCommand,
+    SelectCommand
 )
-from src.widgets.logic.undo_redo import BoxSelectCommand, ConnectEdgeCommand, DisconnectEdgeCommand, MoveNodeCommand, SelectCommand
-from src.widgets.node_edge import NodeEdgeTmp
 
+from src.widgets.node_edge import NodeEdgeTmp
 from src.widgets.node_graphics import NodeGraphics
 from src.widgets.node_socket import SocketGraphics, SocketInput, SocketOutput
 
@@ -178,7 +180,7 @@ class LeftClickRelease(LeftClick):
             self._create_box_select_command()
 
     def _delete_tmp_edge(self, msg=None):
-        LOGGER.debug('Delete temporary edge. ' + (msg or ''))
+        LOGGER.debug('Delete temporary edge. %s', (msg or ''))
         LeftClick.edge_tmp.delete_edge()
         LeftClick.edge_tmp = None
 
@@ -242,3 +244,5 @@ class LeftClickRelease(LeftClick):
             elif LeftClick.edge_tmp:
                 self._readjust_edge()
                 self._delete_tmp_edge('Edge release was not on a socket')
+
+            LeftClick.mode_drag_edge = False

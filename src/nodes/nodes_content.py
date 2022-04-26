@@ -66,3 +66,7 @@ class NodeContent(QWidget):
         widget.setAlignment(Qt.AlignRight)
         self._layout.addWidget(widget)
         self.outputs.append(widget)
+
+    @property
+    def layout_size(self):
+        return self._layout.sizeHint()

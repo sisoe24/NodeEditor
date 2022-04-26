@@ -2,6 +2,7 @@ import logging
 
 from PySide2.QtCore import Qt
 from PySide2.QtWidgets import (
+    QPlainTextEdit,
     QCheckBox,
     QComboBox,
     QLabel,
@@ -14,7 +15,7 @@ from src.widgets.node_graphics import Node
 LOGGER = logging.getLogger('nodeeditor.nodes_example')
 
 
-class _NodeExampleContent(NodeContent):
+class NodeExampleContent(NodeContent):
     """The node content widgets container class."""
 
     def __init__(self, parent=None):
@@ -24,11 +25,10 @@ class _NodeExampleContent(NodeContent):
         self.combo_box.addItems(['foo', 'bar'])
 
         self.add_output('Output 1')
-        self.add_output('Output 2')
-        self.add_output('Output 3')
-        self.add_widget(QLabel('----'))
+        self.add_widget(QCheckBox('Make Uppercase'))
+        self.add_widget(QCheckBox('Make Lowercase'))
+        self.add_widget(QCheckBox('Make Titlecase'))
         self.add_input(QLabel('Input 1'))
-        self.add_input(QLabel('Input 2'))
 
 
 @NodesRegister.register_class
@@ -37,24 +37,17 @@ class NodeExample(Node):
     title = "Example Node"
 
     def __init__(self, scene):
-        self.node_content = _NodeExampleContent()
-        super().__init__(scene_graphics=scene, node=self, content=self.node_content)
-
-    @property
-    def layout_size(self):
-        return self.node_content._layout.sizeHint()
+        super().__init__(scene=scene, node=self, content=NodeExampleContent())
 
 
-class _NodeDebugContent(NodeContent):
+class NodeDebugContent(NodeContent):
     """The node content widgets container class."""
 
     def __init__(self, parent=None):
         super().__init__(parent)
 
-        self.add_output('Debug Output')
+        self.add_widget(QPlainTextEdit())
         self.add_input(QLabel('Debug Input 1'))
-        self.add_input(QLabel('Debug Input 2'))
-        self.add_input(QLabel('Debug Input 3'))
 
 
 @NodesRegister.register_class
@@ -63,15 +56,10 @@ class NodeDebug(Node):
     title = "Debug Node"
 
     def __init__(self, scene):
-        self.node_content = _NodeDebugContent()
-        super().__init__(scene_graphics=scene, node=self, content=self.node_content)
-
-    @property
-    def layout_size(self):
-        return self.node_content._layout.sizeHint()
+        super().__init__(scene=scene, node=self, content=NodeDebugContent())
 
 
-class _NodeTestContent(NodeContent):
+class NodeTestContent(NodeContent):
     """The node content widgets container class."""
 
     def __init__(self, parent=None):
@@ -89,9 +77,23 @@ class NodeTest(Node):
     title = "Test Node"
 
     def __init__(self, scene):
-        self.node_content = _NodeTestContent()
-        super().__init__(scene_graphics=scene, node=self, content=self.node_content)
+        super().__init__(scene=scene, node=self, content=NodeTestContent())
 
-    @property
-    def layout_size(self):
-        return self.node_content._layout.sizeHint()
+
+class NodeInputContent(NodeContent):
+    """The node content widgets container class."""
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+        self.add_output('Output 1')
+        self.add_input(QPlainTextEdit('foo bar'))
+
+
+@NodesRegister.register_class
+class NodeInput(Node):
+    title_background = Qt.blue
+    title = 'Input Node'
+
+    def __init__(self, scene):
+        super().__init__(scene=scene, node=self, content=NodeInputContent())

@@ -84,8 +84,11 @@ class DebugWidget(QWidget):
 
     def _debug_add_nodes(self):
 
-        node_test = create_node(self.scene, 'NodeTest')
-        node_test.set_position(-150, 150)
+        node_input = create_node(self.scene, 'NodeInput')
+        node_input.set_position(-350, 220)
+
+        # node_test = create_node(self.scene, 'NodeTest')
+        # node_test.set_position(-150, 150)
 
         node_debug = create_node(self.scene, 'NodeDebug')
         node_debug.set_position(250, -40)
@@ -94,10 +97,10 @@ class DebugWidget(QWidget):
         node_example.set_position(50, 0)
 
         # create debug edge
-        start_socket_a = node_test.output_sockets[0]
-        end_socket_a = node_example.input_sockets[0]
+        # start_socket_a = node_test.output_sockets[0]
+        # end_socket_a = node_example.input_sockets[0]
 
-        NodeEdge(self.scene, start_socket_a, end_socket_a)
+        # NodeEdge(self.scene, start_socket_a, end_socket_a)
 
         # start_socket_b = node_example.output_sockets[0]
         # end_socket_b = node_debug.input_sockets[1]
@@ -133,7 +136,7 @@ class MainWindow(QMainWindow):
         self._set_status_bar()
 
         # save_file(self._scene, 'scripts/save_file.json')
-        # self._load_file()
+        self._load_file()
 
     def _load_file(self):
         file = 'scripts/save_file.json'

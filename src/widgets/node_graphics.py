@@ -32,11 +32,10 @@ class NodeGraphics(QGraphicsItem):
 
         self.base = base
         self.content = content
-
         self.node_class = str(self.base)
         self.node_id = NodesRegister.register_node(self)
 
-        self._height = max(self.base.layout_size.height(), 50)
+        self._height = max(self.content.layout_size.height(), 50)
 
         self._set_flags()
         self._set_colors()
@@ -225,32 +224,32 @@ class NodeGraphics(QGraphicsItem):
 
 class NodeInterface(abc.ABC):
 
-    @abc.abstractproperty
+    @property
+    @abc.abstractmethod
     def title(self):
         pass
 
-    @abc.abstractproperty
+    @property
+    @abc.abstractmethod
     def title_background(self):
-        pass
-
-    @abc.abstractproperty
-    def layout_size(self):
         pass
 
 
 class Node(NodeInterface):
 
-    def __init__(self, scene_graphics, node, content):
+    def __init__(self, scene, node, content):
         LOGGER.info('Init Node')
 
+        self.content = content
+
         self.node_graphics = NodeGraphics(node, content)
-        scene_graphics.addItem(self.node_graphics)
+        scene.addItem(self.node_graphics)
 
         self.input_sockets = []
         self.output_sockets = []
 
-        self._add_inputs(node)
-        self._add_outputs(node)
+        self._add_inputs()
+        self._add_outputs()
 
     def _add_sockets(self, widgets, is_input=True):
         """Add sockets to node.
@@ -275,12 +274,12 @@ class Node(NodeInterface):
 
             yield socket
 
-    def _add_inputs(self, node):
-        for socket in self._add_sockets(node.node_content.inputs):
+    def _add_inputs(self):
+        for socket in self._add_sockets(self.content.inputs):
             self.input_sockets.append(socket)
 
-    def _add_outputs(self, node):
-        for socket in self._add_sockets(node.node_content.outputs, False):
+    def _add_outputs(self):
+        for socket in self._add_sockets(self.content.outputs, False):
             self.output_sockets.append(socket)
 
     def set_position(self, x: int, y: int):

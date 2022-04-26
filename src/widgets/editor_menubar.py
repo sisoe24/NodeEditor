@@ -126,9 +126,9 @@ class EditorEditActions(EditorActions):
 
         self.nodes_copy_stack = []
 
-        self.cut_act = QAction('Cut', self)
-        self.cut_act.setShortcut(QKeySequence.Cut)
-        self.cut_act.triggered.connect(self.cut_nodes)
+        self.duplicate_act = QAction('Duplicate', self)
+        self.duplicate_act.setShortcut(QKeySequence('shift+D'))
+        self.duplicate_act.triggered.connect(self.duplicate_nodes)
 
         self.copy_act = QAction('Copy', self)
         self.copy_act.setShortcut(QKeySequence.Copy)
@@ -142,12 +142,12 @@ class EditorEditActions(EditorActions):
         self.delete_act.setShortcut(QKeySequence.Delete)
         self.delete_act.triggered.connect(self.delete_nodes)
 
-    def cut_nodes(self):
-        # BUG: does not work when pasting nodes
+    def duplicate_nodes(self):
         self.nodes_copy_stack.clear()
         for node in self.view.selected_nodes():
             self.nodes_copy_stack.append(node)
-            node.delete_node()
+
+        self.paste_nodes()
 
     def copy_nodes(self):
         self.nodes_copy_stack.clear()
@@ -159,13 +159,14 @@ class EditorEditActions(EditorActions):
         # to connect the edge to the newly copied version.
         for edges in connections.values():
             for edge in edges.values():
+
                 node_id = edge['end_socket']['node']
                 node_class, _ = node_id.split('.')
-                edge['end_socket']['node'] = NodesRegister.get_last_node_id(
-                    node_class)
+                node = NodesRegister.get_last_node_id(node_class)
+
+                edge['end_socket']['node'] = node
 
     def paste_nodes(self):
-        # Review: Refactor
         self.scene.clearSelection()
 
         connections = {}
@@ -254,7 +255,7 @@ class NodeMenubar(QMenuBar):
         self.edit_menu.addAction(self._edit_actions.undo_act)
         self.edit_menu.addAction(self._edit_actions.redo_act)
         self.edit_menu.addSeparator()
-        self.edit_menu.addAction(self._edit_actions.cut_act)
+        self.edit_menu.addAction(self._edit_actions.duplicate_act)
         self.edit_menu.addAction(self._edit_actions.copy_act)
         self.edit_menu.addAction(self._edit_actions.paste_act)
         self.edit_menu.addAction(self._edit_actions.delete_act)

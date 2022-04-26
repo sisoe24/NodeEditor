@@ -8,8 +8,10 @@ from PySide2.QtWidgets import (
 )
 
 
-from ...widgets.node_graphics import Node, NodeContent, NodesRegister
-LOGGER = logging.getLogger('nodeeditor.node_input')
+from src.nodes import NodeContent, NodesRegister
+from src.widgets.node_graphics import Node
+
+LOGGER = logging.getLogger('nodeeditor.nodes_example')
 
 
 class _NodeExampleContent(NodeContent):

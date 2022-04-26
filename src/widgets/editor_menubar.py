@@ -14,7 +14,7 @@ from PySide2.QtWidgets import (
     QMenuBar,
 )
 
-from src.widgets.node_graphics import NodesRegister
+from src.nodes import NodesRegister
 from src.widgets.logic.undo_redo import AddNodeCommand, DeleteNodeCommand
 from src.utils.graph_state import connect_output_edges, load_file, save_file
 

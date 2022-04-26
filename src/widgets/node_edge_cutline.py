@@ -1,11 +1,10 @@
 
-from PySide2.QtCore import Qt, QRectF, QPointF
+from PySide2.QtCore import Qt, QRectF
 
 from PySide2.QtGui import (
     QPainter,
     QPolygonF,
     QPen,
-    QPainterPath
 
 )
 from PySide2.QtWidgets import (

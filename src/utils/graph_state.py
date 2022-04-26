@@ -1,13 +1,20 @@
 import json
 from pprint import pprint
 
-from PySide2.QtCore import QRectF, QRect, Qt
+from PySide2.QtCore import QRectF, QRect
 from PySide2.QtWidgets import (
     QGraphicsScene
 )
 
+from src.nodes import (
+    connect_output_edges,
+    extract_output_edges,
+    create_node,
+    NodesRegister,
+)
+
 from src.widgets.node_edge import NodeEdge
-from src.widgets.node_graphics import NodeGraphics, NodesRegister, create_node
+from src.widgets.node_graphics import NodeGraphics
 
 
 def create_nodes_from_save_file(scene, file_data) -> dict:
@@ -23,19 +30,6 @@ def create_nodes_from_save_file(scene, file_data) -> dict:
     return connections
 
 
-def connect_output_edges(scene: 'QGraphicsScene', connections: dict) -> None:
-    for node, edges in connections.items():
-        for edge in edges.values():
-            start_socket = node.output_sockets[edge['start_socket_index']]
-
-            end_connection = edge['end_socket']
-            end_node_id = end_connection['node']
-            end_node = NodesRegister.get_node_from_id(end_node_id)
-            end_socket = end_node.base.input_sockets[end_connection['index']]
-
-            NodeEdge(scene, start_socket, end_socket)
-
-
 def load_scene(scene: 'QGraphicsScene', data: dict) -> None:
     scene.clear()
     scene.set_view_center(data['viewport']['x'], data['viewport']['y'])
@@ -46,26 +40,6 @@ def load_file(scene: 'QGraphicsScene', file: str) -> None:
     NodesRegister.clean_register()
     with open(file, 'r', encoding='utf-8') as f:
         load_scene(scene, json.load(f))
-
-
-def _extract_output_edges(node: NodeGraphics):
-    output_edges = {}
-    index = 0
-
-    for output_socket in node.base.output_sockets:
-        socket = output_socket
-
-        if socket.has_edge():
-            for edge in socket.edges:
-                output_edges[f'edge.{index}'] = {
-                    'start_socket_index': edge.start_socket.index,
-                    'end_socket': {
-                        'node': edge.end_socket.node.node_id,
-                        'index': edge.end_socket.index
-                    }}
-
-                index += 1
-    return output_edges
 
 
 def _visible_viewport(scene):
@@ -92,7 +66,7 @@ def scene_state(scene) -> dict:
         state['nodes'][node_data.get('id')] = {
             'class': node_data.get('class'),
             'position': node_data.get('position'),
-            'output_edges': _extract_output_edges(node)
+            'output_edges': extract_output_edges(node)
         }
 
     return state

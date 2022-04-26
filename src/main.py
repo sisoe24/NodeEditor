@@ -20,14 +20,16 @@ from PySide2.QtWidgets import (
     QMainWindow,
     QVBoxLayout,
 )
+
+
+from src.nodes import NodesRegister, create_node
+
 from src.utils.graph_state import load_file, save_file
+
 from src.widgets.editor_menubar import NodeMenubar
-
-
 from src.widgets.editor_scene import Scene
 from src.widgets.node_edge import NodeEdge
 from src.widgets.editor_view import GraphicsView
-from src.widgets.node_graphics import NodesRegister, create_node
 
 LOGGER = logging.getLogger('nodeeditor.main')
 

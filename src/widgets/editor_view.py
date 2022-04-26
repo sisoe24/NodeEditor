@@ -2,7 +2,7 @@ import logging
 from collections import namedtuple
 
 from PySide2.QtCore import Signal, Qt
-from PySide2.QtGui import QPainter, QMouseEvent, QPainterPath
+from PySide2.QtGui import QPainter, QMouseEvent
 from PySide2.QtWidgets import (
     QApplication,
     QGraphicsView,
@@ -11,12 +11,11 @@ from src.widgets.logic.left_click import LeftClick, LeftClickPress, LeftClickRel
 from src.widgets.node_edge_cutline import NodeEdgeCutline
 
 from src.widgets.node_graphics import NodeGraphics
-from src.widgets.node_edge import NodeEdge, NodeEdgeGraphics, NodeEdgeTmp
-from src.widgets.node_socket import SocketGraphics, SocketInput, SocketOutput
+from src.widgets.node_edge import NodeEdgeGraphics
+from src.widgets.node_socket import SocketGraphics
 
 from src.widgets.logic.undo_redo import (
     DeleteEdgeCommand,
-    DeleteNodeCommand,
 )
 
 LOGGER = logging.getLogger('nodeeditor.view')

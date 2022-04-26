@@ -2,7 +2,7 @@
 import json
 import pprint
 from PySide2.QtCore import Qt
-from PySide2.QtGui import QColor, QPen, QPainterPath, QBrush
+from PySide2.QtGui import QPen, QPainterPath, QBrush
 from PySide2.QtWidgets import (
     QGraphicsItem
 )

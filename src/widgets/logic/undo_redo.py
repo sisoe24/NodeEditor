@@ -6,7 +6,7 @@ from PySide2.QtWidgets import QUndoCommand, QGraphicsScene
 
 from src.utils.graph_state import connect_output_edges
 from src.widgets.node_edge import NodeEdge, NodeEdgeGraphics
-from src.widgets.node_graphics import NodesRegister, create_node
+from src.nodes import NodesRegister, create_node
 
 
 def graph_node(node):

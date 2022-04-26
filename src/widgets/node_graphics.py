@@ -2,7 +2,6 @@ import abc
 import json
 import pprint
 import logging
-from typing import Union
 
 from PySide2.QtCore import Qt
 from PySide2.QtGui import QFont, QPen, QColor, QPainterPath, QBrush
@@ -17,202 +16,11 @@ from PySide2.QtWidgets import (
     QWidget
 )
 
-# from src.widgets.node_graphics import Node
+from src.nodes import NodesRegister, extract_output_edges
 from src.widgets.node_socket import Socket
 from src.utils import class_id
 
 LOGGER = logging.getLogger('nodeeditor.master_node')
-
-
-def create_node(scene: QGraphicsScene, node_class: str) -> 'Node':
-    """create_node(scene, 'NodeTest') -> Node"""
-    node = NodesRegister.get_node_class_object(node_class)
-    return node(scene)
-
-
-def _extract_output_edges(node):
-    output_edges = {}
-    index = 0
-
-    for output_socket in node.base.output_sockets:
-        if output_socket.has_edge():
-            for edge in output_socket.edges:
-                output_edges[f'edge.{index}'] = {
-                    'start_socket_index': edge.start_socket.index,
-                    'end_socket': {
-                        'node': edge.end_socket.node.node_id,
-                        'index': edge.end_socket.index
-                    }}
-
-                index += 1
-    return output_edges
-
-
-class NodeContent(QWidget):
-
-    def __init__(self, parent=None):
-        super().__init__(parent)
-
-        self.inputs = []
-        self.outputs = []
-
-        self._layout = QVBoxLayout()
-        self._layout.setContentsMargins(10, 10, 10, 10)
-        self._layout.addSpacerItem(QSpacerItem(0, 0))
-        self._layout.setSpacing(15)
-        self.setLayout(self._layout)
-
-    def _is_widget(func):
-        def wrapper(*args):
-            widget = args[1]
-            if isinstance(widget, QWidget):
-                return func(*args)
-            LOGGER.error('Item is not a child of QObject: %s %s',
-                         type(widget), widget)
-        return wrapper
-
-    @_is_widget
-    def add_widget(self, widget):
-        """Add a widget into the node graphics
-
-        A widget is not going to have any input or output sockets connected.
-
-        Args:
-            widget (any): A instance of a QWidget class.
-        """
-        self._layout.addWidget(widget)
-
-    @_is_widget
-    def add_input(self, widget):
-        """Add an input widget with a socket.
-
-        Args:
-            widget (any): A instance of a QWidget class.
-        """
-        self.inputs.append(widget)
-        self._layout.addWidget(widget)
-
-    def add_output(self, text: str):
-        """Add an output widget with a socket.
-
-        Args:
-            text (str): The name of the output label
-        """
-        widget = QLabel(text)
-        widget.setAlignment(Qt.AlignRight)
-        self._layout.addWidget(widget)
-        self.outputs.append(widget)
-
-
-class NodesRegister:
-    nodes = {}
-    nodes_classes = {}
-
-    @classmethod
-    def register_class(cls, node_class):
-        """Register a node class.
-
-        This function is used as a wrapper on a node class declaration.
-        """
-        cls.nodes_classes[node_class.__name__] = node_class
-
-        def wrapper(*args):
-            return node_class(args[0])
-        return wrapper
-
-    @classmethod
-    def clean_register(cls):
-        """Clear the nodes register."""
-        cls.nodes.clear()
-
-    @classmethod
-    def get_node_class_object(cls, node: str):
-        """Get a class reference object.
-
-        `NodeRegister.get_node_class_object('NodeExample')`.
-
-        Returns:
-            obj - The object reference for the node.
-
-        Raises:
-            RunTimeError: If the class is invalid.
-        """
-        node_class = cls.nodes_classes.get(node)
-        if node_class:
-            return node_class
-
-        raise RuntimeError(f'Node class not found: {node}')
-
-    @classmethod
-    def get_node_from_graph(cls, node: 'NodeGraphics'):
-        """Get a node from the graph by the class id.
-
-        `NodeRegister.get_node_from_graph(node_graphics_obj)`
-
-        Returns:
-            (NodeGraphics) - A NodeGraphics object.
-        """
-        return cls.nodes[node.node_class].get(node.node_id)
-
-    @classmethod
-    def get_node_from_id(cls, _id: str) -> Union['NodeGraphics', None]:
-        """Get a node from the graph by its id.
-
-        `NodeRegister.get_node_from_id('NodeExample.001')`
-
-        Returns:
-            (NodeGraphics) - A NodeGraphics object if id was found, `None`
-            otherwise.
-
-        """
-        for node in cls.nodes.values():
-            for node_id in node:
-                if node_id == _id:
-                    return node[node_id]
-        return None
-
-    @classmethod
-    def get_last_node_id(cls, node_class: str) -> str:
-        """Get the last node id of a specific class from the graph.
-
-        `NodeRegister.get_node_from_graph('NodeExample')`
-
-        Returns:
-            (str) - A node id e.g., `NodeExample.002`.
-        """
-        # XXX: maybe should return the object directly?
-        return max(cls.nodes[node_class])
-
-    @classmethod
-    def register_node(cls, node: 'NodeGraphics') -> str:
-        """Add a node to the current scene register.
-
-        Returns:
-            (str) - The id of the registered node.
-        """
-        node_class = node.node_class
-        node_data = cls.nodes.get(node_class)
-
-        node_num = 1
-        if node_data:
-            for index, key in enumerate(sorted(node_data.keys()), 1):
-                num = key.split('.')[-1]
-                if index != int(num):
-                    node_num = index
-                    break
-                node_num += 1
-        else:
-            cls.nodes.update({node_class: {}})
-
-        node_id = f'{node_class}.{str(node_num).zfill(3)}'
-        cls.nodes[node_class].update(({node_id: node}))
-
-        return node_id
-
-    @classmethod
-    def unregister_node(cls, node: 'NodeGraphics') -> None:
-        """Remove a node from the current scene register."""
-        cls.nodes[node.node_class].pop(node.node_id)
 
 
 class NodeGraphics(QGraphicsItem):
@@ -395,9 +203,10 @@ class NodeGraphics(QGraphicsItem):
             'id': self.node_id,
             'zValue': self.zValue(),
             'position': {'x': position.x(), 'y': position.y()},
-            'input_sockets': get_sockets(self.base.input_sockets, True),
-            'output_sockets': get_sockets(self.base.output_sockets),
-            'output_edges': _extract_output_edges(self)
+            # 'input_sockets': get_sockets(self.base.input_sockets, True),
+            # 'output_sockets': get_sockets(self.base.output_sockets),
+            'output_edges': extract_output_edges(self),
+            'input_edges': {}
         }
 
     def repr(self):

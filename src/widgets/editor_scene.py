@@ -1,7 +1,6 @@
 import logging
-from math import floor, ceil
 
-from PySide2.QtCore import QPoint, Qt
+from PySide2.QtCore import Qt
 from PySide2.QtGui import QColor, QBrush, QPen
 from PySide2.QtWidgets import (
     QGraphicsScene,

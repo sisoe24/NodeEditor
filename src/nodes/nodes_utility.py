@@ -28,6 +28,19 @@ def connect_output_edges(scene: 'QGraphicsScene', connections: dict) -> None:
             NodeEdge(scene, start_socket, end_socket)
 
 
+def connect_input_edges(scene: 'QGraphicsScene', connections: dict) -> None:
+    for node, edges in connections.items():
+        for edge in edges.values():
+            end_socket = node.input_sockets[edge['end_socket']['index']]
+
+            start_connection = edge['start_socket']
+            start_node_id = start_connection['node']
+            start_node = NodesRegister.get_node_from_id(start_node_id)
+            start_socket = start_node.base.output_sockets[start_connection['index']]
+
+            NodeEdge(scene, start_socket, end_socket)
+
+
 def _create_edge_connection_data(edges: dict, index: int, edge: NodeEdge):
     edges[f'edge.{index}'] = {
         'end_socket': {

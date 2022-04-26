@@ -1,7 +1,9 @@
 import contextlib
+from pprint import pformat
 
 from PySide2.QtGui import QPainterPath
 from PySide2.QtWidgets import QUndoCommand, QGraphicsScene
+from src.nodes.nodes_utility import connect_input_edges
 
 
 from src.utils.graph_state import connect_output_edges
@@ -121,69 +123,43 @@ class AddNodeCommand(QUndoCommand):
 
 
 class DeleteNodeCommand(QUndoCommand):
-    # TODO: this class has much in common with the load method from graph_state.py
-    # Should try to merge them.
-
-    def __init__(self, nodes, scene, description):
+    def __init__(self, scene, selected_nodes: list, description: str):
         super().__init__(description)
-        self.nodes = nodes
+
         self.scene = scene
-        self.node_info = {}
+        self.selected_nodes = selected_nodes
 
-    def _created_nodes(self):
-        connections = {}
+        self.nodes_data = {}
+        self.input_edges = {}
+        self.output_edges = {}
 
-        for old_node in self.nodes:
-            node_data = self.node_info[old_node.node_id]
+    def _create_nodes(self):
+        for old_node in self.selected_nodes:
+            node_data = self.nodes_data[old_node.node_id]
+
             node = create_node(self.scene, old_node.node_class)
             node.node_graphics.setPos(node_data['position']['x'],
                                       node_data['position']['y'])
-            connections[node] = node_data.get('output_edges', {})
-        return connections
 
-    def _create_input_edges(self, node, node_data):
-        for edges in node_data['input_sockets'].values():
-            for node_edges in edges.values():
-                edge = node_edges['edges']
-
-                if edge:
-                    start_node = graph_node(edge.start_socket.node)
-                    start_socket = start_node.base.output_sockets[edge.start_socket.index]
-
-                    end_socket = node.input_sockets[edge.end_socket.index]
-
-                    NodeEdge(self.scene, start_socket, end_socket)
-
-    def __create_output_edges(self, node, node_data):
-        for edges in node_data['output_sockets'].values():
-            for node_edges in edges.values():
-                edges = node_edges['edges']
-
-                if not edges:
-                    continue
-
-                for edge in edges:
-                    start_socket = node.output_sockets[edge.start_socket.index]
-
-                    end_node = graph_node(edge.end_socket.node)
-                    end_socket = end_node.base.input_sockets[edge.end_socket.index]
-
-                    NodeEdge(self.scene, start_socket, end_socket)
+            self.input_edges[node] = node_data.get('input_edges', {})
+            self.output_edges[node] = node_data.get('output_edges', {})
 
     def undo(self):
-        # FIXME: refactor
-        connections = self._created_nodes()
-        connect_output_edges(self.scene, connections)
 
-        # TODO: currently not connecting input edges
-        # for node in connections.values():
-        #     node_data = self.node_info[node.node_graphics.node_id]
-        #     # self._create_output_edges(node, node_data)
-        #     self._create_input_edges(node, node_data)
+        self._create_nodes()
+
+        if self.input_edges:
+            connect_input_edges(self.scene, self.input_edges)
+
+        if self.output_edges:
+            connect_output_edges(self.scene, self.output_edges)
 
     def redo(self):
-        for node in self.nodes:
-            self.node_info.update({node.node_id: node.data()})
+        """Append the node data into a class attribute and delete them."""
+        for node in self.selected_nodes:
+
+            self.nodes_data[node.node_id] = node.data()
+
             node = graph_node(node)
             node.delete_node()
 

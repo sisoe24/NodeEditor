@@ -3,12 +3,12 @@ from pprint import pformat
 
 from PySide2.QtGui import QPainterPath
 from PySide2.QtWidgets import QUndoCommand, QGraphicsScene
-from src.nodes.nodes_utility import connect_input_edges
 
 
-from src.utils.graph_state import connect_output_edges
 from src.widgets.node_edge import NodeEdge, NodeEdgeGraphics
-from src.nodes import NodesRegister, create_node
+from src.nodes import (
+    NodesRegister, create_node, connect_output_edges, connect_input_edges
+)
 
 
 def graph_node(node):
@@ -145,13 +145,15 @@ class DeleteNodeCommand(QUndoCommand):
             self.output_edges[node] = node_data.get('output_edges', {})
 
     def undo(self):
+        def connected_edges(node_list):
+            return bool([_ for _ in node_list.values() if _])
 
         self._create_nodes()
 
-        if self.input_edges:
+        if connected_edges(self.input_edges):
             connect_input_edges(self.scene, self.input_edges)
 
-        if self.output_edges:
+        if connected_edges(self.output_edges):
             connect_output_edges(self.scene, self.output_edges)
 
     def redo(self):

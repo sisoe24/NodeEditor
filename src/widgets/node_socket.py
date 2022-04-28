@@ -10,6 +10,13 @@ from PySide2.QtWidgets import (
 from src.utils import class_id
 
 
+def create_socket(parent_node, socket_index, is_input):
+    return (
+        SocketInput(parent_node, socket_index) if is_input
+        else SocketOutput(parent_node, socket_index)
+    )
+
+
 class SocketGraphics(QGraphicsItem):
     def __init__(self, node,  index):
         super().__init__(node)
@@ -140,14 +147,3 @@ class SocketOutput(SocketGraphics):
 
     def __str__(self) -> str:
         return class_id('SocketOutput', self)
-
-
-class Socket:
-    def __new__(self, node, index, is_input):
-        return SocketInput(node, index) if is_input else SocketOutput(node, index)
-
-    # def __init__(self, node, index, is_input):
-    #     if is_input:
-    #         self.socket_graphics = SocketInput(node, index)
-    #     else:
-    #         self.socket_graphics = SocketOutput(node, index)

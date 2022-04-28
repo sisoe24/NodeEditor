@@ -24,11 +24,13 @@ class NodeExampleContent(NodeContent):
         self.combo_box = QComboBox()
         self.combo_box.addItems(['foo', 'bar'])
 
+
         self.add_output('Output 1')
+
         self.add_widget(QCheckBox('Make Uppercase'))
         self.add_widget(QCheckBox('Make Lowercase'))
         self.add_widget(QCheckBox('Make Titlecase'))
-        self.add_input(QLabel('Input 1'))
+        self.add_input(QLabel('Input 1'), 0)
 
 
 @NodesRegister.register_class
@@ -86,8 +88,13 @@ class NodeInputContent(NodeContent):
     def __init__(self, parent=None):
         super().__init__(parent)
 
-        self.add_output('Output 1')
-        self.add_input(QPlainTextEdit('foo bar'))
+        text = QPlainTextEdit('foo far')
+        self.add_widget(text)
+
+        self.output1 = self.add_output('Output 1', 0, text.toPlainText())
+
+    def exec_(self):
+        pass
 
 
 @NodesRegister.register_class

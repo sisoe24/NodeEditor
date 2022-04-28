@@ -36,7 +36,7 @@ class NodeContent(QWidget):
         return wrapper
 
     @_is_widget
-    def add_widget(self, widget):
+    def add_widget(self, widget, index=0):
         """Add a widget into the node graphics
 
         A widget is not going to have any input or output sockets connected.
@@ -44,19 +44,19 @@ class NodeContent(QWidget):
         Args:
             widget (any): A instance of a QWidget class.
         """
-        self._layout.addWidget(widget)
+        self._layout.insertWidget(index, widget)
 
     @_is_widget
-    def add_input(self, widget):
+    def add_input(self, widget, index=0):
         """Add an input widget with a socket.
 
         Args:
             widget (any): A instance of a QWidget class.
         """
         self.inputs.append(widget)
-        self._layout.addWidget(widget)
+        self._layout.insertWidget(index, widget)
 
-    def add_output(self, text: str):
+    def add_output(self, text: str, index=0, value=""):
         """Add an output widget with a socket.
 
         Args:
@@ -64,7 +64,7 @@ class NodeContent(QWidget):
         """
         widget = QLabel(text)
         widget.setAlignment(Qt.AlignRight)
-        self._layout.addWidget(widget)
+        self._layout.insertWidget(index, widget)
         self.outputs.append(widget)
 
     @property

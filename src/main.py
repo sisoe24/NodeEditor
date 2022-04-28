@@ -68,10 +68,12 @@ class DebugWidget(QWidget):
         self.tabs.addTab(QUndoView(self.undo_stack), 'Undo History')
         self.tabs.addTab(self.console, 'Debug Console')
 
+        self._btn_exec = QPushButton('Exec')
         self._btn_debug = QPushButton('Test')
 
         _layout = QVBoxLayout()
         _layout.addWidget(self.node_editor)
+        _layout.addWidget(self._btn_exec)
         _layout.addWidget(self._btn_debug)
         _layout.addWidget(self.tabs)
 
@@ -84,17 +86,17 @@ class DebugWidget(QWidget):
 
     def _debug_add_nodes(self):
 
-        node_input = create_node(self.scene, 'NodeInput')
-        node_input.set_position(-350, 220)
+        self.node_input = create_node(self.scene, 'NodeInput')
+        self.node_input.set_position(-350, 220)
 
         # node_test = create_node(self.scene, 'NodeTest')
         # node_test.set_position(-150, 150)
 
-        node_debug = create_node(self.scene, 'NodeDebug')
-        node_debug.set_position(250, -40)
+        self.node_debug = create_node(self.scene, 'NodeDebug')
+        self.node_debug.set_position(250, -40)
 
-        node_example = create_node(self.scene, 'NodeExample')
-        node_example.set_position(50, 0)
+        self.node_example = create_node(self.scene, 'NodeExample')
+        self.node_example.set_position(50, 0)
 
         # create debug edge
         # start_socket_a = node_test.output_sockets[0]
@@ -120,14 +122,14 @@ class MainWindow(QMainWindow):
         self.node_editor = NodeEditor(self)
         self.node_editor.view.mouse_position.connect(self.set_coords)
 
-        debug_widget = DebugWidget(self.node_editor, self.undo_stack)
-        debug_widget._btn_debug.clicked.connect(self._debug_function)
-        self.setCentralWidget(debug_widget)
+        self.debug_widget = DebugWidget(self.node_editor, self.undo_stack)
+        self.debug_widget._btn_debug.clicked.connect(self._debug_function)
+        self.setCentralWidget(self.debug_widget)
 
         self._scene = self.node_editor.scene.graphics_scene
 
         self._view = self.node_editor.view
-        self._view.graph_debug.connect(debug_widget._write_to_console)
+        self._view.graph_debug.connect(self.debug_widget._write_to_console)
 
         self.menubar = NodeMenubar(self)
         self.setMenuBar(self.menubar)
@@ -136,7 +138,7 @@ class MainWindow(QMainWindow):
         self._set_status_bar()
 
         # save_file(self._scene, 'scripts/save_file.json')
-        self._load_file()
+        # self._load_file()
 
     def _load_file(self):
         file = 'scripts/save_file.json'
@@ -146,7 +148,8 @@ class MainWindow(QMainWindow):
 
     def _debug_function(self):
         """Debug function"""
-        node = NodesRegister.get_node_last_id('NodeExample')
+        node_input = self.debug_widget.node_input
+        print("➡ node_input dir :", dir(node_input.content))
 
     def _set_toolbar(self):
 

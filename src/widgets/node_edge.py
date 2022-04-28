@@ -11,7 +11,7 @@ from PySide2.QtWidgets import (
 )
 
 from src.utils import class_id
-from src.widgets.node_socket import Socket, SocketInput, SocketOutput
+from src.widgets.node_socket import SocketInput, SocketOutput
 
 LOGGER = logging.getLogger('nodeeditor.edge')
 LOGGER.setLevel(logging.DEBUG)
@@ -152,7 +152,7 @@ class NodeEdge(_EdgeInterface):
 
 
 class NodeEdgeTmp(_EdgeInterface):
-    def __init__(self, scene, view, start_socket: Socket):
+    def __init__(self, scene, view, start_socket):
         LOGGER.debug('Create temporary edge')
 
         self._mouse_position = QPointF(start_socket.get_position().x(),

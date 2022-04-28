@@ -17,8 +17,8 @@ from PySide2.QtWidgets import (
 )
 
 from src.nodes import NodesRegister, extract_output_edges, extract_input_edges
-from src.widgets.node_socket import Socket
 from src.utils import class_id
+from src.widgets.node_socket import create_socket
 
 LOGGER = logging.getLogger('nodeeditor.master_node')
 
@@ -269,7 +269,7 @@ class Node(NodeInterface):
         for index, widget in enumerate(widgets):
             y = self.node_graphics._title_height + widget.pos().y() + offset
 
-            socket = Socket(self.node_graphics, index, is_input)
+            socket = create_socket(self.node_graphics, index, is_input)
             socket.setPos(0 if is_input else width, y)
 
             yield socket

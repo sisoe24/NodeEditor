@@ -15,6 +15,7 @@ from PySide2.QtWidgets import (
 )
 
 from src.nodes import NodesRegister
+from src.widgets.node_edge import data_cache
 from src.widgets.logic.undo_redo import AddNodeCommand, DeleteNodeCommand
 from src.utils.graph_state import connect_output_edges, load_file, save_file
 
@@ -228,6 +229,20 @@ class EditorAddActions(EditorActions):
         self.undo_stack.push(command)
 
 
+class EditorRunActions(EditorActions):
+    def __init__(self, parent):
+        super().__init__(parent)
+
+        self.run_act = QAction('Run', self)
+        self.run_act.setShortcut(QKeySequence('ctrl+r'))
+        self.run_act.triggered.connect(self.run_data)
+
+    def run_data(self):
+        self.top_window.show_status_message('Graph executed')
+        for transfer_data in data_cache.values():
+            transfer_data()
+
+
 class NodeMenubar(QMenuBar):
     def __init__(self, parent):
         super().__init__(parent)
@@ -243,6 +258,10 @@ class NodeMenubar(QMenuBar):
         self._add_actions = EditorAddActions(self)
         self.add_menu = self.addMenu('&Add')
         self.add_add_menu()
+
+        self._run_actions = EditorRunActions(self)
+        self.run_menu = self.addMenu('&Run')
+        self.add_run_menu()
 
     def add_file_menu(self):
         self.file_menu.addAction(self._file_actions.new_file_act)
@@ -265,3 +284,6 @@ class NodeMenubar(QMenuBar):
     def add_add_menu(self):
         for node in self._add_actions.nodes:
             self.add_menu.addAction(node)
+
+    def add_run_menu(self):
+        self.run_menu.addAction(self._run_actions.run_act)

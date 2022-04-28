@@ -170,6 +170,10 @@ class MainWindow(QMainWindow):
         self.add_action.setMenu(self.menubar.add_menu)
         toolbar.addAction(self.add_action)
 
+        self.run_action = QAction('Run', self)
+        self.run_action.setMenu(self.menubar.run_menu)
+        toolbar.addAction(self.run_action)
+
         self.addToolBar(toolbar)
 
     def set_coords(self, x, y):
@@ -190,6 +194,7 @@ class MainWindow(QMainWindow):
         menu.addMenu(self.menubar.file_menu)
         menu.addMenu(self.menubar.edit_menu)
         menu.addMenu(self.menubar.add_menu)
+        menu.addMenu(self.menubar.run_menu)
         menu.popup(event.globalPos())
         super().contextMenuEvent(event)
 

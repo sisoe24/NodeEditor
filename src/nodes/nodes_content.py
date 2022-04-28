@@ -37,7 +37,7 @@ class NodeContent(QWidget):
         return wrapper
 
     @_is_widget
-    def add_widget(self, widget, index=0):
+    def add_widget(self, widget, pos=0):
         """Add a widget into the node graphics
 
         A widget is not going to have any input or output sockets connected.
@@ -45,30 +45,43 @@ class NodeContent(QWidget):
         Args:
             widget (any): A instance of a QWidget class.
         """
-        self._layout.insertWidget(index, widget)
+        self._layout.insertWidget(pos, widget)
+
+    def add_label(self, label, pos=0):
+        """Add a widget into the node graphics
+
+        A widget is not going to have any input or output sockets connected.
+
+        Args:
+            widget (any): A instance of a QWidget class.
+        """
+        self._layout.insertWidget(pos, QLabel(label))
 
     @_is_widget
-    def add_input(self, widget, index=0):
+    def add_input(self, widget, pos=0):
         """Add an input widget with a socket.
 
         Args:
             widget (any): A instance of a QWidget class.
         """
         self.inputs.append(widget)
-        self._layout.insertWidget(index, widget)
+        self._layout.insertWidget(pos, widget)
 
-    def add_input_widget(self, label: str, widget, index=0):
+    def add_input_widget(self, widget, label="", pos=0):
         """Add an input widget with a socket.
 
         Args:
             widget (any): A instance of a QWidget class.
         """
         self.inputs.append(widget)
-        _form = QFormLayout()
-        _form.addRow(QLabel(label), widget)
-        self._layout.insertLayout(index, _form)
+        if label:
+            _form = QFormLayout()
+            _form.addRow(QLabel(label), widget)
+            self._layout.insertLayout(pos, _form)
+        else:
+            self._layout.insertWidget(pos, widget)
 
-    def add_output(self, text: str, index=0, value=""):
+    def add_output(self, text: str, pos=0):
         """Add an output widget with a socket.
 
         Args:
@@ -76,7 +89,7 @@ class NodeContent(QWidget):
         """
         widget = QLabel(text)
         widget.setAlignment(Qt.AlignRight)
-        self._layout.insertWidget(index, widget)
+        self._layout.insertWidget(pos, widget)
         self.outputs.append(widget)
 
     @property

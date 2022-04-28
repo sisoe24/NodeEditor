@@ -48,8 +48,13 @@ class NodeDebugContent(NodeContent):
     def __init__(self, parent=None):
         super().__init__(parent)
 
-        self.add_widget(QPlainTextEdit())
-        self.add_input(QLabel('Debug Input 1'))
+        self.text_box = QPlainTextEdit()
+        self.add_label('Debug Print', pos=0)
+        self.add_input_widget(self.text_box, pos=1)
+        self.add_input_widget(QPlainTextEdit(), pos=2)
+
+    def set_input(self, value, index):
+        self.inputs[index].setPlainText(value)
 
 
 @NodesRegister.register_class
@@ -88,14 +93,13 @@ class NodeInputContent(NodeContent):
     def __init__(self, parent=None):
         super().__init__(parent)
 
-        text = QPlainTextEdit('foo far')
+        self.text_box = QPlainTextEdit('foo far')
 
-        self.add_input_widget('Value', QSpinBox())
-        self.add_widget(text)
-        self.add_output('Output 1', 0, text.toPlainText())
+        self.add_widget(self.text_box)
+        self.add_output('Output 1', 0)
 
-    def exec_(self):
-        pass
+    def get_output(self):
+        return self.text_box.toPlainText()
 
 
 @NodesRegister.register_class

@@ -285,5 +285,11 @@ class Node(NodeInterface):
     def set_position(self, x: int, y: int):
         self.node_graphics.setPos(x, y)
 
+    def get_output(self):
+        return self.content.get_output()
+
+    def set_input(self, value, index):
+        self.content.set_input(value, index)
+
     def __str__(self):
         return f'{self.__class__.__name__}'

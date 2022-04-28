@@ -87,22 +87,20 @@ class DebugWidget(QWidget):
     def _debug_add_nodes(self):
 
         self.node_input = create_node(self.scene, 'NodeInput')
-        self.node_input.set_position(-350, 220)
-
-        # node_test = create_node(self.scene, 'NodeTest')
-        # node_test.set_position(-150, 150)
-
-        self.node_debug = create_node(self.scene, 'NodeDebug')
-        self.node_debug.set_position(250, -40)
+        self.node_input.set_position(-240, 140)
 
         self.node_example = create_node(self.scene, 'NodeExample')
-        self.node_example.set_position(50, 0)
+        self.node_example.set_position(100, -140)
 
-        # create debug edge
-        # start_socket_a = node_test.output_sockets[0]
-        # end_socket_a = node_example.input_sockets[0]
+        self.node_debug = create_node(self.scene, 'NodeDebug')
+        self.node_debug.set_position(100, 60)
 
-        # NodeEdge(self.scene, start_socket_a, end_socket_a)
+        start_socket_a = self.node_input.output_sockets[0]
+        end_socket_a = self.node_debug.input_sockets[0]
+        NodeEdge(self.scene, start_socket_a, end_socket_a)
+
+        end_socket_a = self.node_example.input_sockets[0]
+        NodeEdge(self.scene, start_socket_a, end_socket_a)
 
         # start_socket_b = node_example.output_sockets[0]
         # end_socket_b = node_debug.input_sockets[1]
@@ -124,6 +122,7 @@ class MainWindow(QMainWindow):
 
         self.debug_widget = DebugWidget(self.node_editor, self.undo_stack)
         self.debug_widget._btn_debug.clicked.connect(self._debug_function)
+        self.debug_widget._btn_exec.clicked.connect(self._debug_exec)
         self.setCentralWidget(self.debug_widget)
 
         self._scene = self.node_editor.scene.graphics_scene
@@ -138,7 +137,7 @@ class MainWindow(QMainWindow):
         self._set_status_bar()
 
         # save_file(self._scene, 'scripts/save_file.json')
-        self._load_file()
+        # self._load_file()
 
     def _load_file(self):
         file = 'scripts/save_file.json'
@@ -146,10 +145,20 @@ class MainWindow(QMainWindow):
         self.menubar._file_actions.editor_file = file
         self.setWindowTitle(os.path.basename(file))
 
-    def _debug_function(self):
+    def _debug_exec(self):
         """Debug function"""
         node_input = self.debug_widget.node_input
-        print("➡ node_input dir :", dir(node_input.content))
+        node_debug = self.debug_widget.node_debug
+
+        input_output = node_input.get_output()
+        for socket in node_input.output_sockets:
+            if socket.has_edge():
+                for edge in socket.edges:
+                    end_socket = edge.end_socket.index
+                    node_debug.set_input(input_output, end_socket)
+
+    def _debug_function(self):
+        """Debug function"""
 
     def _set_toolbar(self):
 

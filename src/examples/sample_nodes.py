@@ -2,6 +2,7 @@ import logging
 
 from PySide2.QtCore import Qt
 from PySide2.QtWidgets import (
+    QSpinBox,
     QPlainTextEdit,
     QCheckBox,
     QComboBox,
@@ -23,7 +24,6 @@ class NodeExampleContent(NodeContent):
 
         self.combo_box = QComboBox()
         self.combo_box.addItems(['foo', 'bar'])
-
 
         self.add_output('Output 1')
 
@@ -89,9 +89,10 @@ class NodeInputContent(NodeContent):
         super().__init__(parent)
 
         text = QPlainTextEdit('foo far')
-        self.add_widget(text)
 
-        self.output1 = self.add_output('Output 1', 0, text.toPlainText())
+        self.add_input_widget('Value', QSpinBox())
+        self.add_widget(text)
+        self.add_output('Output 1', 0, text.toPlainText())
 
     def exec_(self):
         pass

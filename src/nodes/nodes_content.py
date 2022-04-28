@@ -3,6 +3,7 @@ import logging
 
 from PySide2.QtCore import Qt
 from PySide2.QtWidgets import (
+    QFormLayout,
     QSpacerItem,
     QLabel,
     QVBoxLayout,
@@ -55,6 +56,17 @@ class NodeContent(QWidget):
         """
         self.inputs.append(widget)
         self._layout.insertWidget(index, widget)
+
+    def add_input_widget(self, label: str, widget, index=0):
+        """Add an input widget with a socket.
+
+        Args:
+            widget (any): A instance of a QWidget class.
+        """
+        self.inputs.append(widget)
+        _form = QFormLayout()
+        _form.addRow(QLabel(label), widget)
+        self._layout.insertLayout(index, _form)
 
     def add_output(self, text: str, index=0, value=""):
         """Add an output widget with a socket.

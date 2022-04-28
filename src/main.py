@@ -138,7 +138,7 @@ class MainWindow(QMainWindow):
         self._set_status_bar()
 
         # save_file(self._scene, 'scripts/save_file.json')
-        # self._load_file()
+        self._load_file()
 
     def _load_file(self):
         file = 'scripts/save_file.json'

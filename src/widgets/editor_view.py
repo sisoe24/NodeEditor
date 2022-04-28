@@ -276,7 +276,9 @@ class GraphicsView(QGraphicsView):
 
     def keyPressEvent(self, event):
         key = event.key()
-        if key == Qt.Key_I:
+        modifiers = event.modifiers()
+
+        if key == Qt.Key_I and modifiers == Qt.ControlModifier:
             item = self._get_graphic_item(self._mouse_pos_view)
 
             if not item:

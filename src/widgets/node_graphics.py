@@ -288,7 +288,7 @@ class Node(NodeInterface):
     def get_output(self):
         return self.content.get_output()
 
-    def set_input(self, value, index):
+    def set_input(self, value, index=0):
         self.content.set_input(value, index)
 
     def __str__(self):

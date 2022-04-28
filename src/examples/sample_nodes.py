@@ -2,6 +2,7 @@ import logging
 
 from PySide2.QtCore import Qt
 from PySide2.QtWidgets import (
+    QRadioButton,
     QSpinBox,
     QPlainTextEdit,
     QCheckBox,
@@ -22,15 +23,37 @@ class NodeExampleContent(NodeContent):
     def __init__(self, parent=None):
         super().__init__(parent)
 
-        self.combo_box = QComboBox()
-        self.combo_box.addItems(['foo', 'bar'])
+        self.add_output('Output', pos=0)
 
-        self.add_output('Output 1')
+        self.make_upper = QRadioButton('Make Uppercase')
+        self.make_upper.setChecked(True)
+        self.add_widget(self.make_upper, pos=1)
 
-        self.add_widget(QCheckBox('Make Uppercase'))
-        self.add_widget(QCheckBox('Make Lowercase'))
-        self.add_widget(QCheckBox('Make Titlecase'))
-        self.add_input(QLabel('Input 1'), 0)
+        self.make_lower = QRadioButton('Make Lowercase')
+        self.add_widget(self.make_lower, pos=2)
+
+        self.make_title = QRadioButton('Make Titlecase')
+        self.add_widget(self.make_title, pos=3)
+
+        self.add_input(QLabel('Input'), pos=4)
+
+        self.output_text = None
+
+    def get_output(self):
+        return self.output_text
+
+    def set_input(self, value, index):
+
+        if self.make_upper.isChecked():
+            self.output_text = value.upper()
+        elif self.make_lower.isChecked():
+            self.output_text = value.lower()
+        elif self.make_title.isChecked():
+            self.output_text = value.title()
+        else:
+            self.output_text = value
+
+        print("➡ self.output_text :", self.output_text)
 
 
 @NodesRegister.register_class
@@ -93,7 +116,7 @@ class NodeInputContent(NodeContent):
     def __init__(self, parent=None):
         super().__init__(parent)
 
-        self.text_box = QPlainTextEdit('foo far')
+        self.text_box = QPlainTextEdit('foo BAR')
 
         self.add_widget(self.text_box)
         self.add_output('Output 1', 0)

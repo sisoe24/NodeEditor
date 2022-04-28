@@ -105,6 +105,9 @@ class _EdgeInterface(abc.ABC):
         """End point scene location."""
 
 
+data_cache = {}
+
+
 class NodeEdge(_EdgeInterface):
     def __init__(self, scene, start_socket: SocketInput, end_socket: SocketOutput):
 
@@ -119,6 +122,14 @@ class NodeEdge(_EdgeInterface):
         self.scene.addItem(self.edge_graphics)
 
         self._add_reference()
+
+        self.transfer_data()
+        data_cache[self] = self.transfer_data
+
+    def transfer_data(self):
+        self.socket_output = self.start_socket.node.base.get_output()
+        self.end_socket.node.base.set_input(
+            self.socket_output, self.end_socket.index)
 
     @property
     def start_socket(self) -> SocketOutput:
@@ -138,6 +149,7 @@ class NodeEdge(_EdgeInterface):
         Remove the edge graphics from the scene and delete its reference from
         its connected sockets.
         """
+        data_cache.pop(self)
         self.start_socket.clear_reference(self)
         self.end_socket.clear_reference()
         self.scene.removeItem(self.edge_graphics)

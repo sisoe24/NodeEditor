@@ -1,5 +1,6 @@
 
 import logging
+import sys
 
 from PySide2.QtCore import Qt
 from PySide2.QtWidgets import (
@@ -28,12 +29,13 @@ class NodeContent(QWidget):
         self.setLayout(self._layout)
 
     def _is_widget(func):
-        def wrapper(*args):
+        def wrapper(*args, **kwargs):
             widget = args[1]
             if isinstance(widget, QWidget):
-                return func(*args)
+                return func(*args, **kwargs)
             LOGGER.error('Item is not a child of QObject: %s %s',
                          type(widget), widget)
+            sys.exit()
         return wrapper
 
     @_is_widget

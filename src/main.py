@@ -28,7 +28,7 @@ from src.utils.graph_state import load_file, save_file
 
 from src.widgets.editor_menubar import NodeMenubar
 from src.widgets.editor_scene import Scene
-from src.widgets.node_edge import NodeEdge
+from src.widgets.node_edge import NodeEdge, data_cache
 from src.widgets.editor_view import GraphicsView
 
 LOGGER = logging.getLogger('nodeeditor.main')
@@ -78,7 +78,6 @@ class DebugWidget(QWidget):
         _layout.addWidget(self.tabs)
 
         self.setLayout(_layout)
-        self._debug_add_nodes()
 
     def _write_to_console(self, text):
         self.tabs.setCurrentIndex(1)
@@ -137,7 +136,8 @@ class MainWindow(QMainWindow):
         self._set_status_bar()
 
         # save_file(self._scene, 'scripts/save_file.json')
-        # self._load_file()
+        # self.debug_widget._debug_add_nodes()
+        self._load_file()
 
     def _load_file(self):
         file = 'scripts/save_file.json'
@@ -147,15 +147,8 @@ class MainWindow(QMainWindow):
 
     def _debug_exec(self):
         """Debug function"""
-        node_input = self.debug_widget.node_input
-        node_debug = self.debug_widget.node_debug
-
-        input_output = node_input.get_output()
-        for socket in node_input.output_sockets:
-            if socket.has_edge():
-                for edge in socket.edges:
-                    end_socket = edge.end_socket.index
-                    node_debug.set_input(input_output, end_socket)
+        for transfer_data in data_cache.values():
+            transfer_data()
 
     def _debug_function(self):
         """Debug function"""

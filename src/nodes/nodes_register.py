@@ -4,6 +4,7 @@ from typing import Union
 class NodesRegister:
     nodes = {}
     nodes_classes = {}
+    nodes_in_graph = []
 
     @classmethod
     def register_class(cls, node_class):
@@ -87,6 +88,7 @@ class NodesRegister:
         Returns:
             (str) - The id of the registered node.
         """
+        cls.nodes_in_graph.append(node)
         node_class = node.node_class
         node_data = cls.nodes.get(node_class)
 
@@ -109,4 +111,5 @@ class NodesRegister:
     @classmethod
     def unregister_node(cls, node: 'NodeGraphics') -> None:
         """Remove a node from the current scene register."""
+        cls.nodes_in_graph.remove(node)
         cls.nodes[node.node_class].pop(node.node_id)

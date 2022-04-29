@@ -1,4 +1,5 @@
 import os
+from pprint import pformat
 import sys
 import logging
 
@@ -28,7 +29,7 @@ from src.utils.graph_state import load_file, save_file
 
 from src.widgets.editor_menubar import NodeMenubar
 from src.widgets.editor_scene import Scene
-from src.widgets.node_edge import NodeEdge, data_cache
+from src.widgets.node_edge import NodeEdge, data_cache, data_hierarchy
 from src.widgets.editor_view import GraphicsView
 
 LOGGER = logging.getLogger('nodeeditor.main')
@@ -138,6 +139,7 @@ class MainWindow(QMainWindow):
         # save_file(self._scene, 'scripts/save_file.json')
         # self.debug_widget._debug_add_nodes()
         self._load_file()
+        self._debug_exec()
 
     def _load_file(self):
         file = 'scripts/save_file.json'
@@ -147,8 +149,6 @@ class MainWindow(QMainWindow):
 
     def _debug_exec(self):
         """Debug function"""
-        for transfer_data in data_cache.values():
-            transfer_data()
 
     def _debug_function(self):
         """Debug function"""

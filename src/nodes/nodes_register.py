@@ -4,7 +4,7 @@ from typing import Union
 class NodesRegister:
     nodes = {}
     nodes_classes = {}
-    nodes_in_graph = []
+    all_nodes = []
 
     @classmethod
     def register_class(cls, node_class):
@@ -82,13 +82,31 @@ class NodesRegister:
         return max(cls.nodes[node_class])
 
     @classmethod
+    def get_root_nodes(cls) -> str:
+        """Get all of the root nodes in the graphs.
+
+        `NodeRegister.ger_root_nodes()`
+
+        Root nodes are nodes which have no parent node attached.
+
+        Returns:
+            (list) - A list of nodes.
+        """
+        starting_nodes = []
+        for node in cls.all_nodes:
+            node_data = node.data()
+            if not node_data['parents'] and node_data['children']:
+                starting_nodes.append(node.base)
+        return starting_nodes
+
+    @classmethod
     def register_node(cls, node: 'NodeGraphics') -> str:
         """Add a node to the current scene register.
 
         Returns:
             (str) - The id of the registered node.
         """
-        cls.nodes_in_graph.append(node)
+        cls.all_nodes.append(node)
         node_class = node.node_class
         node_data = cls.nodes.get(node_class)
 
@@ -111,5 +129,5 @@ class NodesRegister:
     @classmethod
     def unregister_node(cls, node: 'NodeGraphics') -> None:
         """Remove a node from the current scene register."""
-        cls.nodes_in_graph.remove(node)
+        cls.all_nodes.remove(node)
         cls.nodes[node.node_class].pop(node.node_id)

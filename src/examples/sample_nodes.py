@@ -39,8 +39,8 @@ class NodeExampleContent(NodeContent):
 
         self.output_text = None
 
-    def get_output(self):
-        return self.output_text
+    def get_output(self, index):
+        return self.output_text or "Sample Text"
 
     def set_input(self, value, index):
 
@@ -53,7 +53,7 @@ class NodeExampleContent(NodeContent):
         else:
             self.output_text = value
 
-        print("➡ self.output_text :", self.output_text)
+        # print("➡ self.output_text :", self.output_text)
 
 
 @NodesRegister.register_class
@@ -118,11 +118,17 @@ class NodeInputContent(NodeContent):
 
         self.text_box = QPlainTextEdit('foo BAR')
 
-        self.add_widget(self.text_box)
-        self.add_output('Output 1', 0)
+        self.add_output('Text', pos=0)
+        self.add_output('Text length', pos=1)
+        self.add_widget(self.text_box, pos=2)
 
-    def get_output(self):
-        return self.text_box.toPlainText()
+    def get_output(self, index=1):
+
+        if index == 0:
+            return self.text_box.toPlainText()
+
+        if index == 1:
+            return str(len(self.text_box.toPlainText()))
 
 
 @NodesRegister.register_class

@@ -19,8 +19,18 @@ from PySide2.QtWidgets import (
 from src.nodes import NodesRegister, extract_output_edges, extract_input_edges
 from src.utils import class_id
 from src.widgets.node_socket import create_socket
+from src.widgets.node_edge import data_cache
 
 LOGGER = logging.getLogger('nodeeditor.master_node')
+
+
+class NodeGraphicsContent(QGraphicsProxyWidget):
+    def __init__(self, content, parent=None):
+        super().__init__(parent)
+        self.setWidget(content)
+
+    def __str__(self):
+        return class_id('NodeGraphicsContent', self)
 
 
 class NodeGraphics(QGraphicsItem):
@@ -95,8 +105,7 @@ class NodeGraphics(QGraphicsItem):
         """
         self.content.setGeometry(0, self._title_height,
                                  self._width, self._height)
-        gr_content = QGraphicsProxyWidget(self)
-        gr_content.setWidget(self.content)
+        NodeGraphicsContent(self.content, self)
 
     def _draw_graphics(self):
         """Draw the node graphics content.
@@ -195,6 +204,23 @@ class NodeGraphics(QGraphicsItem):
                 sockets[index] = {str(socket): {'edges': socket.get_edges()}}
             return sockets
 
+        def get_parents():
+            parents = [
+                socket.edge.start_socket.node.base
+                for socket in self.base.input_sockets if socket.has_edge()
+            ]
+
+            return set(parents)
+
+        def get_children():
+            parents = []
+            for socket in self.base.output_sockets:
+                if socket.has_edge():
+                    for edge in socket.edges:
+                        parents.append(edge.end_socket.node.base)
+
+            return set(parents)
+
         position = self.pos()
         return {
             'class': self.node_class,
@@ -205,7 +231,10 @@ class NodeGraphics(QGraphicsItem):
             # 'input_sockets': get_sockets(self.base.input_sockets, True),
             # 'output_sockets': get_sockets(self.base.output_sockets),
             'output_edges': extract_output_edges(self),
-            'input_edges': extract_input_edges(self)
+            'input_edges': extract_input_edges(self),
+            'output': self.base.get_output(),
+            'parents': get_parents(),
+            'children': get_children(),
         }
 
     def repr(self):
@@ -285,8 +314,8 @@ class Node(NodeInterface):
     def set_position(self, x: int, y: int):
         self.node_graphics.setPos(x, y)
 
-    def get_output(self):
-        return self.content.get_output()
+    def get_output(self, index=0):
+        return self.content.get_output(index)
 
     def set_input(self, value, index=0):
         self.content.set_input(value, index)

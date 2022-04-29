@@ -97,3 +97,6 @@ class NodeContent(QWidget):
     @property
     def layout_size(self):
         return self._layout.sizeHint()
+
+    def get_output(self, index):
+        return ""

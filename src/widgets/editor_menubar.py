@@ -239,8 +239,26 @@ class EditorRunActions(EditorActions):
 
     def run_data(self):
         self.top_window.show_status_message('Graph executed')
-        for transfer_data in data_cache.values():
-            transfer_data()
+        self.exec_node_tree(NodesRegister.get_root_nodes())
+
+    def exec_node_tree(self, nodes):
+        for node in nodes:
+            node_data = node.node_graphics.data()
+
+            for socket in node.output_sockets:
+
+                if socket.has_edge():
+                    for edge in socket.edges:
+
+                        start_socket = edge.start_socket
+                        end_socket = edge.end_socket
+                        self.transfer_data(start_socket, end_socket)
+
+            self.exec_node_tree(node_data['children'])
+
+    def transfer_data(self, start_socket, end_socket):
+        socket_output = start_socket.node.base.get_output(start_socket.index)
+        end_socket.node.base.set_input(socket_output, end_socket.index)
 
 
 class NodeMenubar(QMenuBar):

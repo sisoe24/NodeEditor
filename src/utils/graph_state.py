@@ -1,5 +1,5 @@
 import json
-from pprint import pprint
+from pprint import pformat, pprint
 
 from PySide2.QtCore import QRectF, QRect
 from PySide2.QtWidgets import (
@@ -35,7 +35,8 @@ def create_nodes_from_save_file(scene, file_data) -> dict:
 def load_scene(scene: 'QGraphicsScene', data: dict) -> None:
     scene.clear()
     scene.set_view_center(data['viewport']['x'], data['viewport']['y'])
-    connect_output_edges(scene, create_nodes_from_save_file(scene, data))
+    nodes = create_nodes_from_save_file(scene, data)
+    connect_output_edges(scene, nodes)
 
 
 def load_file(scene: 'QGraphicsScene', file: str) -> None:
@@ -77,4 +78,4 @@ def scene_state(scene) -> dict:
 def save_file(scene, file):
     """Save current graph scene."""
     with open(file, 'w', encoding='utf-8') as f:
-        json.dump(scene_state(scene), f, indent=2)
+        json.dump(scene_state(scene), f, indent=2, sort_keys=True)

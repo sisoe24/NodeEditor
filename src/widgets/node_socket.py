@@ -72,6 +72,7 @@ class SocketGraphics(QGraphicsItem):
 
         return {
             'object': str(self),
+            'index': self._index,
             'color': self.color.name.decode('utf-8'),
             'node': str(self.node),
             'edges': edges

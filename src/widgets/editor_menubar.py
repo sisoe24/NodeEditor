@@ -1,6 +1,5 @@
 import os
 from functools import partial
-from pprint import pformat
 
 from PySide2.QtGui import (
     QKeySequence
@@ -15,7 +14,6 @@ from PySide2.QtWidgets import (
 )
 
 from src.nodes import NodesRegister
-from src.widgets.node_edge import data_cache
 from src.widgets.logic.undo_redo import AddNodeCommand, DeleteNodeCommand
 from src.utils.graph_state import connect_output_edges, load_file, save_file
 

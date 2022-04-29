@@ -1,9 +1,9 @@
 import os
-from pprint import pformat
 import sys
 import logging
+from pprint import pformat
 
-from PySide2.QtCore import QRect, Qt
+from PySide2.QtCore import Qt
 from PySide2.QtGui import QFont
 
 from PySide2.QtWidgets import (
@@ -29,7 +29,6 @@ from src.utils.graph_state import load_file, save_file
 
 from src.widgets.editor_menubar import NodeMenubar
 from src.widgets.editor_scene import Scene
-from src.widgets.node_edge import NodeEdge, data_cache, data_hierarchy
 from src.widgets.editor_view import GraphicsView
 
 LOGGER = logging.getLogger('nodeeditor.main')

@@ -1,25 +1,19 @@
 import abc
-import json
 import pprint
 import logging
 
 from PySide2.QtCore import Qt
 from PySide2.QtGui import QFont, QPen, QColor, QPainterPath, QBrush
 from PySide2.QtWidgets import (
-    QGraphicsScene,
-    QSpacerItem,
-    QLabel,
     QGraphicsItem,
     QGraphicsTextItem,
     QGraphicsProxyWidget,
-    QVBoxLayout,
     QWidget
 )
 
 from src.nodes import NodesRegister, extract_output_edges, extract_input_edges
 from src.utils import class_id
 from src.widgets.node_socket import create_socket
-from src.widgets.node_edge import data_cache
 
 LOGGER = logging.getLogger('nodeeditor.master_node')
 

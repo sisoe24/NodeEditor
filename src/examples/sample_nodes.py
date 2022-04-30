@@ -96,9 +96,15 @@ class NodeTestContent(NodeContent):
         super().__init__(parent)
 
         self.add_output('Output 1')
-        self.add_output('Output 2')
-        self.add_output('Output 3')
-        self.add_input(QCheckBox('Random text'))
+        self.checkbox = QCheckBox('Save render')
+        self.add_input(self.checkbox)
+
+    def get_output(self, index):
+        return "Output from test node"
+
+    def set_input(self, value, index):
+        self.checkbox.setChecked(bool(value))
+        return "Output from test node"
 
 
 @NodesRegister.register_class
@@ -119,7 +125,7 @@ class NodeInputContent(NodeContent):
         self.text_box = QPlainTextEdit('foo BAR')
 
         self.add_output('Text', pos=0)
-        self.add_output('Text length', pos=1)
+        self.add_output('Random Text', pos=1)
         self.add_widget(self.text_box, pos=2)
 
     def get_output(self, index=1):
@@ -129,6 +135,8 @@ class NodeInputContent(NodeContent):
 
         if index == 1:
             return str(len(self.text_box.toPlainText()))
+
+        return ""
 
 
 @NodesRegister.register_class

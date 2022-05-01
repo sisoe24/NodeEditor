@@ -2,12 +2,12 @@ import logging
 
 from PySide2.QtCore import Qt
 from PySide2.QtWidgets import (
+    QLineEdit,
+    QPushButton,
     QRadioButton,
-    QSpinBox,
     QPlainTextEdit,
     QCheckBox,
     QComboBox,
-    QLabel,
 )
 
 
@@ -35,11 +35,17 @@ class NodeExampleContent(NodeContent):
         self.make_title = QRadioButton('Make Titlecase')
         self.add_widget(self.make_title, pos=3)
 
-        self.add_input(QLabel('Input'), pos=4)
+        self.add_widget(QComboBox(), pos=5)
+        self.add_widget(QPushButton('Button'), pos=6)
+
+        self.text = QLineEdit()
+        self.text.setPlaceholderText('text')
+        self.add_input_widget(self.text, pos=4)
 
         self.output_text = None
 
     def get_output(self, index):
+        
         return self.output_text or "Sample Text"
 
     def set_input(self, value, index):
@@ -146,3 +152,22 @@ class NodeInput(Node):
 
     def __init__(self, scene):
         super().__init__(scene=scene, node=self, content=NodeInputContent())
+
+
+class NodeOutputContent(NodeContent):
+    """The node content widgets container class."""
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.add_label('Test', pos=0, alignment=Qt.AlignCenter)
+        self.add_input('Click', pos=1)
+        self.add_input_widget(QPushButton('Click'), 'label', pos=1)
+
+
+@NodesRegister.register_class
+class NodeOutput(Node):
+    title_background = Qt.darkGray
+    title = 'Output Node'
+
+    def __init__(self, scene):
+        super().__init__(scene=scene, node=self, content=NodeOutputContent())

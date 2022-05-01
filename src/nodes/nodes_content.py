@@ -49,26 +49,6 @@ class NodeContent(QWidget):
         """
         self._layout.insertWidget(pos, widget)
 
-    def add_label(self, label, pos=0):
-        """Add a widget into the node graphics
-
-        A widget is not going to have any input or output sockets connected.
-
-        Args:
-            widget (any): A instance of a QWidget class.
-        """
-        self._layout.insertWidget(pos, QLabel(label))
-
-    @_is_widget
-    def add_input(self, widget, pos=0):
-        """Add an input widget with a socket.
-
-        Args:
-            widget (any): A instance of a QWidget class.
-        """
-        self.inputs.append(widget)
-        self._layout.insertWidget(pos, widget)
-
     def add_input_widget(self, widget, label="", pos=0):
         """Add an input widget with a socket.
 
@@ -76,23 +56,52 @@ class NodeContent(QWidget):
             widget (any): A instance of a QWidget class.
         """
         self.inputs.append(widget)
+
         if label:
             _form = QFormLayout()
-            _form.addRow(QLabel(label), widget)
+            _form.setFieldGrowthPolicy(QFormLayout.AllNonFixedFieldsGrow)
+            _form.setFormAlignment(Qt.AlignLeft | Qt.AlignTop)
+            _form.setLabelAlignment(Qt.AlignTop)
+
+            label = QLabel(label)
+            label.setAlignment(Qt.AlignTop)
+
+            _form.addRow(label, widget)
             self._layout.insertLayout(pos, _form)
         else:
             self._layout.insertWidget(pos, widget)
 
-    def add_output(self, text: str, pos=0):
+    def add_label(self, label: str, pos=0, alignment=Qt.AlignLeft):
+        """Add a label into the node.
+
+        Args:
+            label (str): The name of the label.
+        """
+        self._layout.insertWidget(pos, QLabel(label), alignment=alignment)
+
+    def add_input(self, label: str, pos=0):
+        """Add an input socket with a label.
+
+        Args:
+            label (str): The name of the input socket label.
+        """
+        label = QLabel(label)
+        label.setAlignment(Qt.AlignLeft)
+
+        self._layout.insertWidget(pos, label)
+        self.inputs.append(label)
+
+    def add_output(self, label: str, pos=0):
         """Add an output widget with a socket.
 
         Args:
-            text (str): The name of the output label
+            label (str): The name of the output socket label.
         """
-        widget = QLabel(text)
-        widget.setAlignment(Qt.AlignRight)
-        self._layout.insertWidget(pos, widget)
-        self.outputs.append(widget)
+        label = QLabel(label)
+        label.setAlignment(Qt.AlignRight)
+
+        self._layout.insertWidget(pos, label)
+        self.outputs.append(label)
 
     @property
     def layout_size(self):

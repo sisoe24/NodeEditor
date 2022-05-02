@@ -38,27 +38,18 @@ class GraphicsView(QGraphicsView):
         ZoomRange = namedtuple('ZoomRange', ['min', 'max'])
         self.zoom_range = ZoomRange(5, 15)
 
-        self._debug_zoom()
-
         self._edge_drag_mode = None
         self._edge_cut_mode = None
-        self._edge_readjust_mode = None
-        self._node_drag_mode = None
-        self._box_selection_mode = None
 
         self._selected_item = None
-        self._edge_tmp = None
-        self._clicked_socket = None
-
-        self._previous_selection = None
-        self._previous_node_selection = None
 
         self._mouse_pos_view = None
         self._mouse_pos_scene = None
-        self._mouse_initial_position = None
 
         self._scene = self.scene()
         self._scene.selectionChanged.connect(self._update_selection)
+
+        # self._debug_zoom()
 
     def _debug_zoom(self):
         z = 1.15

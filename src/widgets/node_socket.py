@@ -9,19 +9,20 @@ from PySide2.QtWidgets import (
 from src.utils import class_id
 
 
-def create_socket(parent_node, socket_index, is_input):
+def create_socket(parent_node, socket_index, widget, is_input):
     return (
-        SocketInput(parent_node, socket_index) if is_input
-        else SocketOutput(parent_node, socket_index)
+        SocketInput(parent_node, socket_index, widget) if is_input
+        else SocketOutput(parent_node, socket_index, widget)
     )
 
 
 class SocketGraphics(QGraphicsItem):
-    def __init__(self, node,  index):
+    def __init__(self, node, index, widget):
         super().__init__(node)
 
         self._node = node
         self._index = index
+        self._widget = widget
 
         self._outline_pen = QPen(Qt.black)
         self._outline_pen.setWidthF(0.5)
@@ -40,6 +41,10 @@ class SocketGraphics(QGraphicsItem):
     @property
     def index(self):
         return self._index
+
+    @property
+    def widget(self):
+        return self._widget
 
     def _set_flags(self):
         """Initialize UI for the Node graphic content."""
@@ -73,6 +78,7 @@ class SocketGraphics(QGraphicsItem):
         return {
             'object': str(self),
             'index': self._index,
+            'widget': self._widget,
             'color': self.color.name.decode('utf-8'),
             'node': str(self.node),
             'edges': edges
@@ -86,8 +92,8 @@ class SocketGraphics(QGraphicsItem):
 class SocketInput(SocketGraphics):
     color = Qt.green
 
-    def __init__(self, node, index):
-        super().__init__(node, index)
+    def __init__(self, node, index, widget=None):
+        super().__init__(node, index, widget)
         self._edge = None
 
     @property
@@ -116,8 +122,8 @@ class SocketInput(SocketGraphics):
 class SocketOutput(SocketGraphics):
     color = Qt.blue
 
-    def __init__(self, node, index):
-        super().__init__(node, index)
+    def __init__(self, node, index, widget=None):
+        super().__init__(node, index, widget)
         self._edges = []
 
     @property

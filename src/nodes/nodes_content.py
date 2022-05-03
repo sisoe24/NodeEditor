@@ -1,6 +1,5 @@
-
-import logging
 import sys
+import logging
 
 from PySide2.QtCore import Qt
 from PySide2.QtWidgets import (
@@ -21,6 +20,8 @@ class NodeContent(QWidget):
 
         self.inputs = []
         self.outputs = []
+        self.widgets = {}
+        self._replaceable_widgets = {}
 
         self._layout = QVBoxLayout()
         self._layout.setContentsMargins(10, 10, 10, 10)
@@ -57,19 +58,25 @@ class NodeContent(QWidget):
         """
         self.inputs.append(widget)
 
+        is_form_layout = None
         if label:
-            _form = QFormLayout()
-            _form.setFieldGrowthPolicy(QFormLayout.AllNonFixedFieldsGrow)
-            _form.setFormAlignment(Qt.AlignLeft | Qt.AlignTop)
-            _form.setLabelAlignment(Qt.AlignTop)
+            form = QFormLayout()
+            form.setFieldGrowthPolicy(QFormLayout.AllNonFixedFieldsGrow)
+            form.setFormAlignment(Qt.AlignLeft | Qt.AlignTop)
+            form.setLabelAlignment(Qt.AlignTop)
 
             label = QLabel(label)
             label.setAlignment(Qt.AlignTop)
 
-            _form.addRow(label, widget)
-            self._layout.insertLayout(pos, _form)
+            form.addRow(label, widget)
+            self._layout.insertLayout(pos, form)
+            is_form_layout = True
         else:
             self._layout.insertWidget(pos, widget)
+
+        self.widgets[widget] = pos
+        self._replaceable_widgets[widget] = {
+            'label': label, 'replace': True, 'is_form_layout': is_form_layout}
 
     def add_label(self, label: str, pos=0, alignment=Qt.AlignLeft):
         """Add a label into the node.
@@ -77,7 +84,9 @@ class NodeContent(QWidget):
         Args:
             label (str): The name of the label.
         """
-        self._layout.insertWidget(pos, QLabel(label), alignment=alignment)
+        label = QLabel(label)
+        self._layout.insertWidget(pos, label, alignment)
+        return label
 
     def add_input(self, label: str, pos=0):
         """Add an input socket with a label.
@@ -109,3 +118,33 @@ class NodeContent(QWidget):
 
     def get_output(self, index):
         return ""
+
+    def set_input(self, value, index):
+        widget = self.inputs[index]
+
+        replaceable_widget = self._replaceable_widgets.get(widget)
+        if replaceable_widget and replaceable_widget.get('replace'):
+            if replaceable_widget.get('label'):
+                widget.setHidden(True)
+            else:
+                self.convert_to_label(widget)
+
+    def convert_to_label(self, widget):
+        widget.setHidden(True)
+
+        label = self.add_label(widget.objectName(), pos=self.widgets[widget])
+        self._replaceable_widgets[widget] = {'label': label, 'replace': False}
+
+    def restore_widget(self, widget):
+        if isinstance(widget, QLabel):
+            return
+
+        replaceable_widget = self._replaceable_widgets.get(widget)
+
+        if not replaceable_widget.get('is_form_layout'):
+            label = self._replaceable_widgets[widget]['label']
+            self._layout.removeWidget(label)
+            label.close()
+            self._replaceable_widgets[widget] = {'replace': True}
+
+        widget.setHidden(False)

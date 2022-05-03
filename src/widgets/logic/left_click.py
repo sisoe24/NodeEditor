@@ -1,7 +1,6 @@
 import logging
 import contextlib
 
-
 from src.widgets.logic.undo_redo import (
     BoxSelectCommand,
     ConnectEdgeCommand,
@@ -97,6 +96,10 @@ class LeftClickPress(LeftClick):
 
         LeftClick.socket_start = socket.edge.start_socket
         LeftClick.socket_end = socket.edge.end_socket
+
+        end_node = LeftClick.socket_end.node.base
+        end_socket_widget = LeftClick.socket_end.widget
+        end_node.content.restore_widget(end_socket_widget)
 
         # Invert the sockets if click starts at a output socket
         LeftClick.socket_clicked = (

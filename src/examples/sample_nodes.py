@@ -2,6 +2,7 @@ import logging
 
 from PySide2.QtCore import Qt
 from PySide2.QtWidgets import (
+    QSpinBox,
     QLineEdit,
     QPushButton,
     QRadioButton,
@@ -35,31 +36,31 @@ class NodeExampleContent(NodeContent):
         self.make_title = QRadioButton('Make Titlecase')
         self.add_widget(self.make_title, pos=3)
 
-        self.add_widget(QComboBox(), pos=5)
-        self.add_widget(QPushButton('Button'), pos=6)
-
         self.text = QLineEdit()
+        self.text.setObjectName('Text')
         self.text.setPlaceholderText('text')
         self.add_input_widget(self.text, pos=4)
 
         self.output_text = None
 
+    def update_text(self, text):
+        if self.make_upper.isChecked():
+            return text.upper()
+
+        if self.make_lower.isChecked():
+            return text.lower()
+
+        if self.make_title.isChecked():
+            return text.title()
+
+        return text
+
     def get_output(self, index):
-        
-        return self.output_text or "Sample Text"
+        return self.output_text or self.update_text(self.text.text())
 
     def set_input(self, value, index):
-
-        if self.make_upper.isChecked():
-            self.output_text = value.upper()
-        elif self.make_lower.isChecked():
-            self.output_text = value.lower()
-        elif self.make_title.isChecked():
-            self.output_text = value.title()
-        else:
-            self.output_text = value
-
-        # print("➡ self.output_text :", self.output_text)
+        self.output_text = self.update_text(value)
+        super().set_input(value, index)
 
 
 @NodesRegister.register_class
@@ -78,12 +79,12 @@ class NodeDebugContent(NodeContent):
         super().__init__(parent)
 
         self.text_box = QPlainTextEdit()
-        self.add_label('Debug Print', pos=0)
-        self.add_input_widget(self.text_box, pos=1)
-        self.add_input_widget(QPlainTextEdit(), pos=2)
+        self.add_input('Debug Print', pos=0)
+        self.add_widget(self.text_box, pos=1)
 
     def set_input(self, value, index):
-        self.inputs[index].setPlainText(value)
+        super().set_input(value, index)
+        self.text_box.setPlainText(value)
 
 
 @NodesRegister.register_class
@@ -161,7 +162,7 @@ class NodeOutputContent(NodeContent):
         super().__init__(parent)
         self.add_label('Test', pos=0, alignment=Qt.AlignCenter)
         self.add_input('Click', pos=1)
-        self.add_input_widget(QPushButton('Click'), 'label', pos=1)
+        self.add_input_widget(QSpinBox(), 'label', pos=1)
 
 
 @NodesRegister.register_class

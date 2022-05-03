@@ -89,6 +89,12 @@ class NodeDebugContent(NodeContent):
         super().set_input(value, index)
         self.text_box.setPlainText(value)
 
+    def clear_output(self, index):
+        return
+
+    def get_output(self, index):
+        return
+
 
 @NodesRegister.register_class
 class NodeDebug(Node):
@@ -148,6 +154,9 @@ class NodeInputContent(NodeContent):
 
         return ""
 
+    def clear_output(self, index):
+        return
+
 
 @NodesRegister.register_class
 class NodeInput(Node):
@@ -163,9 +172,24 @@ class NodeOutputContent(NodeContent):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.add_label('Test', pos=0, alignment=Qt.AlignCenter)
-        self.add_input('Click', pos=1)
-        self.add_input_widget(QSpinBox(), 'label', pos=1)
+        self.add_output('Output', pos=0)
+
+        self.add_label('Test', pos=1, alignment=Qt.AlignCenter)
+
+        self.spinbox = QSpinBox()
+        self.add_input_widget(self.spinbox, 'Increment', pos=2)
+
+    def clear_output(self, index):
+        self.spinbox.setValue(0)
+
+    def get_output(self, index):
+        value = self.spinbox.value()
+        return str(value)
+
+    def set_input(self, value, index):
+        super().set_input(value, index)
+        value = value if isinstance(value, int) else int(value)
+        self.spinbox.setValue(value)
 
 
 @NodesRegister.register_class

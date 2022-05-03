@@ -1,3 +1,4 @@
+import abc
 import sys
 import logging
 
@@ -89,7 +90,7 @@ class NodeContent(QWidget):
             label (str): The name of the label.
         """
         label = QLabel(label)
-        self._layout.insertWidget(pos, label, alignment)
+        self._layout.insertWidget(pos, label, alignment=alignment)
         return label
 
     def add_input(self, label: str, pos=0):
@@ -117,10 +118,10 @@ class NodeContent(QWidget):
         self.outputs.append(label)
 
     def clear_output(self, index):
-        return ""
+        raise NotImplementedError
 
     def get_output(self, index):
-        return ""
+        raise NotImplementedError
 
     def set_input(self, value, index):
         widget = self.inputs[index]
@@ -130,9 +131,9 @@ class NodeContent(QWidget):
             if replaceable_widget.get('label'):
                 widget.setHidden(True)
             else:
-                self.convert_to_label(widget)
+                self._convert_to_label(widget)
 
-    def convert_to_label(self, widget):
+    def _convert_to_label(self, widget):
         widget.setHidden(True)
 
         label = self.add_label(widget.objectName(), pos=self.widgets[widget])

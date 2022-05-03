@@ -100,6 +100,7 @@ class LeftClickPress(LeftClick):
         end_node = LeftClick.socket_end.node.base
         end_socket_widget = LeftClick.socket_end.widget
         end_node.content.restore_widget(end_socket_widget)
+        end_node.content.clear_output(LeftClick.socket_end.index)
 
         # Invert the sockets if click starts at a output socket
         LeftClick.socket_clicked = (

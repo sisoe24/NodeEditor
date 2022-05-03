@@ -62,6 +62,9 @@ class NodeExampleContent(NodeContent):
         self.output_text = self.update_text(value)
         super().set_input(value, index)
 
+    def clear_output(self, index):
+        self.output_text = None
+
 
 @NodesRegister.register_class
 class NodeExample(Node):

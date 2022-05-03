@@ -29,6 +29,10 @@ class NodeContent(QWidget):
         self._layout.setSpacing(15)
         self.setLayout(self._layout)
 
+    @property
+    def layout_size(self):
+        return self._layout.sizeHint()
+
     def _is_widget(func):
         def wrapper(*args, **kwargs):
             widget = args[1]
@@ -112,9 +116,8 @@ class NodeContent(QWidget):
         self._layout.insertWidget(pos, label)
         self.outputs.append(label)
 
-    @property
-    def layout_size(self):
-        return self._layout.sizeHint()
+    def clear_output(self, index):
+        return ""
 
     def get_output(self, index):
         return ""

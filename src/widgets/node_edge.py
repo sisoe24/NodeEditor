@@ -119,7 +119,7 @@ class NodeEdge(_EdgeInterface):
         self.scene.addItem(self.edge_graphics)
 
         self._add_reference()
-        self.transfer_data()
+        # self.transfer_data()
 
     def transfer_data(self):
 

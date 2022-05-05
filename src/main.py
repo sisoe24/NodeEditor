@@ -149,7 +149,7 @@ class MainWindow(QMainWindow):
 
     def _debug_exec(self):
         """Debug function"""
-        self.menubar._run_actions.run_data()
+        # self.menubar._run_actions.run_data()
 
     def _debug_function(self):
         """Debug function"""

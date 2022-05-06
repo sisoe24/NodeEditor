@@ -12,7 +12,6 @@ from PySide2.QtWidgets import (
 )
 
 from src.nodes import NodesRegister, extract_output_edges, extract_input_edges
-from src.nodes.nodes_content import NodeExecuteInputLabel,  NodeExecuteOutputLabel
 from src.utils import class_id
 from src.widgets.node_socket import create_socket
 
@@ -290,10 +289,10 @@ class Node(NodeInterface):
         offset = 8
         node_width = self.node_graphics._width
 
-        for index, _widget in enumerate(widgets):
+        for index, node_socket in enumerate(widgets):
 
-            socket_type = _widget[0]
-            widget = _widget[1]
+            socket_type = node_socket.data
+            widget = node_socket.widget
 
             socket = create_socket(
                 self.node_graphics, index, socket_type, widget, node_side

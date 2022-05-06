@@ -39,14 +39,6 @@ class SocketPath:
             path.addRect(-6, -6, 10, 10)
             return path
 
-        if self.socket_type == 'input_widget':
-            self.color = Qt.red
-            return self._draw_ellipse()
-
-        if self.socket_type == 'output_label':
-            self.color = Qt.blue
-            return self._draw_ellipse()
-
         if self.socket_type in ['output_execute', 'input_execute']:
             path = QPainterPath()
             path.moveTo(7.0, 0.0)
@@ -54,6 +46,17 @@ class SocketPath:
             path.lineTo(-7.0, -0.0)
             path.lineTo(0.0, 7.0)
             return path
+
+        if self.socket_type == 'input_widget':
+            self.color = QColor('#B69D12')
+
+        if self.socket_type == 'input_boolean':
+            self.color = Qt.red
+
+        if self.socket_type == 'output_label':
+            self.color = Qt.blue
+
+        return self._draw_ellipse()
 
 
 class SocketGraphics(QGraphicsItem):
@@ -71,7 +74,7 @@ class SocketGraphics(QGraphicsItem):
         self._outline_pen = QPen(Qt.black)
         self._outline_pen.setWidthF(0.5)
 
-        self.setToolTip(self._socket_type)
+        self.setToolTip(self._socket_type.split('_')[1].title())
 
         self._set_flags()
 

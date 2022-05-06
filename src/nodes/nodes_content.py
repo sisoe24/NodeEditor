@@ -70,7 +70,7 @@ class NodeContent(QWidget):
         self._layout.insertWidget(pos, label)
         self.inputs.append(SocketNode(socket_type, label))
 
-    def add_input_widget(self, widget, label="", pos=0, socket_type=None):
+    def add_input_widget(self, widget, label="", pos=0, socket_type: SocketType = None):
         """Add an input widget with a socket.
 
         Args:
@@ -99,7 +99,7 @@ class NodeContent(QWidget):
         self._replaceable_widgets[widget] = {
             'label': label, 'replace': True, 'is_form_layout': is_form_layout}
 
-    def add_input(self, socket_type, label: str, pos=0):
+    def add_input(self, socket_type: SocketType, label: str, pos=0):
         """Add an input socket with a label.
 
         Args:
@@ -134,7 +134,7 @@ class NodeContent(QWidget):
             checkbox, pos=pos, socket_type=SocketType.boolean)
         return checkbox
 
-    def _add_output(self, socket_type, label, pos):
+    def _add_output(self, socket_type: SocketType, label, pos):
         """Add an output widget with a socket.
 
         Args:
@@ -145,7 +145,7 @@ class NodeContent(QWidget):
         self._layout.insertWidget(pos, label)
         self.outputs.append(SocketNode(socket_type, label))
 
-    def add_output(self, socket_type, label: str, pos=0):
+    def add_output(self, socket_type: SocketType, label: str, pos=0):
         """Add an output widget with a socket.
 
         Args:

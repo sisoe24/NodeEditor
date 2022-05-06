@@ -68,6 +68,7 @@ class DebugWidget(QWidget):
         self.console.setFont(QFont('Menlo', 16))
         self.tabs.addTab(QUndoView(self.undo_stack), 'Undo History')
         self.tabs.addTab(self.console, 'Debug Console')
+        self.tabs.setCurrentIndex(1)
 
         self._btn_exec = QPushButton('Exec')
         self._btn_debug = QPushButton('Test')

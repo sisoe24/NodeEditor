@@ -34,7 +34,7 @@ class NodeNumberContent(NodeContent):
 @NodesRegister.register_class
 class NodeNumber(Node):
     title_background = Qt.gray
-    title = 'Increment number'
+    title = 'Numbers'
 
     def __init__(self, scene):
         super().__init__(scene=scene, node=self, content=NodeNumberContent())

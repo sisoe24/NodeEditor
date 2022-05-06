@@ -10,31 +10,58 @@ from src.utils import class_id
 
 
 def create_socket(parent_node, socket_index, widget, socket_type):
-    if socket_type == 'input':
-        return SocketInput(parent_node, socket_index, widget)
+    if 'input' in socket_type:
+        return SocketInput(parent_node, socket_index, socket_type, widget)
 
-    if socket_type == 'output':
-        return SocketOutput(parent_node, socket_index, widget)
+    if 'output' in socket_type:
+        return SocketOutput(parent_node, socket_index, socket_type, widget)
 
-    if socket_type == 'input_execute':
-        return SocketInputExecute(parent_node, socket_index, widget)
 
-    if socket_type == 'output_execute':
-        return SocketOutputExecute(parent_node, socket_index, widget)
+class SocketPath:
+    def __init__(self, socket_type):
+        self.color = Qt.white
+
+        self.socket_type = socket_type
+        self.path = self.draw_socket()
+
+    def _draw_ellipse(self):
+        path = QPainterPath()
+        radius = 6.0
+        path.addEllipse(-radius, -radius, radius * 2, radius * 2)
+        return path
+
+    def draw_socket(self):
+        if self.socket_type == 'input':
+            self.color = Qt.green
+            return self._draw_ellipse()
+
+        if self.socket_type == 'output':
+            self.color = Qt.blue
+            return self._draw_ellipse()
+
+        if self.socket_type in ['output_execute', 'input_execute']:
+            path = QPainterPath()
+            path.moveTo(7.0, 0.0)
+            path.lineTo(0.0, -7.0)
+            path.lineTo(-7.0, -0.0)
+            path.lineTo(0.0, 7.0)
+            return path
 
 
 class SocketGraphics(QGraphicsItem):
-    def __init__(self, node, index, widget):
+    def __init__(self, node, index, socket_type, widget):
         super().__init__(node)
 
         self._node = node
         self._index = index
         self._widget = widget
+        self._socket_type = socket_type
 
         self._outline_pen = QPen(Qt.black)
         self._outline_pen.setWidthF(0.5)
 
-        self._draw_graphics()
+        self._socket_body = SocketPath(self._socket_type)
+
         self._set_flags()
 
     def get_position(self):
@@ -57,20 +84,13 @@ class SocketGraphics(QGraphicsItem):
         """Initialize UI for the Node graphic content."""
         self.setFlag(QGraphicsItem.ItemIsSelectable)
 
-    def _draw_graphics(self):
-        """Draw the graphics of the socket ellipse."""
-        path = QPainterPath()
-        radius = 6.0
-        path.addEllipse(-radius, -radius, radius * 2, radius * 2)
-        self._socket_body = path
-
     def paint(self, painter, option, widget=None):
-        painter.setBrush(QBrush(self.color))
+        painter.setBrush(QBrush(self._socket_body.color))
         painter.setPen(self._outline_pen)
-        painter.drawPath(self._socket_body)
+        painter.drawPath(self._socket_body.path)
 
     def boundingRect(self):
-        return self._socket_body.boundingRect()
+        return self._socket_body.path.boundingRect()
 
     def __str__(self) -> str:
         return class_id('SocketGraphics', self)
@@ -97,10 +117,9 @@ class SocketGraphics(QGraphicsItem):
 
 
 class SocketInput(SocketGraphics):
-    color = Qt.green
 
-    def __init__(self, node, index, widget=None):
-        super().__init__(node, index, widget)
+    def __init__(self, node, index, socket_type, widget=None):
+        super().__init__(node, index, socket_type, widget)
         self._edge = None
 
     @property
@@ -126,33 +145,10 @@ class SocketInput(SocketGraphics):
         return class_id('SocketInput', self)
 
 
-class SocketInputExecute(SocketInput):
-    color = Qt.green
-
-    def __init__(self, node, index, widget=None):
-        super().__init__(node, index, widget)
-        self._edge = None
-
-    def _draw_graphics(self):
-        """Draw the graphics of the socket ellipse."""
-        path = QPainterPath()
-        path.moveTo(7.0, 0.0)
-        path.lineTo(0.0, -7.0)
-        path.lineTo(-7.0, -0.0)
-        path.lineTo(0.0, 7.0)
-        self._socket_body = path
-
-    def paint(self, painter, option, widget=None):
-        painter.setBrush(QBrush(Qt.white))
-        painter.setPen(self._outline_pen)
-        painter.drawPath(self._socket_body)
-
-
 class SocketOutput(SocketGraphics):
-    color = Qt.blue
 
-    def __init__(self, node, index, widget=None):
-        super().__init__(node, index, widget)
+    def __init__(self, node, index, socket_type, widget=None):
+        super().__init__(node, index, socket_type, widget)
         self._edges = []
 
     @property
@@ -182,25 +178,3 @@ class SocketOutput(SocketGraphics):
 
     def __str__(self) -> str:
         return class_id('SocketOutput', self)
-
-
-class SocketOutputExecute(SocketOutput):
-    color = Qt.green
-
-    def __init__(self, node, index, widget=None):
-        super().__init__(node, index, widget)
-        self._edge = None
-
-    def _draw_graphics(self):
-        """Draw the graphics of the socket ellipse."""
-        path = QPainterPath()
-        path.moveTo(7.0, 0.0)
-        path.lineTo(0.0, -7.0)
-        path.lineTo(-7.0, -0.0)
-        path.lineTo(0.0, 7.0)
-        self._socket_body = path
-
-    def paint(self, painter, option, widget=None):
-        painter.setBrush(QBrush(Qt.white))
-        painter.setPen(self._outline_pen)
-        painter.drawPath(self._socket_body)

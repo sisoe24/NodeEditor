@@ -83,8 +83,8 @@ class NodeGraphics(QGraphicsItem):
         # title gets created at 0,0 thats why is already inside the title box
         title_item = QGraphicsTextItem(self)
 
-        title_item.setPlainText(self.node_id)
-        # title_item.setPlainText(self.base.title)
+        # title_item.setPlainText(self.node_id)
+        title_item.setPlainText(self.base.title)
         title_item.setDefaultTextColor(Qt.white)
         title_item.setFont(QFont('Menlo', 12))
 

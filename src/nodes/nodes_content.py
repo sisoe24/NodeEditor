@@ -1,9 +1,8 @@
-import abc
-import sys
 import logging
 
 from PySide2.QtCore import Qt
 from PySide2.QtWidgets import (
+    QCheckBox,
     QFormLayout,
     QSpacerItem,
     QLabel,
@@ -75,13 +74,13 @@ class NodeContent(QWidget):
         self._layout.insertWidget(pos, label)
         self.inputs.append((socket_type, label))
 
-    def add_input_widget(self, widget, label="", pos=0):
+    def add_input_widget(self, widget, label="", pos=0, socket_type='input_widget'):
         """Add an input widget with a socket.
 
         Args:
             widget (any): A instance of a QWidget class.
         """
-        self.inputs.append(('input_widget', widget))
+        self.inputs.append((socket_type, widget))
 
         is_form_layout = None
         if label:
@@ -126,6 +125,16 @@ class NodeContent(QWidget):
             label (str): The name of the input socket label.
         """
         self._add_input('input_list', QLabel(label), pos)
+
+    def add_input_boolean(self, label, pos=0):
+        """Add an input socket with a label.
+
+        Args:
+            label (str): The name of the input socket label.
+        """
+        checkbox = QCheckBox(label)
+        self.add_input_widget(checkbox, pos=pos, socket_type='input_boolean')
+        return checkbox
 
     def _add_output(self, socket_type, label, pos):
         """Add an output widget with a socket.

@@ -14,8 +14,7 @@ class NodeConditionalsContent(NodeContent):
         super().__init__(parent)
         self.add_input_execute('Execute', 2)
 
-        self.condition = QCheckBox('Condition')
-        self.add_input_widget(self.condition, pos=3)
+        self.condition = self.add_input_boolean('Condition', pos=3)
 
         self.add_output_execute('True', 0)
         self.add_output_execute('False', 1)

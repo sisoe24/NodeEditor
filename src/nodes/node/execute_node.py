@@ -23,7 +23,7 @@ class NodeExecuteContent(NodeContent):
 @NodesRegister.register_class
 class NodeExecute(Node):
     title_background = Qt.red
-    title = "For Loop"
+    title = "Execute"
 
     def __init__(self, scene):
         super().__init__(scene=scene, node=self, content=NodeExecuteContent())

@@ -8,6 +8,8 @@ from src.widgets.node_graphics import Node
 class NodeForLoopContent(NodeContent):
     def __init__(self, parent=None):
         super().__init__(parent)
+        self.add_output_execute(pos=0)
+        self.add_input_execute(pos=1)
 
     def get_output(self, index):
         return ""

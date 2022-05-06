@@ -212,7 +212,7 @@ class EditorAddActions(EditorActions):
 
         nodes = NodesRegister.nodes_classes.items()
         for node, obj in nodes:
-            action = QAction(node, self)
+            action = QAction(obj.title, self)
 
             # XXX: lambda does not work in this case, don't know why
             # err: Cell variable obj defined in loop

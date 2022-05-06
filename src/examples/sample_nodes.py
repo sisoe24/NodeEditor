@@ -101,37 +101,10 @@ class NodeDebugContent(NodeContent):
 @NodesRegister.register_class
 class NodeDebug(Node):
     title_background = Qt.green
-    title = "Debug Node"
+    title = "Debug Print"
 
     def __init__(self, scene):
         super().__init__(scene=scene, node=self, content=NodeDebugContent())
-
-
-class NodeTestContent(NodeContent):
-    """The node content widgets container class."""
-
-    def __init__(self, parent=None):
-        super().__init__(parent)
-
-        self.add_output('Output 1')
-        self.checkbox = QCheckBox('Save render')
-        self.add_input(self.checkbox)
-
-    def get_output(self, index):
-        return "Output from test node"
-
-    def set_input(self, value, index):
-        self.checkbox.setChecked(bool(value))
-        return "Output from test node"
-
-
-@NodesRegister.register_class
-class NodeTest(Node):
-    title_background = Qt.black
-    title = "Test Node"
-
-    def __init__(self, scene):
-        super().__init__(scene=scene, node=self, content=NodeTestContent())
 
 
 class NodeInputContent(NodeContent):
@@ -163,40 +136,7 @@ class NodeInputContent(NodeContent):
 @NodesRegister.register_class
 class NodeInput(Node):
     title_background = Qt.blue
-    title = 'Input Node'
+    title = 'Input Text'
 
     def __init__(self, scene):
         super().__init__(scene=scene, node=self, content=NodeInputContent())
-
-
-class NodeOutputContent(NodeContent):
-    """The node content widgets container class."""
-
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.add_output('Output', pos=0)
-
-
-        self.spinbox = QSpinBox()
-        self.add_input_widget(self.spinbox, 'Increment', pos=2)
-
-    def clear_output(self, index):
-        self.spinbox.setValue(0)
-
-    def get_output(self, index):
-        value = self.spinbox.value()
-        return str(value)
-
-    def set_input(self, value, index):
-        super().set_input(value, index)
-        value = value if isinstance(value, int) else int(value)
-        self.spinbox.setValue(value)
-
-
-@NodesRegister.register_class
-class NodeOutput(Node):
-    title_background = Qt.darkGray
-    title = 'Output Node'
-
-    def __init__(self, scene):
-        super().__init__(scene=scene, node=self, content=NodeOutputContent())

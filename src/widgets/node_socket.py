@@ -5,7 +5,6 @@ from PySide2.QtGui import QColor, QPen, QPainterPath, QBrush
 from PySide2.QtWidgets import (
     QGraphicsItem
 )
-from src.sockets.sockets_types import SocketType
 
 from src.utils import class_id
 
@@ -25,11 +24,19 @@ def create_socket(parent_node, socket_index, socket_type, widget, node_side):
     if node_side == 'left':
         return SocketInput(socket)
 
-    if node_side == 'right':
-        return SocketOutput(socket)
+    return SocketOutput(socket)
 
 
-class SocketPath:
+class SocketType:
+
+    execute = {'type': 'execute', 'color': QColor('#FFFFFF')}
+    number = {'type': 'number', 'color': QColor('#D19A66')}
+    array = {'type': 'list', 'color': QColor('#18B2A5')}
+    boolean = {'type': 'boolean', 'color': QColor('#BD74D3')}
+    text = {'type': 'string', 'color': QColor('#98C379')}
+    widget = {'type': 'widget', 'color': QColor('#BD0015')}
+    value = {'type': 'value', 'color': QColor('#BDFF45')}
+
     def __init__(self, socket_type):
         self.color = Qt.white
 
@@ -44,31 +51,21 @@ class SocketPath:
         return path
 
     def draw_socket(self):
-        if self.socket_type == SocketType.array:
-            self.color = QColor('#F2A19D')
+
+        self.color = self.socket_type['color']
+
+        if self.socket_type == self.array:
             path = QPainterPath()
             path.addRect(-6, -6, 10, 10)
             return path
 
-        if self.socket_type == SocketType.execute:
+        if self.socket_type == self.execute:
             path = QPainterPath()
             path.moveTo(7.0, 0.0)
             path.lineTo(0.0, -7.0)
             path.lineTo(-7.0, -0.0)
             path.lineTo(0.0, 7.0)
             return path
-
-        if self.socket_type == SocketType.widget:
-            self.color = QColor('#BD0015')
-
-        if self.socket_type == SocketType.boolean:
-            self.color = QColor('#BD74D3')
-
-        if self.socket_type == SocketType.text:
-            self.color = QColor('#98C379')
-
-        if self.socket_type == SocketType.number:
-            self.color = QColor('#D19A66')
 
         return self._draw_ellipse()
 
@@ -80,9 +77,9 @@ class SocketGraphics(QGraphicsItem):
         self._socket = socket
 
         self.socket_type = socket.socket_type
-        self.setToolTip(self.socket_type.title())
+        self.setToolTip(self.socket_type['type'].title())
 
-        self._socket_body = SocketPath(self.socket_type)
+        self._socket_body = SocketType(self.socket_type)
         self.color = self._socket_body.color
 
         self._outline_pen = QPen(Qt.black)

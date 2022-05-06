@@ -10,7 +10,7 @@ from PySide2.QtWidgets import (
     QWidget
 )
 
-from src.sockets.sockets_types import SocketType
+from src.widgets.node_socket import SocketType
 
 LOGGER = logging.getLogger('nodeeditor.master_node')
 
@@ -176,6 +176,7 @@ class NodeContent(QWidget):
     def set_input(self, value, index):
         widget = self.inputs[index]
 
+        widget = widget[1]
         replaceable_widget = self._replaceable_widgets.get(widget)
         if replaceable_widget and replaceable_widget.get('replace'):
             if replaceable_widget.get('label'):

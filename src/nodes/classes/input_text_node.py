@@ -5,7 +5,7 @@ from PySide2.QtWidgets import QPlainTextEdit
 
 from src.nodes import NodeContent, NodesRegister
 from src.widgets.node_graphics import Node
-from src.sockets import SocketType
+from src.widgets.node_socket import SocketType
 
 
 class NodeInputContent(NodeContent):

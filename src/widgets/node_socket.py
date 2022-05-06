@@ -10,13 +10,23 @@ from src.sockets.sockets_types import SocketType
 from src.utils import class_id
 
 
+class SocketObject:
+    def __init__(self, parent_node, socket_index, socket_type, widget):
+
+        self.parent_node = parent_node
+        self.socket_index = socket_index
+        self.socket_type = socket_type
+        self.socket_widget = widget
+
+
 def create_socket(parent_node, socket_index, socket_type, widget, node_side):
+    socket = SocketObject(parent_node, socket_index, socket_type, widget)
 
     if node_side == 'left':
-        return SocketInput(parent_node, socket_index, socket_type, widget)
+        return SocketInput(socket)
 
     if node_side == 'right':
-        return SocketOutput(parent_node, socket_index, socket_type, widget)
+        return SocketOutput(socket)
 
 
 class SocketPath:
@@ -49,36 +59,34 @@ class SocketPath:
             return path
 
         if self.socket_type == SocketType.widget:
-            self.color = QColor('#B69D12')
+            self.color = QColor('#BD0015')
 
         if self.socket_type == SocketType.boolean:
-            self.color = Qt.red
+            self.color = QColor('#BD74D3')
 
         if self.socket_type == SocketType.text:
-            self.color = QColor('#B63712')
+            self.color = QColor('#98C379')
 
         if self.socket_type == SocketType.number:
-            self.color = QColor('#B637F8')
+            self.color = QColor('#D19A66')
 
         return self._draw_ellipse()
 
 
 class SocketGraphics(QGraphicsItem):
-    def __init__(self, node, index, socket_type, widget):
-        super().__init__(node)
+    def __init__(self, socket):
+        super().__init__(socket.parent_node)
 
-        self._node = node
-        self._index = index
-        self._widget = widget
+        self._socket = socket
 
-        self._socket_type = socket_type
-        self._socket_body = SocketPath(self._socket_type)
+        self.socket_type = socket.socket_type
+        self.setToolTip(self.socket_type.title())
+
+        self._socket_body = SocketPath(self.socket_type)
         self.color = self._socket_body.color
 
         self._outline_pen = QPen(Qt.black)
         self._outline_pen.setWidthF(0.5)
-
-        self.setToolTip(self._socket_type)
 
         self._set_flags()
 
@@ -88,15 +96,15 @@ class SocketGraphics(QGraphicsItem):
 
     @property
     def node(self):
-        return self._node
+        return self._socket.parent_node
 
     @property
     def index(self):
-        return self._index
+        return self._socket.socket_index
 
     @property
     def widget(self):
-        return self._widget
+        return self._socket.socket_widget
 
     def _set_flags(self):
         """Initialize UI for the Node graphic content."""
@@ -121,7 +129,7 @@ class SocketGraphics(QGraphicsItem):
             str(edge) for edge in self.edges]
 
         return {
-            'type': str(self._socket_type),
+            'type': str(self.socket_type),
             'object': str(self),
             'index': self._index,
             'widget': str(self._widget),
@@ -137,8 +145,8 @@ class SocketGraphics(QGraphicsItem):
 
 class SocketInput(SocketGraphics):
 
-    def __init__(self, node, index, socket_type, widget=None):
-        super().__init__(node, index, socket_type, widget)
+    def __init__(self, socket):
+        super().__init__(socket)
         self._edge = None
 
     @property
@@ -166,8 +174,8 @@ class SocketInput(SocketGraphics):
 
 class SocketOutput(SocketGraphics):
 
-    def __init__(self, node, index, socket_type, widget=None):
-        super().__init__(node, index, socket_type, widget)
+    def __init__(self, socket):
+        super().__init__(socket)
         self._edges = []
 
     @property

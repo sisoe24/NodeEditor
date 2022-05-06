@@ -12,6 +12,7 @@ from PySide2.QtWidgets import (
 )
 
 from src.nodes import NodesRegister, extract_output_edges, extract_input_edges
+from src.nodes.nodes_content import NodeExecuteInputLabel,  NodeExecuteOutputLabel
 from src.utils import class_id
 from src.widgets.node_socket import create_socket
 
@@ -274,7 +275,7 @@ class Node(NodeInterface):
         self._add_inputs()
         self._add_outputs()
 
-    def _add_sockets(self, widgets, is_input=True):
+    def _add_sockets(self, widgets, socket_type):
         """Add sockets to node.
 
         Sockets will be added at the left or right of the node based on which
@@ -282,7 +283,7 @@ class Node(NodeInterface):
 
         Args:
             widgets (list): a list of widgets to assign a socket.
-            is_input (bool, optional): If True, sockets will be positioned on,
+            socket_type (str): socket type
             the left. If False, will be position on the right. Defaults to True.
         """
         # arbitrary offset to account for the widget position
@@ -292,17 +293,26 @@ class Node(NodeInterface):
         for index, widget in enumerate(widgets):
             y = self.node_graphics._title_height + widget.pos().y() + offset
 
-            socket = create_socket(self.node_graphics, index, widget, is_input)
-            socket.setPos(0 if is_input else width, y)
+            if isinstance(widget, NodeExecuteInputLabel):
+                _socket_type = 'input_execute'
+            elif isinstance(widget, NodeExecuteOutputLabel):
+                _socket_type = 'output_execute'
+            else:
+                _socket_type = socket_type
+
+            socket = create_socket(
+                self.node_graphics, index, widget, _socket_type)
+            socket.setPos(0 if socket_type in [
+                          'input', 'execute'] else width, y)
 
             yield socket
 
     def _add_inputs(self):
-        for socket in self._add_sockets(self.content.inputs):
+        for socket in self._add_sockets(self.content.inputs, 'input'):
             self.input_sockets.append(socket)
 
     def _add_outputs(self):
-        for socket in self._add_sockets(self.content.outputs, False):
+        for socket in self._add_sockets(self.content.outputs, 'output'):
             self.output_sockets.append(socket)
 
     def set_position(self, x: int, y: int):

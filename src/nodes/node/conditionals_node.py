@@ -12,13 +12,13 @@ from src.widgets.node_graphics import Node
 class NodeConditionalsContent(NodeContent):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.add_input('Execute', 2)
+        self.add_input_execute('Execute', 2)
 
         self.condition = QCheckBox('Condition')
         self.add_input_widget(self.condition, pos=3)
 
-        self.add_output('True', 0)
-        self.add_output('False', 1)
+        self.add_output_execute('True', 0)
+        self.add_output_execute('False', 1)
 
     def get_output(self, index):
         return ""

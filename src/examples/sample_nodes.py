@@ -24,7 +24,7 @@ class NodeExampleContent(NodeContent):
     def __init__(self, parent=None):
         super().__init__(parent)
 
-        self.add_output('Execute', pos=0)
+        self.add_output_execute('Execute', pos=0)
 
         self.make_upper = QRadioButton('Make Uppercase')
         self.make_upper.setChecked(True)
@@ -41,7 +41,7 @@ class NodeExampleContent(NodeContent):
         self.text.setPlaceholderText('text')
         self.add_input_widget(self.text, pos=4)
 
-        self.add_input('Execute', pos=5)
+        self.add_input_execute('Execute', pos=5)
 
         self.output_text = None
 
@@ -83,8 +83,8 @@ class NodeDebugContent(NodeContent):
     def __init__(self, parent=None):
         super().__init__(parent)
 
+        self.add_input_execute(label='Print', pos=0)
         self.text_box = QPlainTextEdit()
-        self.add_input('Debug Print', pos=0)
         self.add_widget(self.text_box, pos=1)
 
     def set_input(self, value, index):

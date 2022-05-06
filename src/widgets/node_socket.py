@@ -9,11 +9,18 @@ from PySide2.QtWidgets import (
 from src.utils import class_id
 
 
-def create_socket(parent_node, socket_index, widget, is_input):
-    return (
-        SocketInput(parent_node, socket_index, widget) if is_input
-        else SocketOutput(parent_node, socket_index, widget)
-    )
+def create_socket(parent_node, socket_index, widget, socket_type):
+    if socket_type == 'input':
+        return SocketInput(parent_node, socket_index, widget)
+
+    if socket_type == 'output':
+        return SocketOutput(parent_node, socket_index, widget)
+
+    if socket_type == 'input_execute':
+        return SocketInputExecute(parent_node, socket_index, widget)
+
+    if socket_type == 'output_execute':
+        return SocketOutputExecute(parent_node, socket_index, widget)
 
 
 class SocketGraphics(QGraphicsItem):
@@ -119,6 +126,28 @@ class SocketInput(SocketGraphics):
         return class_id('SocketInput', self)
 
 
+class SocketInputExecute(SocketInput):
+    color = Qt.green
+
+    def __init__(self, node, index, widget=None):
+        super().__init__(node, index, widget)
+        self._edge = None
+
+    def _draw_graphics(self):
+        """Draw the graphics of the socket ellipse."""
+        path = QPainterPath()
+        path.moveTo(7.0, 0.0)
+        path.lineTo(0.0, -7.0)
+        path.lineTo(-7.0, -0.0)
+        path.lineTo(0.0, 7.0)
+        self._socket_body = path
+
+    def paint(self, painter, option, widget=None):
+        painter.setBrush(QBrush(Qt.white))
+        painter.setPen(self._outline_pen)
+        painter.drawPath(self._socket_body)
+
+
 class SocketOutput(SocketGraphics):
     color = Qt.blue
 
@@ -153,3 +182,25 @@ class SocketOutput(SocketGraphics):
 
     def __str__(self) -> str:
         return class_id('SocketOutput', self)
+
+
+class SocketOutputExecute(SocketOutput):
+    color = Qt.green
+
+    def __init__(self, node, index, widget=None):
+        super().__init__(node, index, widget)
+        self._edge = None
+
+    def _draw_graphics(self):
+        """Draw the graphics of the socket ellipse."""
+        path = QPainterPath()
+        path.moveTo(7.0, 0.0)
+        path.lineTo(0.0, -7.0)
+        path.lineTo(-7.0, -0.0)
+        path.lineTo(0.0, 7.0)
+        self._socket_body = path
+
+    def paint(self, painter, option, widget=None):
+        painter.setBrush(QBrush(Qt.white))
+        painter.setPen(self._outline_pen)
+        painter.drawPath(self._socket_body)

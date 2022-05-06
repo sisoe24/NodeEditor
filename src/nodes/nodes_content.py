@@ -14,6 +14,16 @@ from PySide2.QtWidgets import (
 LOGGER = logging.getLogger('nodeeditor.master_node')
 
 
+class NodeExecuteOutputLabel(QLabel):
+    def __init__(self, text):
+        super().__init__(text)
+
+
+class NodeExecuteInputLabel(QLabel):
+    def __init__(self, text):
+        super().__init__(text)
+
+
 class NodeContent(QWidget):
 
     def __init__(self, parent=None):
@@ -93,17 +103,42 @@ class NodeContent(QWidget):
         self._layout.insertWidget(pos, label, alignment=alignment)
         return label
 
+    def _add_input(self, label, pos=0):
+        """Add an input socket with a label.
+
+        Args:
+            label (str): The name of the input socket label.
+        """
+        label.setAlignment(Qt.AlignLeft)
+        self._layout.insertWidget(pos, label)
+        self.inputs.append(label)
+
     def add_input(self, label: str, pos=0):
         """Add an input socket with a label.
 
         Args:
             label (str): The name of the input socket label.
         """
-        label = QLabel(label)
-        label.setAlignment(Qt.AlignLeft)
+        self._add_input(QLabel(label), pos)
+
+    def add_input_execute(self, label='Execute', pos=0):
+        """Add an input socket with a label.
+
+        Args:
+            label (str): The name of the input socket label.
+        """
+        self._add_input(NodeExecuteInputLabel(label), pos)
+
+    def _add_output(self, label, pos=0):
+        """Add an output widget with a socket.
+
+        Args:
+            label (str): The name of the output socket label.
+        """
+        label.setAlignment(Qt.AlignRight)
 
         self._layout.insertWidget(pos, label)
-        self.inputs.append(label)
+        self.outputs.append(label)
 
     def add_output(self, label: str, pos=0):
         """Add an output widget with a socket.
@@ -111,11 +146,15 @@ class NodeContent(QWidget):
         Args:
             label (str): The name of the output socket label.
         """
-        label = QLabel(label)
-        label.setAlignment(Qt.AlignRight)
+        self._add_output(QLabel(label), pos)
 
-        self._layout.insertWidget(pos, label)
-        self.outputs.append(label)
+    def add_output_execute(self, label='Execute', pos=0):
+        """Add an input socket with a label.
+
+        Args:
+            label (str): The name of the input socket label.
+        """
+        self._add_output(NodeExecuteOutputLabel(label), pos)
 
     def clear_output(self, index):
         raise NotImplementedError

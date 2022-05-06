@@ -10,6 +10,7 @@ class NodeForLoopContent(NodeContent):
         super().__init__(parent)
         self.add_output_execute(pos=0)
         self.add_input_execute(pos=1)
+        self.add_input_list('List', pos=2)
 
     def get_output(self, index):
         return ""

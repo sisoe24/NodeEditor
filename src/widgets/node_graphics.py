@@ -275,7 +275,7 @@ class Node(NodeInterface):
         self._add_inputs()
         self._add_outputs()
 
-    def _add_sockets(self, widgets, socket_type):
+    def _add_sockets(self, widgets, node_side):
         """Add sockets to node.
 
         Sockets will be added at the left or right of the node based on which
@@ -283,36 +283,32 @@ class Node(NodeInterface):
 
         Args:
             widgets (list): a list of widgets to assign a socket.
-            socket_type (str): socket type
+            node_side (str): socket type
             the left. If False, will be position on the right. Defaults to True.
         """
         # arbitrary offset to account for the widget position
         offset = 8
-        width = self.node_graphics._width
+        node_width = self.node_graphics._width
 
-        for index, widget in enumerate(widgets):
+        for index, _widget in enumerate(widgets):
+
+            socket_type = _widget[0]
+            widget = _widget[1]
+
             y = self.node_graphics._title_height + widget.pos().y() + offset
 
-            if isinstance(widget, NodeExecuteInputLabel):
-                _socket_type = 'input_execute'
-            elif isinstance(widget, NodeExecuteOutputLabel):
-                _socket_type = 'output_execute'
-            else:
-                _socket_type = socket_type
-
             socket = create_socket(
-                self.node_graphics, index, widget, _socket_type)
-            socket.setPos(0 if socket_type in [
-                          'input', 'execute'] else width, y)
+                self.node_graphics, index, widget, socket_type)
+            socket.setPos(0 if node_side == 'left' else node_width, y)
 
             yield socket
 
     def _add_inputs(self):
-        for socket in self._add_sockets(self.content.inputs, 'input'):
+        for socket in self._add_sockets(self.content.inputs, 'left'):
             self.input_sockets.append(socket)
 
     def _add_outputs(self):
-        for socket in self._add_sockets(self.content.outputs, 'output'):
+        for socket in self._add_sockets(self.content.outputs, 'right'):
             self.output_sockets.append(socket)
 
     def set_position(self, x: int, y: int):

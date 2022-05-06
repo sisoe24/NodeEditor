@@ -1,7 +1,7 @@
 
 import json
 from PySide2.QtCore import Qt
-from PySide2.QtGui import QPen, QPainterPath, QBrush
+from PySide2.QtGui import QColor, QPen, QPainterPath, QBrush
 from PySide2.QtWidgets import (
     QGraphicsItem
 )
@@ -10,6 +10,7 @@ from src.utils import class_id
 
 
 def create_socket(parent_node, socket_index, widget, socket_type):
+
     if 'input' in socket_type:
         return SocketInput(parent_node, socket_index, socket_type, widget)
 
@@ -24,18 +25,25 @@ class SocketPath:
         self.socket_type = socket_type
         self.path = self.draw_socket()
 
-    def _draw_ellipse(self):
+    @staticmethod
+    def _draw_ellipse():
         path = QPainterPath()
         radius = 6.0
         path.addEllipse(-radius, -radius, radius * 2, radius * 2)
         return path
 
     def draw_socket(self):
-        if self.socket_type == 'input':
-            self.color = Qt.green
+        if self.socket_type == 'input_list':
+            self.color = QColor('#F2A19D')
+            path = QPainterPath()
+            path.addRect(-6, -6, 10, 10)
+            return path
+
+        if self.socket_type == 'input_widget':
+            self.color = Qt.red
             return self._draw_ellipse()
 
-        if self.socket_type == 'output':
+        if self.socket_type == 'output_label':
             self.color = Qt.blue
             return self._draw_ellipse()
 

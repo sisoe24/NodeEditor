@@ -31,6 +31,7 @@ class NodeContent(QWidget):
 
         self.inputs = []
         self.outputs = []
+
         self.widgets = {}
         self._replaceable_widgets = {}
 
@@ -44,17 +45,6 @@ class NodeContent(QWidget):
     def layout_size(self):
         return self._layout.sizeHint()
 
-    def _is_widget(func):
-        def wrapper(*args, **kwargs):
-            widget = args[1]
-            if isinstance(widget, QWidget):
-                return func(*args, **kwargs)
-            LOGGER.error('Item is not a child of QObject: %s %s',
-                         type(widget), widget)
-            sys.exit()
-        return wrapper
-
-    @_is_widget
     def add_widget(self, widget, pos=0):
         """Add a widget into the node graphics
 
@@ -65,13 +55,33 @@ class NodeContent(QWidget):
         """
         self._layout.insertWidget(pos, widget)
 
+    def add_label(self, label: str, pos=0, alignment=Qt.AlignLeft):
+        """Add a label into the node.
+
+        Args:
+            label (str): The name of the label.
+        """
+        label = QLabel(label)
+        self._layout.insertWidget(pos, label, alignment=alignment)
+        return label
+
+    def _add_input(self, socket_type, label, pos):
+        """Add an input socket with a label.
+
+        Args:
+            label (str): The name of the input socket label.
+        """
+        label.setAlignment(Qt.AlignLeft)
+        self._layout.insertWidget(pos, label)
+        self.inputs.append((socket_type, label))
+
     def add_input_widget(self, widget, label="", pos=0):
         """Add an input widget with a socket.
 
         Args:
             widget (any): A instance of a QWidget class.
         """
-        self.inputs.append(widget)
+        self.inputs.append(('input_widget', widget))
 
         is_form_layout = None
         if label:
@@ -93,33 +103,13 @@ class NodeContent(QWidget):
         self._replaceable_widgets[widget] = {
             'label': label, 'replace': True, 'is_form_layout': is_form_layout}
 
-    def add_label(self, label: str, pos=0, alignment=Qt.AlignLeft):
-        """Add a label into the node.
-
-        Args:
-            label (str): The name of the label.
-        """
-        label = QLabel(label)
-        self._layout.insertWidget(pos, label, alignment=alignment)
-        return label
-
-    def _add_input(self, label, pos=0):
-        """Add an input socket with a label.
-
-        Args:
-            label (str): The name of the input socket label.
-        """
-        label.setAlignment(Qt.AlignLeft)
-        self._layout.insertWidget(pos, label)
-        self.inputs.append(label)
-
     def add_input(self, label: str, pos=0):
         """Add an input socket with a label.
 
         Args:
             label (str): The name of the input socket label.
         """
-        self._add_input(QLabel(label), pos)
+        self._add_input('input_label', QLabel(label), pos)
 
     def add_input_execute(self, label='Execute', pos=0):
         """Add an input socket with a label.
@@ -127,9 +117,17 @@ class NodeContent(QWidget):
         Args:
             label (str): The name of the input socket label.
         """
-        self._add_input(NodeExecuteInputLabel(label), pos)
+        self._add_input('input_execute', NodeExecuteInputLabel(label), pos)
 
-    def _add_output(self, label, pos=0):
+    def add_input_list(self, label, pos=0):
+        """Add an input socket with a label.
+
+        Args:
+            label (str): The name of the input socket label.
+        """
+        self._add_input('input_list', QLabel(label), pos)
+
+    def _add_output(self, socket_type, label, pos):
         """Add an output widget with a socket.
 
         Args:
@@ -138,7 +136,7 @@ class NodeContent(QWidget):
         label.setAlignment(Qt.AlignRight)
 
         self._layout.insertWidget(pos, label)
-        self.outputs.append(label)
+        self.outputs.append((socket_type, label))
 
     def add_output(self, label: str, pos=0):
         """Add an output widget with a socket.
@@ -146,7 +144,7 @@ class NodeContent(QWidget):
         Args:
             label (str): The name of the output socket label.
         """
-        self._add_output(QLabel(label), pos)
+        self._add_output('output_label', QLabel(label), pos)
 
     def add_output_execute(self, label='Execute', pos=0):
         """Add an input socket with a label.
@@ -154,7 +152,7 @@ class NodeContent(QWidget):
         Args:
             label (str): The name of the input socket label.
         """
-        self._add_output(NodeExecuteOutputLabel(label), pos)
+        self._add_output('output_execute', NodeExecuteOutputLabel(label), pos)
 
     def clear_output(self, index):
         raise NotImplementedError

@@ -298,7 +298,7 @@ class Node(NodeInterface):
             y = self.node_graphics._title_height + widget.pos().y() + offset
 
             socket = create_socket(
-                self.node_graphics, index, widget, socket_type)
+                self.node_graphics, index, socket_type, widget, node_side)
             socket.setPos(0 if node_side == 'left' else node_width, y)
 
             yield socket

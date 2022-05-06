@@ -5,7 +5,7 @@ from PySide2.QtWidgets import QPlainTextEdit
 
 from src.nodes import NodeContent, NodesRegister
 from src.widgets.node_graphics import Node
-from src.sockets import SocketInputType, SocketOutputType
+from src.sockets import SocketType
 
 
 class NodeInputContent(NodeContent):
@@ -14,11 +14,10 @@ class NodeInputContent(NodeContent):
     def __init__(self, parent=None):
         super().__init__(parent)
 
+        self.add_output(SocketType.text, 'Text', pos=0)
+        self.add_output(SocketType.number, 'Text Length', pos=1)
+
         self.text_box = QPlainTextEdit('foo BAR')
-
-        self.add_output(SocketOutputType.text, 'Text', pos=0)
-        self.add_output(SocketOutputType.number, 'Text Length', pos=1)
-
         self.add_widget(self.text_box, pos=2)
 
     def get_output(self, index=1):

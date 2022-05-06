@@ -3,6 +3,7 @@ from PySide2.QtCore import Qt
 
 
 from src.nodes import NodeContent, NodesRegister
+from src.sockets.sockets_types import SocketType
 from src.widgets.node_graphics import Node
 
 
@@ -12,8 +13,8 @@ class NodeNumberContent(NodeContent):
     def __init__(self, parent=None):
         super().__init__(parent)
 
-        self.add_input('input_number', 'Number', pos=0)
-        self.add_output('output_number', 'Number', pos=1)
+        self.add_input(SocketType.number, 'Number', pos=0)
+        self.add_output(SocketType.number, 'Number', pos=1)
 
     def set_input(self, value, index):
         return ""

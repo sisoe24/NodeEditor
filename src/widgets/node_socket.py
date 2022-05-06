@@ -5,16 +5,17 @@ from PySide2.QtGui import QColor, QPen, QPainterPath, QBrush
 from PySide2.QtWidgets import (
     QGraphicsItem
 )
+from src.sockets.sockets_types import SocketType
 
 from src.utils import class_id
 
 
-def create_socket(parent_node, socket_index, widget, socket_type):
+def create_socket(parent_node, socket_index, socket_type, widget, node_side):
 
-    if 'input' in socket_type:
+    if node_side == 'left':
         return SocketInput(parent_node, socket_index, socket_type, widget)
 
-    if 'output' in socket_type:
+    if node_side == 'right':
         return SocketOutput(parent_node, socket_index, socket_type, widget)
 
 
@@ -33,13 +34,13 @@ class SocketPath:
         return path
 
     def draw_socket(self):
-        if self.socket_type == 'input_list':
+        if self.socket_type == SocketType.array:
             self.color = QColor('#F2A19D')
             path = QPainterPath()
             path.addRect(-6, -6, 10, 10)
             return path
 
-        if self.socket_type in ['output_execute', 'input_execute']:
+        if self.socket_type == SocketType.execute:
             path = QPainterPath()
             path.moveTo(7.0, 0.0)
             path.lineTo(0.0, -7.0)
@@ -47,14 +48,17 @@ class SocketPath:
             path.lineTo(0.0, 7.0)
             return path
 
-        if self.socket_type == 'input_widget':
+        if self.socket_type == SocketType.widget:
             self.color = QColor('#B69D12')
 
-        if self.socket_type == 'input_boolean':
+        if self.socket_type == SocketType.boolean:
             self.color = Qt.red
 
-        if self.socket_type == 'output_label':
-            self.color = Qt.blue
+        if self.socket_type == SocketType.text:
+            self.color = QColor('#B63712')
+
+        if self.socket_type == SocketType.number:
+            self.color = QColor('#B637F8')
 
         return self._draw_ellipse()
 
@@ -74,7 +78,7 @@ class SocketGraphics(QGraphicsItem):
         self._outline_pen = QPen(Qt.black)
         self._outline_pen.setWidthF(0.5)
 
-        self.setToolTip(self._socket_type.split('_')[1].title())
+        self.setToolTip(self._socket_type)
 
         self._set_flags()
 

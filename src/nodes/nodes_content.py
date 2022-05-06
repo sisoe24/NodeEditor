@@ -10,6 +10,8 @@ from PySide2.QtWidgets import (
     QWidget
 )
 
+from src.sockets.sockets_types import SocketType
+
 LOGGER = logging.getLogger('nodeeditor.master_node')
 
 
@@ -74,7 +76,7 @@ class NodeContent(QWidget):
         self._layout.insertWidget(pos, label)
         self.inputs.append((socket_type, label))
 
-    def add_input_widget(self, widget, label="", pos=0, socket_type='input_widget'):
+    def add_input_widget(self, widget, label="", pos=0, socket_type=SocketType.widget):
         """Add an input widget with a socket.
 
         Args:
@@ -102,13 +104,13 @@ class NodeContent(QWidget):
         self._replaceable_widgets[widget] = {
             'label': label, 'replace': True, 'is_form_layout': is_form_layout}
 
-    def add_input(self, label: str, pos=0):
+    def add_input(self, socket_type, label: str, pos=0):
         """Add an input socket with a label.
 
         Args:
             label (str): The name of the input socket label.
         """
-        self._add_input('input_label', QLabel(label), pos)
+        self._add_input(socket_type, QLabel(label), pos)
 
     def add_input_execute(self, label='Execute', pos=0):
         """Add an input socket with a label.
@@ -116,7 +118,7 @@ class NodeContent(QWidget):
         Args:
             label (str): The name of the input socket label.
         """
-        self._add_input('input_execute', NodeExecuteInputLabel(label), pos)
+        self._add_input(SocketType.execute, NodeExecuteInputLabel(label), pos)
 
     def add_input_list(self, label, pos=0):
         """Add an input socket with a label.
@@ -124,7 +126,7 @@ class NodeContent(QWidget):
         Args:
             label (str): The name of the input socket label.
         """
-        self._add_input('input_list', QLabel(label), pos)
+        self._add_input(SocketType.array, QLabel(label), pos)
 
     def add_input_boolean(self, label, pos=0):
         """Add an input socket with a label.
@@ -133,7 +135,8 @@ class NodeContent(QWidget):
             label (str): The name of the input socket label.
         """
         checkbox = QCheckBox(label)
-        self.add_input_widget(checkbox, pos=pos, socket_type='input_boolean')
+        self.add_input_widget(
+            checkbox, pos=pos, socket_type=SocketType.boolean)
         return checkbox
 
     def _add_output(self, socket_type, label, pos):
@@ -147,13 +150,13 @@ class NodeContent(QWidget):
         self._layout.insertWidget(pos, label)
         self.outputs.append((socket_type, label))
 
-    def add_output(self, label: str, pos=0):
+    def add_output(self, socket_type, label: str, pos=0):
         """Add an output widget with a socket.
 
         Args:
             label (str): The name of the output socket label.
         """
-        self._add_output('output_label', QLabel(label), pos)
+        self._add_output(socket_type, QLabel(label), pos)
 
     def add_output_execute(self, label='Execute', pos=0):
         """Add an input socket with a label.
@@ -161,7 +164,8 @@ class NodeContent(QWidget):
         Args:
             label (str): The name of the input socket label.
         """
-        self._add_output('output_execute', NodeExecuteOutputLabel(label), pos)
+        self._add_output(SocketType.execute,
+                         NodeExecuteOutputLabel(label), pos)
 
     def clear_output(self, index):
         raise NotImplementedError

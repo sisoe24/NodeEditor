@@ -55,12 +55,15 @@ class SocketGraphics(QGraphicsItem):
         self._node = node
         self._index = index
         self._widget = widget
+
         self._socket_type = socket_type
+        self._socket_body = SocketPath(self._socket_type)
+        self.color = self._socket_body.color
 
         self._outline_pen = QPen(Qt.black)
         self._outline_pen.setWidthF(0.5)
 
-        self._socket_body = SocketPath(self._socket_type)
+        self.setToolTip(self._socket_type)
 
         self._set_flags()
 
@@ -85,7 +88,7 @@ class SocketGraphics(QGraphicsItem):
         self.setFlag(QGraphicsItem.ItemIsSelectable)
 
     def paint(self, painter, option, widget=None):
-        painter.setBrush(QBrush(self._socket_body.color))
+        painter.setBrush(QBrush(self.color))
         painter.setPen(self._outline_pen)
         painter.drawPath(self._socket_body.path)
 
@@ -103,6 +106,7 @@ class SocketGraphics(QGraphicsItem):
             str(edge) for edge in self.edges]
 
         return {
+            'type': str(self._socket_type),
             'object': str(self),
             'index': self._index,
             'widget': str(self._widget),

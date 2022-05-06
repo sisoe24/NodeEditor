@@ -1,5 +1,5 @@
 
-from PySide2.QtCore import Qt
+from PySide2.QtGui import QColor
 
 from src.nodes import NodeContent, NodesRegister
 from src.widgets.node_graphics import Node
@@ -24,7 +24,7 @@ class NodeForLoopContent(NodeContent):
 
 @NodesRegister.register_class
 class NodeForLoop(Node):
-    title_background = Qt.red
+    title_background = QColor('#18B2A5')
     title = "For Loop"
 
     def __init__(self, scene):

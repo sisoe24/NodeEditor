@@ -1,5 +1,5 @@
 
-from PySide2.QtCore import Qt
+from PySide2.QtGui import QColor
 from PySide2.QtWidgets import QPlainTextEdit
 
 
@@ -30,7 +30,7 @@ class NodeDebugContent(NodeContent):
 
 @NodesRegister.register_class
 class NodeDebug(Node):
-    title_background = Qt.green
+    title_background = QColor('#21B24F')
     title = "Debug Print"
 
     def __init__(self, scene):

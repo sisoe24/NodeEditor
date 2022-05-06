@@ -1,14 +1,10 @@
 import logging
 
-from PySide2.QtCore import Qt
+from PySide2.QtGui import QColor
 from PySide2.QtWidgets import (
-    QSpinBox,
     QLineEdit,
-    QPushButton,
     QRadioButton,
-    QPlainTextEdit,
-    QCheckBox,
-    QComboBox,
+
 )
 
 
@@ -70,7 +66,7 @@ class NodeExampleContent(NodeContent):
 
 @NodesRegister.register_class
 class NodeExample(Node):
-    title_background = Qt.red
+    title_background = QColor('#FAB27C')
     title = "Example Node"
 
     def __init__(self, scene):

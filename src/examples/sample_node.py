@@ -1,6 +1,6 @@
 """Startup template for a Node object."""
-from PySide2.QtCore import Qt
 
+from PySide2.QtGui import QColor
 
 from src.nodes import NodeContent, NodesRegister
 from src.widgets.node_graphics import Node
@@ -24,7 +24,7 @@ class __NODECLASS__Content(NodeContent):
 
 @NodesRegister.register_class
 class __NODECLASS__(Node):
-    title_background = Qt.gray
+    title_background = QColor('#808080')
     title = '__NODETITLE__'
 
     def __init__(self, scene):

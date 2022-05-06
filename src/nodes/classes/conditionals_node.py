@@ -1,9 +1,5 @@
 
-from PySide2.QtWidgets import (
-    QCheckBox
-)
-
-from PySide2.QtCore import Qt
+from PySide2.QtGui import QColor
 
 from src.nodes import NodeContent, NodesRegister
 from src.widgets.node_graphics import Node
@@ -31,7 +27,7 @@ class NodeConditionalsContent(NodeContent):
 
 @NodesRegister.register_class
 class NodeConditionals(Node):
-    title_background = Qt.red
+    title_background = QColor('#BD74D3')
     title = "If/Else"
 
     def __init__(self, scene):

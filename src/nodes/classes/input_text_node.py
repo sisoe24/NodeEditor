@@ -1,5 +1,4 @@
-
-from PySide2.QtCore import Qt
+from PySide2.QtGui import QColor
 from PySide2.QtWidgets import QPlainTextEdit
 
 
@@ -36,7 +35,7 @@ class NodeInputContent(NodeContent):
 
 @NodesRegister.register_class
 class NodeInput(Node):
-    title_background = Qt.blue
+    title_background = QColor('#1471D0')
     title = 'Input Text'
 
     def __init__(self, scene):

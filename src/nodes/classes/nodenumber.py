@@ -17,15 +17,16 @@ class NodeNumberContent(NodeContent):
         super().__init__(parent)
 
         self.add_input(SocketType.number, 'Number', pos=0)
-        self.add_widget(QDoubleSpinBox(), pos=1)
+        self.spinbox = QDoubleSpinBox()
+        self.spinbox.setValue(21.44)
+        self.add_widget(self.spinbox, pos=1)
         self.add_output(SocketType.number, 'Number', pos=2)
-        self.add_output(SocketType.value, 'Value', pos=2)
 
     def set_input(self, value, index):
         return ""
 
     def get_output(self, index):
-        return ""
+        return str(self.spinbox.value())
 
     def clear_output(self, index):
         return

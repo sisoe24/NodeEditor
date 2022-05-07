@@ -5,6 +5,7 @@ from PySide2.QtWidgets import QPlainTextEdit
 
 from src.nodes import NodeContent, NodesRegister
 from src.widgets.node_graphics import Node
+from src.widgets.node_socket import SocketType
 
 
 class NodeDebugContent(NodeContent):
@@ -15,7 +16,8 @@ class NodeDebugContent(NodeContent):
 
         self.add_input_execute(label='Print', pos=0)
         self.text_box = QPlainTextEdit()
-        self.add_widget(self.text_box, pos=1)
+        self.add_input(SocketType.text, 'Text', pos=1)
+        self.add_widget(self.text_box, pos=2)
 
     def set_input(self, value, index):
         super().set_input(value, index)

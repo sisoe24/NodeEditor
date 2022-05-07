@@ -121,19 +121,21 @@ class SocketGraphics(QGraphicsItem):
     def __repr__(self) -> str:
         return class_id('SocketGraphics', self)
 
-    def data(self) -> str:
+    def data(self, key=None) -> str:
         edges = str(self.edge) if isinstance(self, SocketInput) else [
             str(edge) for edge in self.edges]
 
-        return {
-            'type': str(self.socket_type),
+        socket_data = {
+            'type': self.socket_type['type'],
             'object': str(self),
-            'index': self._index,
-            'widget': str(self._widget),
-            'color': self.color.name.decode('utf-8'),
+            'index': self.index,
+            'widget': str(self.widget),
+            'color': self.socket_type['color'].name(),
             'node': str(self.node),
             'edges': edges
         }
+
+        return socket_data.get(key) or socket_data
 
     def repr(self):
         # return pprint.pformat(self.data(), 1, 100)

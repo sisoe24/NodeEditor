@@ -269,6 +269,7 @@ class Node(NodeInterface):
 
         self.input_sockets = []
         self.output_sockets = []
+        self.output_execs = []
 
         self._add_inputs()
         self._add_outputs()
@@ -299,15 +300,18 @@ class Node(NodeInterface):
             y = self.node_graphics._title_height + widget.pos().y() + offset
             socket.setPos(0 if node_side == 'left' else node_width, y)
 
-            yield socket
+            yield (socket, socket_data.data['type'])
 
     def _add_inputs(self):
-        for socket in self._add_sockets(self.content.inputs, 'left'):
+        for socket, _ in self._add_sockets(self.content.inputs, 'left'):
             self.input_sockets.append(socket)
 
     def _add_outputs(self):
-        for socket in self._add_sockets(self.content.outputs, 'right'):
+        for socket, socket_type in self._add_sockets(self.content.outputs, 'right'):
             self.output_sockets.append(socket)
+
+            if socket_type == 'execute':
+                self.output_execs.append(socket)
 
     def set_position(self, x: int, y: int):
         self.node_graphics.setPos(x, y)
@@ -318,8 +322,8 @@ class Node(NodeInterface):
     def set_input(self, value, index=0):
         self.content.set_input(value, index)
 
-    def get_execute(self):
-        return self.content.get_execute(self.output_sockets)
+    def execute(self):
+        return self.content.execute(self.output_execs)
 
     def __str__(self):
         return f'{self.__class__.__name__}'

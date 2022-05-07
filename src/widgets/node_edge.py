@@ -119,7 +119,7 @@ class NodeEdge(_EdgeInterface):
         self.scene.addItem(self.edge_graphics)
 
         self._add_reference()
-        self.transfer_data()
+        # self.transfer_data()
 
     def transfer_data(self):
 
@@ -147,10 +147,13 @@ class NodeEdge(_EdgeInterface):
         Remove the edge graphics from the scene and delete its reference from
         its connected sockets.
         """
-
-        # data_cache.pop(self)
+        # start socket is always a SocketOutput, which has a list of edges
+        # thus a reference to the deleted edge is needed
         self.start_socket.clear_reference(self)
+
+        # end socket is always a SocketInput, which has only one edge
         self.end_socket.clear_reference()
+
         self.scene.removeItem(self.edge_graphics)
 
     def _add_reference(self):

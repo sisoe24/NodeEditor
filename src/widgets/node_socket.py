@@ -135,7 +135,7 @@ class SocketGraphics(QGraphicsItem):
             'edges': edges
         }
 
-        return socket_data.get(key) or socket_data
+        return socket_data.get(key, socket_data)
 
     def repr(self):
         # return pprint.pformat(self.data(), 1, 100)

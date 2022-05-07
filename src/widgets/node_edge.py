@@ -60,8 +60,8 @@ class NodeEdgeGraphics(QGraphicsPathItem):
     def __str__(self) -> str:
         return class_id('NodeEdgeGraphics', self)
 
-    def data(self) -> str:
-        return {
+    def data(self, key=None) -> str:
+        edge_data = {
             'id': str(self),
             'class_id': str(self.base),
             'start_socket': {
@@ -75,6 +75,8 @@ class NodeEdgeGraphics(QGraphicsPathItem):
                 'index': str(self.base.end_socket.index)
             },
         }
+
+        return edge_data.get(key, edge_data)
 
     def __repr__(self):
         return str(self)

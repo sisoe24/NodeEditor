@@ -191,7 +191,7 @@ class NodeGraphics(QGraphicsItem):
         """Set the bounding margins for the node."""
         return self._node_body.boundingRect()
 
-    def data(self) -> dict:
+    def data(self, key=None) -> dict:
         def get_sockets(sockets_list, is_input=False):
             sockets = {}
             for index, socket in enumerate(sockets_list):
@@ -203,7 +203,6 @@ class NodeGraphics(QGraphicsItem):
                 socket.edge.start_socket.node.base
                 for socket in self.base.input_sockets if socket.has_edge()
             ]
-
             return set(parents)
 
         def get_children():
@@ -212,11 +211,10 @@ class NodeGraphics(QGraphicsItem):
                 if socket.has_edge():
                     for edge in socket.edges:
                         parents.append(edge.end_socket.node.base)
-
             return set(parents)
 
         position = self.pos()
-        return {
+        node_data = {
             'class': self.node_class,
             'object': str(self),
             'id': self.node_id,
@@ -230,6 +228,7 @@ class NodeGraphics(QGraphicsItem):
             'parents': get_parents(),
             'children': get_children(),
         }
+        return node_data.get(key, node_data)
 
     def repr(self):
         return pprint.pformat(self.data(), 1, 100)

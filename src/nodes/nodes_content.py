@@ -16,7 +16,7 @@ from src.widgets.node_socket import SocketType
 
 LOGGER = logging.getLogger('nodeeditor.master_node')
 
-SocketData = namedtuple('SocketData', ['data', 'widget'])
+SocketData = namedtuple('SocketData', ['data', 'widget', 'label'])
 
 
 class NodeContent(QWidget):
@@ -68,7 +68,7 @@ class NodeContent(QWidget):
         """
         label.setAlignment(Qt.AlignLeft)
         self._layout.insertWidget(pos, label)
-        self.inputs.append(SocketData(socket_type, label))
+        self.inputs.append(SocketData(socket_type, label, label.text()))
 
     def add_input_widget(self, widget, label="", pos=0, socket_type: SocketType = None):
         """Add an input widget with a socket.
@@ -77,7 +77,7 @@ class NodeContent(QWidget):
             widget (any): A instance of a QWidget class.
         """
         socket_type = socket_type or SocketType.widget
-        self.inputs.append(SocketData(socket_type, widget))
+        self.inputs.append(SocketData(socket_type, widget, label))
 
         is_form_layout = None
         if label:
@@ -143,7 +143,7 @@ class NodeContent(QWidget):
         label.setAlignment(Qt.AlignRight)
 
         self._layout.insertWidget(pos, label)
-        self.outputs.append(SocketData(socket_type, label))
+        self.outputs.append(SocketData(socket_type, label, label.text()))
 
     def add_output(self, socket_type: SocketType, label: str, pos=0):
         """Add an output widget with a socket.

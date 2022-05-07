@@ -288,13 +288,12 @@ class Node(NodeInterface):
         offset = 8
         node_width = self.node_graphics._width
 
-        for index, node_socket in enumerate(widgets):
+        for index, socket_data in enumerate(widgets):
 
-            socket_type = node_socket.data
-            widget = node_socket.widget
+            widget = socket_data.widget
 
             socket = create_socket(
-                self.node_graphics, index, socket_type, widget, node_side
+                self.node_graphics, index, socket_data, widget, node_side
             )
 
             y = self.node_graphics._title_height + widget.pos().y() + offset
@@ -318,6 +317,9 @@ class Node(NodeInterface):
 
     def set_input(self, value, index=0):
         self.content.set_input(value, index)
+
+    def get_execute(self):
+        return self.content.get_execute(self.output_sockets)
 
     def __str__(self):
         return f'{self.__class__.__name__}'

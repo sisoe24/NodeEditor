@@ -10,16 +10,16 @@ from src.utils import class_id
 
 
 class SocketObject:
-    def __init__(self, parent_node, socket_index, socket_type, widget):
+    def __init__(self, parent_node, socket_index, socket_data, widget):
 
         self.parent_node = parent_node
         self.socket_index = socket_index
-        self.socket_type = socket_type
+        self.socket_data = socket_data
         self.socket_widget = widget
 
 
-def create_socket(parent_node, socket_index, socket_type, widget, node_side):
-    socket = SocketObject(parent_node, socket_index, socket_type, widget)
+def create_socket(parent_node, socket_index, socket_data, widget, node_side):
+    socket = SocketObject(parent_node, socket_index, socket_data, widget)
 
     if node_side == 'left':
         return SocketInput(socket)
@@ -76,16 +76,17 @@ class SocketGraphics(QGraphicsItem):
 
         self._socket = socket
 
-        self.socket_type = socket.socket_type
-        self.setToolTip(self.socket_type['type'].title())
+        self._socket_data = socket.socket_data
 
-        self._socket_body = SocketType(self.socket_type)
+        self._socket_body = SocketType(socket.socket_data.data)
         self.color = self._socket_body.color
 
         self._outline_pen = QPen(Qt.black)
         self._outline_pen.setWidthF(0.5)
 
         self._set_flags()
+
+        self.setToolTip(self.socket_type.title())
 
     def get_position(self):
         """Get socket position in the scene."""
@@ -102,6 +103,14 @@ class SocketGraphics(QGraphicsItem):
     @property
     def widget(self):
         return self._socket.socket_widget
+
+    @property
+    def socket_type(self):
+        return self._socket_data.data['type']
+
+    @property
+    def label(self):
+        return self._socket_data.label
 
     def _set_flags(self):
         """Initialize UI for the Node graphic content."""
@@ -126,12 +135,13 @@ class SocketGraphics(QGraphicsItem):
             str(edge) for edge in self.edges]
 
         socket_data = {
-            'type': self.socket_type['type'],
             'object': str(self),
             'index': self.index,
             'widget': str(self.widget),
-            'color': self.socket_type['color'].name(),
             'node': str(self.node),
+            'type': self.socket_type,
+            'color': self._socket_data.data['color'].name(),
+            'label': self.label,
             'edges': edges
         }
 

@@ -97,6 +97,7 @@ class LeftClickPress(LeftClick):
         LeftClick.socket_start = socket.edge.start_socket
         LeftClick.socket_end = socket.edge.end_socket
 
+        # trigger transfer data between nodes
         end_node = LeftClick.socket_end.node.base
         end_socket_widget = LeftClick.socket_end.widget
         end_node.content.restore_widget(end_socket_widget)
@@ -114,8 +115,13 @@ class LeftClickPress(LeftClick):
         LeftClick.socket_clicked = socket
         LeftClick.mode_drag_edge = True
 
+        socket_type = socket.data('type')
+
         if isinstance(socket, SocketInput) and socket.has_edge():
             self._re_connect_edge(socket)
+
+        elif socket_type == 'execute' and socket.has_edge():
+            socket.remove_edge(socket.edges[0])
 
         LeftClick.edge_tmp = NodeEdgeTmp(self.view.scene(), self.view,
                                          LeftClick.socket_clicked)
@@ -202,10 +208,15 @@ class LeftClickRelease(LeftClick):
     def click_is_on_socket(self, end_socket):
         self._delete_tmp_edge()
 
+        socket_type = end_socket.data('type')
+
         if isinstance(end_socket, SocketInput) and end_socket.has_edge():
             end_socket.remove_edge()
 
         elif isinstance(end_socket, SocketOutput):
+            if socket_type == 'execute':
+                end_socket.remove_edge(end_socket.edges[0])
+
             # invert the sockets if starting point is input to output
             end_socket, LeftClick.socket_clicked = LeftClick.socket_clicked, end_socket
 

@@ -322,6 +322,14 @@ class Node(NodeInterface):
     def set_input(self, value, index=0):
         self.content.set_input(value, index)
 
+        for output_socket in self.output_sockets:
+
+            socket_type = output_socket.socket_type
+            if output_socket.has_edge() and socket_type != 'execute':
+
+                for edge in output_socket.edges:
+                    edge.transfer_data()
+
     def execute(self):
         return self.content.execute(self.output_execs)
 

@@ -158,6 +158,7 @@ class MainWindow(QMainWindow):
         socket = start_socket
 
         execute_is_connected = True
+
         while execute_is_connected:
             execute_is_connected = False
 
@@ -179,13 +180,14 @@ class MainWindow(QMainWindow):
 
                             input_socket.edge.transfer_data()
                             next_node_input = input_socket.edge.start_socket.node.base
-                            print("➡ next_node_input :", next_node_input)
+
+                            if next_node_input.was_execute:
+                                input_socket_is_connected = False
+                                break
 
                 socket = next_node.base.execute()
 
-                # end_node = socket.node
-
-        # print("➡ end_node :", socket.node.base)
+        NodesRegister.reset_nodes_execution()
 
     def _debug_function(self):
         """Debug function"""

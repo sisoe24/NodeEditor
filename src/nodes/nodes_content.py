@@ -21,8 +21,10 @@ SocketData = namedtuple('SocketData', ['data', 'widget', 'label'])
 
 class NodeContent(QWidget):
 
-    def __init__(self, parent=None):
+    def __init__(self, node, parent=None):
         super().__init__(parent)
+
+        self.node = node
 
         self.inputs = []
         self.outputs = []
@@ -130,6 +132,7 @@ class NodeContent(QWidget):
             label (str): The name of the input socket label.
         """
         checkbox = QCheckBox(label)
+        checkbox.setObjectName(label)
         self.add_input_widget(
             checkbox, pos=pos, socket_type=SocketType.boolean)
         return checkbox
@@ -162,10 +165,10 @@ class NodeContent(QWidget):
         self._add_output(SocketType.execute, QLabel(label), pos)
 
     def clear_output(self, index):
-        raise NotImplementedError
+        raise NotImplementedError(self.node)
 
     def get_output(self, index):
-        raise NotImplementedError
+        raise NotImplementedError(self.node)
 
     def execute(self, socket_outputs):
         if len(socket_outputs) >= 2:
@@ -175,6 +178,9 @@ class NodeContent(QWidget):
         return socket_outputs[0]
 
     def set_input(self, value, index):
+        raise NotImplementedError(self.node)
+
+    def convert_to_label(self, index):
         socket = self.inputs[index]
 
         widget = socket.widget

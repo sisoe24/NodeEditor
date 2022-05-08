@@ -237,26 +237,35 @@ class EditorRunActions(EditorActions):
 
     def run_data(self):
         self.top_window.show_status_message('Graph executed')
-        self.exec_node_tree(NodesRegister.get_root_nodes())
 
-    def exec_node_tree(self, nodes):
-        for node in nodes:
-            node_data = node.node_graphics.data()
+        for node in NodesRegister.get_event_nodes():
+            self._find_exec_flow(node.base)
+        NodesRegister.reset_nodes_execution()
 
-            for socket in node.output_sockets:
+    def _exec_connected_sockets(self, node):
+        for input_socket in node.input_sockets:
+            socket_type = input_socket.socket_type
+            if input_socket.has_edge() and socket_type != 'execute':
 
-                if socket.has_edge():
-                    for edge in socket.edges:
+                input_socket.edge.transfer_data()
+                parent_node = input_socket.edge.start_socket.node.base
 
-                        start_socket = edge.start_socket
-                        end_socket = edge.end_socket
-                        self.transfer_data(start_socket, end_socket)
+                if parent_node.was_execute:
+                    break
 
-            self.exec_node_tree(node_data['children'])
+                return self._exec_connected_sockets(parent_node)
 
-    def transfer_data(self, start_socket, end_socket):
-        socket_output = start_socket.node.base.get_output(start_socket.index)
-        end_socket.node.base.set_input(socket_output, end_socket.index)
+        return None
+
+    def _find_exec_flow(self, node):
+        start_socket = node.get_execute_flow()
+
+        if start_socket.has_edge():
+            next_node = start_socket.edges[0].end_socket.node.base
+            self._exec_connected_sockets(next_node)
+            return self._find_exec_flow(next_node)
+
+        return None
 
 
 class NodeMenubar(QMenuBar):

@@ -227,6 +227,7 @@ class NodeGraphics(QGraphicsItem):
             'output': self.base.get_output(),
             'parents': get_parents(),
             'children': get_children(),
+            'was_executed': str(self.base.was_execute)
         }
         return node_data.get(key, node_data)
 
@@ -270,6 +271,8 @@ class Node(NodeInterface):
         self.input_sockets = []
         self.output_sockets = []
         self.output_execs = []
+
+        self.was_execute = False
 
         self._add_inputs()
         self._add_outputs()
@@ -329,6 +332,8 @@ class Node(NodeInterface):
 
                 for edge in output_socket.edges:
                     edge.transfer_data()
+
+        self.was_execute = True
 
     def execute(self):
         return self.content.execute(self.output_execs)

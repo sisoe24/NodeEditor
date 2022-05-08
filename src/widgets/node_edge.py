@@ -122,6 +122,11 @@ class NodeEdge(_EdgeInterface):
 
         self._add_reference()
         # self.transfer_data()
+        self._convert_widget_to_label()
+
+    def _convert_widget_to_label(self):
+        end_node = self.end_socket.node.base
+        end_node.content.convert_to_label(self.end_socket.index)
 
     def transfer_data(self):
 

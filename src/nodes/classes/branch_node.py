@@ -24,7 +24,7 @@ class NodeConditionalsContent(NodeContent):
     def set_input(self, value, index):
         return ""
 
-    def execute(self, output_execs):
+    def get_execute_flow(self, output_execs):
         return (
             output_execs[0] if self.condition.isChecked() else output_execs[1]
         )

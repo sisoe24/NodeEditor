@@ -337,8 +337,8 @@ class Node(NodeInterface):
 
         self.was_execute = True
 
-    def execute(self):
-        return self.content.execute(self.output_execs)
+    def get_execute_flow(self):
+        return self.content.get_execute_flow(self.output_execs)
 
     def __str__(self):
         return f'{self.__class__.__name__}'

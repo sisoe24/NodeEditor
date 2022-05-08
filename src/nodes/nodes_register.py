@@ -83,6 +83,11 @@ class NodesRegister:
         return max(cls.nodes[node_class])
 
     @classmethod
+    def reset_nodes_execution(cls) -> str:
+        for node in cls.all_nodes:
+            node.base.was_execute = False
+
+    @classmethod
     def get_root_nodes(cls) -> str:
         """Get all of the root nodes in the graphs.
 

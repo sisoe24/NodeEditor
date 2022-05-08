@@ -19,24 +19,19 @@ LOGGER.setLevel(logging.DEBUG)
 
 class NodeEdgeGraphics(QGraphicsPathItem):
 
-    def __init__(self, base, parent=None):
+    def __init__(self, base, color=None, parent=None):
         super().__init__(parent)
 
         self.base = base
+        self.color = QColor('#808080')
 
-        self._set_colors()
         self._set_flags()
 
-    def _set_colors(self):
-        self._pen_selected = QPen(QColor('#DD8600'))
-        self._pen_selected.setWidthF(2.0)
-
-        self._pen = QPen(QColor("#001000"))
-        self._pen.setWidthF(2.0)
+    def update_flow_color(self, color='#78DD2A'):
+        self.color = QColor(color)
 
     def _set_flags(self):
         # Review: I might not need to select the edge
-        # self.setFlag(QGraphicsItem.ItemIsSelectable)
         self.setFlag(QGraphicsItem.ItemStacksBehindParent)
         self.setZValue(-5.0)
 
@@ -51,7 +46,10 @@ class NodeEdgeGraphics(QGraphicsPathItem):
         stroker_path = stroke.createStroke(path)
         self.setPath(stroker_path)
 
-        painter.setPen(self._pen_selected if self.isSelected() else self._pen)
+        self._pen = QPen(self.color)
+        self._pen.setWidthF(2.0)
+        painter.setPen(self._pen)
+
         painter.drawPath(self.path())
 
     def boundingRect(self):
@@ -64,6 +62,7 @@ class NodeEdgeGraphics(QGraphicsPathItem):
         edge_data = {
             'id': str(self),
             'class_id': str(self.base),
+            'color': str(self.color.name()),
             'start_socket': {
                 'node': str(self.base.start_socket.node),
                 'socket': str(self.base.start_socket),
@@ -129,6 +128,7 @@ class NodeEdge(_EdgeInterface):
         end_node.content.convert_to_label(self.end_socket.index)
 
     def transfer_data(self):
+        self.edge_graphics.update_flow_color('#4692DD')
 
         self.socket_output = self.start_socket.node.base.get_output(
             self.start_socket.index)

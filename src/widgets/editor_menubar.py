@@ -261,7 +261,11 @@ class EditorRunActions(EditorActions):
         start_socket = node.get_execute_flow()
 
         if start_socket.has_edge():
-            next_node = start_socket.edges[0].end_socket.node.base
+            socket_edge = start_socket.edges[0]
+            socket_edge.edge_graphics.update_flow_color()
+
+            next_node = socket_edge.end_socket.node.base
+
             self._exec_connected_sockets(next_node)
             return self._find_exec_flow(next_node)
 

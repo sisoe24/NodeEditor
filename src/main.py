@@ -140,7 +140,7 @@ class MainWindow(QMainWindow):
         # save_file(self._scene, 'scripts/save_file.json')
         # self.debug_widget._debug_add_nodes()
         self._load_file()
-        # self._debug_exec()
+        self._debug_exec()
 
     def _load_file(self):
         file = 'scripts/save_file.json'
@@ -150,7 +150,40 @@ class MainWindow(QMainWindow):
 
     def _debug_exec(self):
         """Debug function"""
-        # self.menubar._run_actions.run_data()
+        for node in NodesRegister.all_nodes:
+            if node.node_class == 'NodeExecute':
+                event_node = node
+
+        start_socket = event_node.base.execute()
+        socket = start_socket
+
+        execute_is_connected = True
+        while execute_is_connected:
+            execute_is_connected = False
+
+            if socket.has_edge():
+                execute_is_connected = True
+
+                next_node = socket.edges[0].end_socket.node
+
+                input_socket_is_connected = True
+                next_node_input = next_node.base
+
+                while input_socket_is_connected:
+                    input_socket_is_connected = False
+
+                    for input_socket in next_node_input.input_sockets:
+
+                        socket_type = input_socket.socket_type
+
+                        if input_socket.has_edge() and socket_type != 'execute':
+                            input_socket_is_connected = True
+                            input_socket.edge.transfer_data()
+                            next_node_input = input_socket.edge.start_socket.node.base
+                            print("➡ next_node_input :", next_node_input)
+
+                socket = next_node.base.execute()
+                end_node = socket.node
 
     def _debug_function(self):
         """Debug function"""

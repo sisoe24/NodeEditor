@@ -1,4 +1,3 @@
-import logging
 
 from PySide2.QtGui import QColor
 from PySide2.QtWidgets import (
@@ -7,39 +6,38 @@ from PySide2.QtWidgets import (
 
 )
 
-
 from src.nodes import NodeContent, NodesRegister
+from src.widgets.node_socket import SocketType
 from src.widgets.node_graphics import Node
 
-LOGGER = logging.getLogger('nodeeditor.nodes_example')
 
-
-class NodeExampleContent(NodeContent):
+class NodeStringContent(NodeContent):
     """The node content widgets container class."""
 
     def __init__(self, parent=None):
         super().__init__(parent)
 
         self.add_output_execute('Execute', pos=0)
+        self.add_output(SocketType.text, 'Text', pos=1)
 
         self.make_upper = QRadioButton('Make Uppercase')
         self.make_upper.setChecked(True)
-        self.add_widget(self.make_upper, pos=1)
+        self.add_widget(self.make_upper, pos=2)
 
         self.make_lower = QRadioButton('Make Lowercase')
-        self.add_widget(self.make_lower, pos=2)
+        self.add_widget(self.make_lower, pos=3)
 
         self.make_title = QRadioButton('Make Titlecase')
-        self.add_widget(self.make_title, pos=3)
+        self.add_widget(self.make_title, pos=4)
 
         self.text = QLineEdit()
         self.text.setObjectName('Text')
         self.text.setPlaceholderText('text')
-        self.add_input_widget(self.text, pos=4)
+        self.add_input_widget(self.text, pos=5)
 
-        self.add_input_execute('Execute', pos=5)
+        self.add_input_execute('Execute', pos=6)
 
-        self.output_text = None
+        self.output_text = "STRINGMODE"
 
     def update_text(self, text):
         if self.make_upper.isChecked():
@@ -57,17 +55,17 @@ class NodeExampleContent(NodeContent):
         return self.output_text or self.update_text(self.text.text())
 
     def set_input(self, value, index):
-        self.output_text = self.update_text(value)
         super().set_input(value, index)
+        self.output_text = self.update_text(value)
 
     def clear_output(self, index):
         self.output_text = None
 
 
 @NodesRegister.register_class
-class NodeExample(Node):
+class NodeString(Node):
     title_background = QColor('#FAB27C')
-    title = "Example Node"
+    title = "String mod"
 
     def __init__(self, scene):
-        super().__init__(scene=scene, node=self, content=NodeExampleContent())
+        super().__init__(scene=scene, node=self, content=NodeStringContent())

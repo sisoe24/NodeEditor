@@ -3,6 +3,7 @@
 from PySide2.QtGui import QColor
 
 from src.nodes import NodeContent, NodesRegister
+from src.widgets.node_socket import SocketType
 from src.widgets.node_graphics import Node
 
 

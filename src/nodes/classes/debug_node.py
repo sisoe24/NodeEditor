@@ -14,10 +14,11 @@ class NodeDebugContent(NodeContent):
     def __init__(self, parent=None):
         super().__init__(parent)
 
-        self.add_input_execute(label='Print', pos=0)
+        self.add_output_execute(pos=0)
+        self.add_input_execute(pos=1)
         self.text_box = QPlainTextEdit()
-        self.add_input(SocketType.text, 'Text', pos=1)
-        self.add_widget(self.text_box, pos=2)
+        self.add_input(SocketType.text, 'Text', pos=2)
+        self.add_widget(self.text_box, pos=3)
 
     def set_input(self, value, index):
         super().set_input(value, index)

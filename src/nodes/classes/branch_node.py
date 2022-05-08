@@ -8,12 +8,12 @@ from src.widgets.node_graphics import Node
 class NodeConditionalsContent(NodeContent):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.add_input_execute('Execute', 2)
-
-        self.condition = self.add_input_boolean('Condition', pos=3)
 
         self.add_output_execute('True', 0)
         self.add_output_execute('False', 1)
+        self.add_input_execute('Execute', 2)
+
+        self.condition = self.add_input_boolean('Condition', pos=3)
 
     def get_output(self, index):
         return ""
@@ -23,6 +23,11 @@ class NodeConditionalsContent(NodeContent):
 
     def set_input(self, value, index):
         return ""
+
+    def execute(self, output_execs):
+        return (
+            output_execs[0] if self.condition.isChecked() else output_execs[1]
+        )
 
 
 @NodesRegister.register_class

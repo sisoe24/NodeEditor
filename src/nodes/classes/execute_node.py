@@ -1,7 +1,8 @@
 
-from PySide2.QtCore import Qt
+from PySide2.QtGui import QColor
 
 from src.nodes import NodeContent, NodesRegister
+from src.widgets.node_socket import SocketType
 from src.widgets.node_graphics import Node
 
 
@@ -22,7 +23,7 @@ class NodeExecuteContent(NodeContent):
 
 @NodesRegister.register_class
 class NodeExecute(Node):
-    title_background = Qt.red
+    title_background = QColor('#EE0000')
     title = "Execute"
 
     def __init__(self, scene):

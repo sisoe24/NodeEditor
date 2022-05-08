@@ -7,8 +7,9 @@ from src.widgets.node_graphics import Node
 
 
 class NodeExecuteContent(NodeContent):
-    def __init__(self, parent=None):
-        super().__init__(parent)
+    def __init__(self, node, parent=None):
+        super().__init__(node, parent)
+
         self.add_output_execute(pos=0)
 
     def get_output(self, index):
@@ -27,4 +28,4 @@ class NodeExecute(Node):
     title = "Execute"
 
     def __init__(self, scene):
-        super().__init__(scene=scene, node=self, content=NodeExecuteContent())
+        super().__init__(scene=scene, node=self, content=NodeExecuteContent(self))

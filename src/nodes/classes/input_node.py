@@ -10,8 +10,8 @@ from src.widgets.node_socket import SocketType
 class NodeInputContent(NodeContent):
     """The node content widgets container class."""
 
-    def __init__(self, parent=None):
-        super().__init__(parent)
+    def __init__(self, node, parent=None):
+        super().__init__(node, parent)
 
         self.add_output(SocketType.text, 'Text', pos=0)
         self.add_output(SocketType.number, 'Text Length', pos=1)
@@ -39,4 +39,4 @@ class NodeInput(Node):
     title = 'Input Text'
 
     def __init__(self, scene):
-        super().__init__(scene=scene, node=self, content=NodeInputContent())
+        super().__init__(scene=scene, node=self, content=NodeInputContent(self))

@@ -14,8 +14,8 @@ from src.widgets.node_graphics import Node
 class NodeStringContent(NodeContent):
     """The node content widgets container class."""
 
-    def __init__(self, parent=None):
-        super().__init__(parent)
+    def __init__(self, node, parent=None):
+        super().__init__(node, parent)
 
         self.add_output_execute('Execute', pos=0)
         self.add_output(SocketType.text, 'Text', pos=1)
@@ -55,7 +55,6 @@ class NodeStringContent(NodeContent):
         return self.output_text or self.update_text(self.text.text())
 
     def set_input(self, value, index):
-        super().set_input(value, index)
         self.output_text = self.update_text(value)
 
     def clear_output(self, index):
@@ -68,4 +67,4 @@ class NodeString(Node):
     title = "String mod"
 
     def __init__(self, scene):
-        super().__init__(scene=scene, node=self, content=NodeStringContent())
+        super().__init__(scene=scene, node=self, content=NodeStringContent(self))

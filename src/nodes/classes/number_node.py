@@ -13,8 +13,8 @@ from src.widgets.node_graphics import Node
 class NodeNumberContent(NodeContent):
     """The node content widgets container class."""
 
-    def __init__(self, parent=None):
-        super().__init__(parent)
+    def __init__(self, node, parent=None):
+        super().__init__(node, parent)
 
         self.add_input(SocketType.number, 'Number', pos=0)
         self.spinbox = QDoubleSpinBox()
@@ -38,4 +38,4 @@ class NodeNumber(Node):
     title = 'Numbers'
 
     def __init__(self, scene):
-        super().__init__(scene=scene, node=self, content=NodeNumberContent())
+        super().__init__(scene=scene, node=self, content=NodeNumberContent(self))

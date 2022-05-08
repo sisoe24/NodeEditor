@@ -6,8 +6,8 @@ from src.widgets.node_graphics import Node
 
 
 class NodeConditionalsContent(NodeContent):
-    def __init__(self, parent=None):
-        super().__init__(parent)
+    def __init__(self, node, parent=None):
+        super().__init__(node, parent)
 
         self.add_output_execute('True', 0)
         self.add_output_execute('False', 1)
@@ -36,4 +36,4 @@ class NodeConditionals(Node):
     title = "If/Else"
 
     def __init__(self, scene):
-        super().__init__(scene=scene, node=self, content=NodeConditionalsContent())
+        super().__init__(scene=scene, node=self, content=NodeConditionalsContent(self))

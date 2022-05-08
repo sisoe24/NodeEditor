@@ -13,8 +13,8 @@ from src.widgets.node_graphics import Node
 class NodePassthruContent(NodeContent):
     """The node content widgets container class."""
 
-    def __init__(self, parent=None):
-        super().__init__(parent)
+    def __init__(self, node, parent=None):
+        super().__init__(node, parent)
         self.add_input(SocketType.text, 'Text')
         self.add_output(SocketType.text, 'Text')
 
@@ -36,4 +36,4 @@ class NodePassthru(Node):
     title = 'Passthru'
 
     def __init__(self, scene):
-        super().__init__(scene=scene, node=self, content=NodePassthruContent())
+        super().__init__(scene=scene, node=self, content=NodePassthruContent(self))

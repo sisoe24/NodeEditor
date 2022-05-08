@@ -6,8 +6,9 @@ from src.widgets.node_graphics import Node
 
 
 class NodeForLoopContent(NodeContent):
-    def __init__(self, parent=None):
-        super().__init__(parent)
+    def __init__(self, node, parent=None):
+        super().__init__(node, parent)
+
         self.add_output_execute(pos=0)
         self.add_input_execute(pos=1)
         self.add_input_list('List', pos=2)
@@ -28,4 +29,4 @@ class NodeForLoop(Node):
     title = "For Loop"
 
     def __init__(self, scene):
-        super().__init__(scene=scene, node=self, content=NodeForLoopContent())
+        super().__init__(scene=scene, node=self, content=NodeForLoopContent(self))

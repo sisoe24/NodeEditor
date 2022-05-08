@@ -6,6 +6,7 @@ class NodesRegister:
     nodes = {}
     nodes_classes = {}
     all_nodes = []
+    event_nodes = []
 
     @classmethod
     def register_class(cls, node_class):
@@ -88,6 +89,10 @@ class NodesRegister:
             node.base.was_execute = False
 
     @classmethod
+    def get_event_nodes(cls) -> str:
+        return cls.event_nodes
+
+    @classmethod
     def get_root_nodes(cls) -> str:
         """Get all of the root nodes in the graphs.
 
@@ -113,6 +118,10 @@ class NodesRegister:
             (str) - The id of the registered node.
         """
         cls.all_nodes.append(node)
+
+        if node.base.is_event_node:
+            cls.event_nodes.append(node)
+
         node_class = node.node_class
         node_data = cls.nodes.get(node_class)
 

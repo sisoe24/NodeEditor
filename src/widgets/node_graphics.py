@@ -247,6 +247,8 @@ class NodeGraphics(QGraphicsItem):
 
 class NodeInterface(abc.ABC):
 
+    is_event_node = None
+
     @property
     @abc.abstractmethod
     def title(self):

@@ -170,15 +170,15 @@ class NodeContent(QWidget):
     def get_output(self, index):
         raise NotImplementedError(self.node)
 
+    def set_input(self, value, index):
+        raise NotImplementedError(self.node)
+
     def execute(self, socket_outputs):
         if len(socket_outputs) >= 2:
             raise NotImplementedError(
                 'Node should override the execute method '
                 'because it has more than one exec output')
         return socket_outputs[0]
-
-    def set_input(self, value, index):
-        raise NotImplementedError(self.node)
 
     def convert_to_label(self, index):
         socket = self.inputs[index]

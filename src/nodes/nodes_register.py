@@ -22,8 +22,10 @@ class NodesRegister:
 
     @classmethod
     def clean_register(cls):
-        """Clear the nodes register."""
+        """Clear the nodes in the register."""
         cls.nodes.clear()
+        cls.all_nodes.clear()
+        cls.event_nodes.clear()
 
     @classmethod
     def get_node_class_object(cls, node: str):

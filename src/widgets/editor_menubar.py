@@ -96,6 +96,7 @@ class EditorFileActions(EditorActions):
 
         self.scene.clear()
         self.undo_stack.clear()
+        NodesRegister.clean_register()
 
     def open_file(self):
         if self._cancel_action():

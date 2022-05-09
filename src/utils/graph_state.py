@@ -33,14 +33,12 @@ def create_nodes_from_save_file(scene, file_data) -> dict:
 
 
 def load_scene(scene: 'QGraphicsScene', data: dict) -> None:
-    scene.clear()
     scene.set_view_center(data['viewport']['x'], data['viewport']['y'])
     nodes = create_nodes_from_save_file(scene, data)
     connect_output_edges(scene, nodes)
 
 
 def load_file(scene: 'QGraphicsScene', file: str) -> None:
-    NodesRegister.clean_register()
     with open(file, 'r', encoding='utf-8') as f:
         try:
             load_scene(scene, json.load(f))

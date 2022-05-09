@@ -3,7 +3,7 @@ import sys
 import logging
 from pprint import pformat
 
-from PySide2.QtCore import Qt
+from PySide2.QtCore import QEvent, Qt
 from PySide2.QtGui import QFont
 
 from PySide2.QtWidgets import (
@@ -30,6 +30,7 @@ from src.utils.graph_state import load_file, save_file
 from src.widgets.editor_menubar import NodeMenubar
 from src.widgets.editor_scene import Scene
 from src.widgets.editor_view import GraphicsView
+from src.widgets.logic.left_click import reset_left_click_constants
 from src.widgets.node_edge import NodeEdge
 
 LOGGER = logging.getLogger('nodeeditor.main')
@@ -141,6 +142,12 @@ class MainWindow(QMainWindow):
         # self.debug_widget._debug_add_nodes()
         self._load_file()
         self._debug_exec()
+
+    def reset_graph(self):
+        self._scene.clear()
+        self.undo_stack.clear()
+        NodesRegister.clean_register()
+        reset_left_click_constants()
 
     def _load_file(self):
         file = 'scripts/save_file.json'

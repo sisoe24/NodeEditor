@@ -93,10 +93,7 @@ class EditorFileActions(EditorActions):
     def new_file(self):
         if self._cancel_action():
             return
-
-        self.scene.clear()
-        self.undo_stack.clear()
-        NodesRegister.clean_register()
+        self.top_window.reset_graph()
 
     def open_file(self):
         if self._cancel_action():
@@ -107,11 +104,11 @@ class EditorFileActions(EditorActions):
                                               dir='scripts',
                                               filter='*.json')
         if file:
+            self.top_window.reset_graph()
             load_file(self.scene, file)
             self.editor_file = file
             self.top_window.setWindowTitle(os.path.basename(file))
             self.top_window.show_status_message('File Loaded')
-            self.undo_stack.clear()
 
 
 class EditorEditActions(EditorActions):

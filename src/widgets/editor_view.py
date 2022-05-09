@@ -7,7 +7,7 @@ from PySide2.QtWidgets import (
     QApplication,
     QGraphicsView,
 )
-from src.widgets.logic.left_click import LeftClick, LeftClickPress, LeftClickRelease
+from src.widgets.logic.left_click import LeftClickConstants, LeftClickPress, LeftClickRelease
 from src.widgets.node_edge_cutline import NodeEdgeCutline
 
 from src.widgets.node_graphics import NodeGraphics
@@ -152,7 +152,7 @@ class GraphicsView(QGraphicsView):
         nodes = self.selected_nodes()
         if len(nodes) <= 1:
             # Review: don't link this
-            LeftClick._box_selection_mode = False
+            LeftClickConstants._box_selection_mode = False
 
     def selected_nodes(self):
         """Return the selected nodes inside the scene."""

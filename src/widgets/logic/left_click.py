@@ -17,12 +17,11 @@ LOGGER = logging.getLogger('nodeeditor.left_click')
 LOGGER.setLevel(logging.DEBUG)
 
 
-class LeftClick:
-
-    mode_selection_box = False
-    mode_drag_node = False
-    mode_drag_edge = False
-    mode_drag_tmp_edge = False
+class LeftClickConstants:
+    mode_selection_box = None
+    mode_drag_node = None
+    mode_drag_edge = None
+    mode_drag_tmp_edge = None
 
     nodes_initial_position = None
     mouse_initial_position = None
@@ -39,6 +38,17 @@ class LeftClick:
     socket_start = None
     socket_end = None
 
+
+def reset_left_click_constants():
+    # FIXME: ugly. maybe check with inspect
+
+    for attr in dir(LeftClickConstants):
+        if not attr.startswith('__'):
+            setattr(LeftClickConstants, attr, None)
+
+
+class LeftClick:
+
     def __init__(self, view, item):
         self.item = item
         self.view = view
@@ -54,8 +64,8 @@ class LeftClick:
     def _click_is_node(self):
         return (
             isinstance(self.item, NodeGraphics) and
-            not self.mode_drag_node and
-            not self.mode_selection_box
+            not LeftClickConstants.mode_drag_node and
+            not LeftClickConstants.mode_selection_box
         )
 
     def _create_selection_command(self, previous, current, description):
@@ -72,7 +82,7 @@ class LeftClick:
         command = SelectCommand(
             self.view._scene, previous, current, description)
         self.view.top.undo_stack.push(command)
-        LeftClick.selection_previous_node = current
+        LeftClickConstants.selection_previous_node = current
 
 
 class LeftClickPress(LeftClick):
@@ -82,38 +92,38 @@ class LeftClickPress(LeftClick):
         self.view = view
         self.event = event
 
-        LeftClick.mouse_initial_position = event.pos()
+        LeftClickConstants.mouse_initial_position = event.pos()
 
         self.item = item
         if self._click_is_node():
-            self._create_selection_command(LeftClick.selection_previous_node,
+            self._create_selection_command(LeftClickConstants.selection_previous_node,
                                            self.item, 'Select')
 
     @staticmethod
     def _re_connect_edge(socket):
         LOGGER.debug('SocketInput has an edge connected already')
-        LeftClick.mode_drag_tmp_edge = True
+        LeftClickConstants.mode_drag_tmp_edge = True
 
-        LeftClick.socket_start = socket.edge.start_socket
-        LeftClick.socket_end = socket.edge.end_socket
+        LeftClickConstants.socket_start = socket.edge.start_socket
+        LeftClickConstants.socket_end = socket.edge.end_socket
 
         # trigger transfer data between nodes
-        end_node = LeftClick.socket_end.node.base
-        end_socket_widget = LeftClick.socket_end.widget
+        end_node = LeftClickConstants.socket_end.node.base
+        end_socket_widget = LeftClickConstants.socket_end.widget
         end_node.content.restore_widget(end_socket_widget)
-        end_node.content.clear_output(LeftClick.socket_end.index)
+        end_node.content.clear_output(LeftClickConstants.socket_end.index)
 
         # Invert the sockets if click starts at a output socket
-        LeftClick.socket_clicked = (
-            LeftClick.socket_end if isinstance(LeftClick.socket_start, SocketInput)
-            else LeftClick.socket_start
+        LeftClickConstants.socket_clicked = (
+            LeftClickConstants.socket_end if isinstance(LeftClickConstants.socket_start, SocketInput)
+            else LeftClickConstants.socket_start
         )
 
         socket.remove_edge()
 
     def on_socket(self, socket):
-        LeftClick.socket_clicked = socket
-        LeftClick.mode_drag_edge = True
+        LeftClickConstants.socket_clicked = socket
+        LeftClickConstants.mode_drag_edge = True
 
         socket_type = socket.data('type')
 
@@ -123,27 +133,26 @@ class LeftClickPress(LeftClick):
         elif socket_type == 'execute' and socket.has_edge():
             socket.remove_edge(socket.edges[0])
 
-        LeftClick.edge_tmp = NodeEdgeTmp(self.view.scene(), self.view,
-                                         LeftClick.socket_clicked)
+        LeftClickConstants.edge_tmp = NodeEdgeTmp(self.view.scene(), self.view,
+                                                  LeftClickConstants.socket_clicked)
 
     def _update_node_zValue(self):
         self.item.setZValue(1)
-        if hasattr(LeftClick.selection_node_previous, 'setZValue'):
-            # BUG: RuntimeError: Internal C++ object (NodeGraphics) already deleted
-            LeftClick.selection_node_previous.setZValue(0)
-        LeftClick.selection_node_previous = self.item
+        if hasattr(LeftClickConstants.selection_node_previous, 'setZValue'):
+            LeftClickConstants.selection_node_previous.setZValue(0)
+        LeftClickConstants.selection_node_previous = self.item
 
     def on_node(self):
         LOGGER.debug('Edge drag-mode Enabled')
 
-        LeftClick.mode_drag_node = True
-        LeftClick.nodes_initial_position = self._selected_nodes_position()
+        LeftClickConstants.mode_drag_node = True
+        LeftClickConstants.nodes_initial_position = self._selected_nodes_position()
 
         self._update_node_zValue()
 
     def update_view(self):
         with contextlib.suppress(AttributeError):
-            LeftClick.edge_tmp.edge_graphics.update()
+            LeftClickConstants.edge_tmp.edge_graphics.update()
 
 
 class LeftClickRelease(LeftClick):
@@ -156,34 +165,34 @@ class LeftClickRelease(LeftClick):
         self.mode_selection_box = False
 
     def _click_moved(self):
-        return LeftClick.mouse_initial_position != self.event.pos()
+        return LeftClickConstants.mouse_initial_position != self.event.pos()
 
     def _click_is_void(self):
         return not self.item and not self._is_box_selection()
 
     def _end_node_move(self):
-        if LeftClick.mode_drag_node:
+        if LeftClickConstants.mode_drag_node:
             command = MoveNodeCommand(self._selected_nodes_position(),
-                                      LeftClick.nodes_initial_position,
+                                      LeftClickConstants.nodes_initial_position,
                                       'Move Node')
             self.view.top.undo_stack.push(command)
-            LeftClick.mode_drag_node = False
+            LeftClickConstants.mode_drag_node = False
 
     def _is_box_selection(self):
         """Return `True` if action is a box selection."""
         return (
-            LeftClick.mouse_initial_position != self.event.pos() and
-            not LeftClick.mode_drag_node and
-            not LeftClick.mode_drag_edge
+            LeftClickConstants.mouse_initial_position != self.event.pos() and
+            not LeftClickConstants.mode_drag_node and
+            not LeftClickConstants.mode_drag_edge
         )
 
     def _create_box_select_command(self):
         scene = self.view.scene()
-        command = BoxSelectCommand(scene, LeftClick.selection_previous_box,
+        command = BoxSelectCommand(scene, LeftClickConstants.selection_previous_box,
                                    scene.selectionArea(), 'Box Select')
         self.view.top.undo_stack.push(command)
-        LeftClick.selection_previous_box = scene.selectionArea()
-        LeftClick.mode_selection_box = True
+        LeftClickConstants.selection_previous_box = scene.selectionArea()
+        LeftClickConstants.mode_selection_box = True
 
     def _end_box_selection(self):
         if self._is_box_selection():
@@ -191,18 +200,18 @@ class LeftClickRelease(LeftClick):
 
     def _delete_tmp_edge(self, msg=None):
         LOGGER.debug('Delete temporary edge. %s', (msg or ''))
-        LeftClick.edge_tmp.delete_edge()
-        LeftClick.edge_tmp = None
+        LeftClickConstants.edge_tmp.delete_edge()
+        LeftClickConstants.edge_tmp = None
 
     def _socket_is_invalid(self):
-        return self.item == LeftClick.socket_clicked
+        return self.item == LeftClickConstants.socket_clicked
 
     @staticmethod
     def _is_same_socket_type(end_socket):
         """Check if input and output socket are the same type."""
-        return (isinstance(LeftClick.socket_clicked, SocketOutput) and
+        return (isinstance(LeftClickConstants.socket_clicked, SocketOutput) and
                 isinstance(end_socket, SocketOutput) or
-                isinstance(LeftClick.socket_clicked, SocketInput) and
+                isinstance(LeftClickConstants.socket_clicked, SocketInput) and
                 isinstance(end_socket, SocketInput))
 
     def click_is_on_socket(self, end_socket):
@@ -218,36 +227,36 @@ class LeftClickRelease(LeftClick):
                 end_socket.remove_edge(end_socket.edges[0])
 
             # invert the sockets if starting point is input to output
-            end_socket, LeftClick.socket_clicked = LeftClick.socket_clicked, end_socket
+            end_socket, LeftClickConstants.socket_clicked = LeftClickConstants.socket_clicked, end_socket
 
         command = ConnectEdgeCommand(self.view._scene,
-                                     LeftClick.socket_clicked,
+                                     LeftClickConstants.socket_clicked,
                                      end_socket, 'Connect Edge')
         self.view.top.undo_stack.push(command)
 
     def _readjust_edge(self):
-        if LeftClick.mode_drag_tmp_edge:
+        if LeftClickConstants.mode_drag_tmp_edge:
             command = DisconnectEdgeCommand(self.view.scene(),
-                                            LeftClick.socket_start,
-                                            LeftClick.socket_end,
+                                            LeftClickConstants.socket_start,
+                                            LeftClickConstants.socket_end,
                                             'Disconnect Edge')
             self.view.top.undo_stack.push(command)
-            LeftClick.mode_drag_tmp_edge = False
+            LeftClickConstants.mode_drag_tmp_edge = False
 
     def release(self):
         if not self._click_moved():
-            LeftClick.mode_drag_node = False
+            LeftClickConstants.mode_drag_node = False
 
         self._end_box_selection()
 
         if self._click_is_void():
-            self._create_selection_command(LeftClick.selection_previous_node,
+            self._create_selection_command(LeftClickConstants.selection_previous_node,
                                            None, 'Select')
             return
 
         self._end_node_move()
 
-        if LeftClick.mode_drag_edge:
+        if LeftClickConstants.mode_drag_edge:
 
             if self._socket_is_invalid():
                 self._delete_tmp_edge('End socket is invalid. Delete edge.')
@@ -256,8 +265,8 @@ class LeftClickRelease(LeftClick):
             if isinstance(self.item, SocketGraphics):
                 self.click_is_on_socket(self.item)
 
-            elif LeftClick.edge_tmp:
+            elif LeftClickConstants.edge_tmp:
                 self._readjust_edge()
                 self._delete_tmp_edge('Edge release was not on a socket')
 
-            LeftClick.mode_drag_edge = False
+            LeftClickConstants.mode_drag_edge = False

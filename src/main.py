@@ -138,9 +138,10 @@ class MainWindow(QMainWindow):
         self._set_toolbar()
         self._set_status_bar()
 
-        # save_file(self._scene, 'scripts/save_file.json')
-        # self.debug_widget._debug_add_nodes()
+        self.file = 'scripts/save_file.json'
         self._load_file()
+        # save_file(self._scene, self.file)
+
         self._debug_exec()
 
     def reset_graph(self):
@@ -150,10 +151,9 @@ class MainWindow(QMainWindow):
         LeftClickConstants.reset_attrs()
 
     def _load_file(self):
-        file = 'scripts/save_file.json'
-        load_file(self._scene, file)
-        self.menubar._file_actions.editor_file = file
-        self.setWindowTitle(os.path.basename(file))
+        load_file(self._scene, self.file)
+        self.menubar._file_actions.editor_file = self.file
+        self.setWindowTitle(os.path.basename(self.file))
 
     def _debug_exec(self):
         """Debug function"""

@@ -1,11 +1,12 @@
 
 from PySide2.QtGui import QColor
 
+from src.widgets.node_socket import SocketType
 from src.nodes import NodeContent, NodesRegister
 from src.widgets.node_graphics import Node
 
 
-class NodeConditionalsContent(NodeContent):
+class NodeBranchContent(NodeContent):
     def __init__(self, node, parent=None):
         super().__init__(node, parent)
 
@@ -31,9 +32,9 @@ class NodeConditionalsContent(NodeContent):
 
 
 @NodesRegister.register_class
-class NodeConditionals(Node):
+class NodeBranch(Node):
     title_background = QColor('#BD74D3')
     title = "If/Else"
 
     def __init__(self, scene):
-        super().__init__(scene=scene, node=self, content=NodeConditionalsContent(self))
+        super().__init__(scene=scene, node=self, content=NodeBranchContent(self))

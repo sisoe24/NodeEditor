@@ -234,7 +234,7 @@ class EditorRunActions(EditorActions):
         self.run_act.triggered.connect(self.run_data)
 
     def run_data(self):
-        NodesRegister.clean_execution_flow()
+        NodesRegister.reset_execution_flow()
         self.top_window.show_status_message('Graph executed')
 
         for node in NodesRegister.get_event_nodes():
@@ -242,17 +242,18 @@ class EditorRunActions(EditorActions):
         NodesRegister.reset_nodes_execution()
 
     def _exec_connected_sockets(self, node):
-        for input_socket in node.input_sockets:
-            socket_type = input_socket.socket_type
-            if input_socket.has_edge() and socket_type != 'execute':
+        for edge in node.node_graphics.data('input_edges'):
+            socket = edge.start_socket
+            if socket.socket_type == 'execute':
+                continue
 
-                input_socket.edge.transfer_data()
-                parent_node = input_socket.edge.start_socket.node.base
+            edge.transfer_data()
 
-                if parent_node.was_execute:
-                    break
+            parent_node = socket.node.base
+            if parent_node.was_execute:
+                break
 
-                return self._exec_connected_sockets(parent_node)
+            return self._exec_connected_sockets(parent_node)
 
         return None
 
@@ -261,7 +262,7 @@ class EditorRunActions(EditorActions):
 
         if start_socket.has_edge():
             socket_edge = start_socket.edges[0]
-            socket_edge.edge_graphics.update_flow_color()
+            socket_edge.edge_graphics.update_flow_color('#78DD2A')
 
             next_node = socket_edge.end_socket.node.base
 

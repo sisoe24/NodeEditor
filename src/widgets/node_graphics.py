@@ -51,15 +51,10 @@ class NodeGraphics(QGraphicsItem):
         """Delete the graphics node and its input edges."""
         NodesRegister.unregister_node(self)
 
-        for socket in self.base.input_sockets:
-            if socket.has_edge():
-                socket.remove_edge()
-
-        for socket in self.base.output_sockets:
-            if socket.has_edge():
-                edges = socket.get_edges()
-                for edge in edges:
-                    socket.remove_edge(edge)
+        # Merge two dicts. I would rather use .update but does not work
+        edges = {**self.data('input_edges'), **self.data('output_edges')}
+        for edge in edges:
+            edge.delete_edge()
 
         self.scene().removeItem(self)
 
@@ -192,26 +187,6 @@ class NodeGraphics(QGraphicsItem):
         return self._node_body.boundingRect()
 
     def data(self, key=None) -> dict:
-        def get_sockets(sockets_list, is_input=False):
-            sockets = {}
-            for index, socket in enumerate(sockets_list):
-                sockets[index] = {str(socket): {'edges': socket.get_edges()}}
-            return sockets
-
-        def get_parents():
-            parents = [
-                socket.edge.start_socket.node.base
-                for socket in self.base.input_sockets if socket.has_edge()
-            ]
-            return set(parents)
-
-        def get_children():
-            parents = []
-            for socket in self.base.output_sockets:
-                if socket.has_edge():
-                    for edge in socket.edges:
-                        parents.append(edge.end_socket.node.base)
-            return set(parents)
 
         position = self.pos()
         node_data = {
@@ -220,14 +195,13 @@ class NodeGraphics(QGraphicsItem):
             'id': self.node_id,
             'zValue': self.zValue(),
             'position': {'x': position.x(), 'y': position.y()},
-            # 'input_sockets': get_sockets(self.base.input_sockets, True),
-            # 'output_sockets': get_sockets(self.base.output_sockets),
             'output_edges': extract_output_edges(self),
             'input_edges': extract_input_edges(self),
-            'output': self.base.get_output(),
-            'parents': get_parents(),
-            'children': get_children(),
-            'was_executed': str(self.base.was_execute)
+            'node_output': self.base.get_output(),
+            'connected_sockets': {
+                'input_sockets': {},
+                'output_sockets': {}
+            }
         }
         return node_data.get(key, node_data)
 
@@ -327,13 +301,10 @@ class Node(NodeInterface):
     def set_input(self, value, index=0):
         self.content.set_input(value, index)
 
-        for output_socket in self.output_sockets:
-
-            socket_type = output_socket.socket_type
-            if output_socket.has_edge() and socket_type != 'execute':
-
-                for edge in output_socket.edges:
-                    edge.transfer_data()
+        for edge in self.node_graphics.data('output_edges'):
+            if edge.start_socket.socket_type == 'execute':
+                continue
+            edge.transfer_data()
 
         self.was_execute = True
 

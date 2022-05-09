@@ -46,7 +46,7 @@ def connect_input_edges(scene: 'QGraphicsScene', connections: dict) -> None:
 
 
 def _create_edge_connection_data(edges: dict, index: int, edge: NodeEdge):
-    edges[f'edge.{index}'] = {
+    edges[edge] = {
         'end_socket': {
             'node': edge.end_socket.node.node_id,
             'index': edge.end_socket.index

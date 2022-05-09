@@ -1,9 +1,10 @@
 import abc
 import json
+import math
 import logging
 
 from PySide2.QtCore import QPointF,  Qt
-from PySide2.QtGui import QPen, QPainterPath, QColor, QPainterPathStroker
+from PySide2.QtGui import QPen, QPainterPath, QColor, QPainterPathStroker, QPolygonF
 
 from PySide2.QtWidgets import (
     QGraphicsPathItem,
@@ -35,22 +36,60 @@ class NodeEdgeGraphics(QGraphicsPathItem):
         self.setFlag(QGraphicsItem.ItemStacksBehindParent)
         self.setZValue(-5.0)
 
+    @staticmethod
+    def draw_arrow(path):
+        """Draw an arrow in the middle of the edge.
+
+        All credit goes to: https://stackoverflow.com/a/67651251/9392852
+
+        TODO: try to implement myself.
+        """
+        try:
+            start_point = path.pointAtPercent(0.5)
+            end_point = path.pointAtPercent(0.51)
+
+            dx, dy = start_point.x() - end_point.x(), start_point.y() - end_point.y()
+
+            leng = math.sqrt(dx ** 2 + dy ** 2)
+            normX, normY = dx / leng, dy / leng  # normalize
+
+            # perpendicular vector
+            perpX = -normY
+            perpY = normX
+
+            arrow_size = 6
+
+            leftX = end_point.x() + arrow_size * normX + arrow_size * perpX
+            leftY = end_point.y() + arrow_size * normY + arrow_size * perpY
+
+            rightX = end_point.x() + arrow_size * normX - arrow_size * perpX
+            rightY = end_point.y() + arrow_size * normY - arrow_size * perpY
+
+            point2 = QPointF(leftX, leftY)
+            point3 = QPointF(rightX, rightY)
+
+            return QPolygonF([point2, end_point, point3])
+
+        except ZeroDivisionError:
+            return QPolygonF()
+
     def paint(self, painter, option, widget=None):
         """Paint the edge between the nodes."""
-        path = QPainterPath(self.base.start_socket.get_position())
-        path.lineTo(self.mapFromScene(self.base.end_point_loc))
+        painter.setRenderHint(painter.Antialiasing)
 
-        stroke = QPainterPathStroker()
-        stroke.setJoinStyle(Qt.RoundJoin)
-        stroke.setWidth(1.5)
-        stroker_path = stroke.createStroke(path)
-        self.setPath(stroker_path)
+        start_point = self.base.start_socket.get_position()
+        end_point = self.base.end_point_loc
+
+        path = QPainterPath(start_point)
+        path.lineTo(self.mapFromScene(end_point))
+        self.setPath(path)
 
         self._pen = QPen(self.color)
-        self._pen.setWidthF(2.0)
+        self._pen.setWidthF(3.0)
         painter.setPen(self._pen)
 
-        painter.drawPath(self.path())
+        painter.drawPath(path)
+        painter.drawPolyline(self.draw_arrow(path))
 
     def boundingRect(self):
         return self.shape().boundingRect()

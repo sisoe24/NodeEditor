@@ -42,8 +42,8 @@ def load_file(scene: 'QGraphicsScene', file: str) -> None:
     with open(file, 'r', encoding='utf-8') as f:
         try:
             load_scene(scene, json.load(f))
-        except json.JSONDecodeError:
-            print('Could not load the file.')
+        except Exception as err:
+            print('Could not load the file.', err)
 
 
 def _visible_viewport(scene):
@@ -67,10 +67,14 @@ def scene_state(scene) -> dict:
     graph_nodes = [n for n in scene.items() if isinstance(n, NodeGraphics)]
     for node in graph_nodes:
         node_data = node.data()
+
+        # convert edge obj to str for json serialization
+        edges = {str(i): v for i, v in extract_output_edges(node).items()}
+
         state['nodes'][node_data.get('id')] = {
             'class': node_data.get('class'),
             'position': node_data.get('position'),
-            'output_edges': extract_output_edges(node)
+            'output_edges': edges
         }
 
     return state
@@ -78,5 +82,9 @@ def scene_state(scene) -> dict:
 
 def save_file(scene, file):
     """Save current graph scene."""
-    with open(file, 'w', encoding='utf-8') as f:
-        json.dump(scene_state(scene), f, indent=2, sort_keys=True)
+    try:
+        scene = scene_state(scene)
+        with open(file, 'w', encoding='utf-8') as f:
+            json.dump(scene, f, indent=2, sort_keys=True)
+    except Exception as err:
+        print('Could not save file: ', err)

@@ -30,7 +30,7 @@ from src.utils.graph_state import load_file, save_file
 from src.widgets.editor_menubar import NodeMenubar
 from src.widgets.editor_scene import Scene
 from src.widgets.editor_view import GraphicsView
-from src.widgets.logic.left_click import reset_left_click_constants
+from src.widgets.logic.left_click import LeftClickConstants
 from src.widgets.node_edge import NodeEdge
 
 LOGGER = logging.getLogger('nodeeditor.main')
@@ -147,7 +147,7 @@ class MainWindow(QMainWindow):
         self._scene.clear()
         self.undo_stack.clear()
         NodesRegister.clean_register()
-        reset_left_click_constants()
+        LeftClickConstants.reset_attrs()
 
     def _load_file(self):
         file = 'scripts/save_file.json'

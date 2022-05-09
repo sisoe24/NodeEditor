@@ -38,13 +38,11 @@ class LeftClickConstants:
     socket_start = None
     socket_end = None
 
-
-def reset_left_click_constants():
-    # FIXME: ugly. maybe check with inspect
-
-    for attr in dir(LeftClickConstants):
-        if not attr.startswith('__'):
-            setattr(LeftClickConstants, attr, None)
+    @classmethod
+    def reset_attrs(cls):
+        for attr in cls.__dict__:
+            with contextlib.suppress(AttributeError):
+                setattr(cls, attr, None)
 
 
 class LeftClick:

@@ -28,7 +28,7 @@ class NodeEdgeGraphics(QGraphicsPathItem):
 
         self._set_flags()
 
-    def update_flow_color(self, color='#78DD2A'):
+    def update_flow_color(self, color='#808080'):
         self.color = QColor(color)
 
     def _set_flags(self):
@@ -84,10 +84,10 @@ class NodeEdgeGraphics(QGraphicsPathItem):
         path.lineTo(self.mapFromScene(end_point))
         self.setPath(path)
 
-        self._pen = QPen(self.color)
-        self._pen.setWidthF(3.0)
-        painter.setPen(self._pen)
+        pen = QPen(self.color)
+        pen.setWidthF(3.0)
 
+        painter.setPen(pen)
         painter.drawPath(path)
         painter.drawPolyline(self.draw_arrow(path))
 

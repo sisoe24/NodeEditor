@@ -28,6 +28,16 @@ class NodesRegister:
         cls.event_nodes.clear()
 
     @classmethod
+    def clean_execution_flow(cls):
+        # Review: node data should already have all the information
+        # without the need to check if socket has edge
+        for node in cls.all_nodes:
+            for socket in node.base.output_sockets:
+                if socket.has_edge():
+                    for edge in socket.edges:
+                        edge.edge_graphics.update_flow_color('#808080')
+
+    @classmethod
     def get_node_class_object(cls, node: str):
         """Get a class reference object.
 

@@ -1,5 +1,6 @@
 import logging
 import contextlib
+from src.nodes import nodes_register
 
 from src.widgets.logic.undo_redo import (
     BoxSelectCommand,
@@ -124,11 +125,13 @@ class LeftClickPress(LeftClick):
         LeftClickConstants.mode_drag_edge = True
 
         socket_type = socket.data('type')
+        nodes_register.NodesRegister.clean_execution_flow()
 
         if isinstance(socket, SocketInput) and socket.has_edge():
             self._re_connect_edge(socket)
 
         elif socket_type == 'execute' and socket.has_edge():
+            # TODO: reset all edges color
             socket.remove_edge(socket.edges[0])
 
         LeftClickConstants.edge_tmp = NodeEdgeTmp(self.view.scene(), self.view,

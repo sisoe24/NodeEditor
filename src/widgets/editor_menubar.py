@@ -234,6 +234,7 @@ class EditorRunActions(EditorActions):
         self.run_act.triggered.connect(self.run_data)
 
     def run_data(self):
+        NodesRegister.clean_execution_flow()
         self.top_window.show_status_message('Graph executed')
 
         for node in NodesRegister.get_event_nodes():

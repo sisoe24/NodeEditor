@@ -25,7 +25,7 @@ class NodeExecuteContent(NodeContent):
 @NodesRegister.register_class
 class NodeExecute(Node):
     title_background = QColor('#EE0000')
-    title = "Execute"
+    title = "Event"
     is_event_node = True
 
     def __init__(self, scene):

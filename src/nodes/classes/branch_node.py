@@ -15,6 +15,7 @@ class NodeBranchContent(NodeContent):
         self.add_input_execute('Execute', 2)
 
         self.condition = self.add_input_boolean('Condition', pos=3)
+        self.output = None
 
     def get_output(self, index):
         return ""
@@ -23,11 +24,11 @@ class NodeBranchContent(NodeContent):
         return ""
 
     def set_input(self, value, index):
-        return ""
+        self.output = value
 
     def get_execute_flow(self, output_execs):
         return (
-            output_execs[0] if self.condition.isChecked() else output_execs[1]
+            output_execs[0] if self.output else output_execs[1]
         )
 
 

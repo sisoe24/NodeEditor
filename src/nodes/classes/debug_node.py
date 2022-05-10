@@ -21,7 +21,7 @@ class NodeDebugContent(NodeContent):
         self.add_widget(self.text_box, pos=3)
 
     def set_input(self, value, index):
-        self.text_box.setPlainText(value)
+        self.text_box.setPlainText(str(value))
 
     def clear_output(self, index):
         return

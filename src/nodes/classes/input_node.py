@@ -25,7 +25,7 @@ class NodeInputContent(NodeContent):
             return self.text_box.toPlainText()
 
         if index == 1:
-            return str(len(self.text_box.toPlainText()))
+            return len(self.text_box.toPlainText())
 
         return ""
 

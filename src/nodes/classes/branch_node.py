@@ -27,9 +27,9 @@ class NodeBranchContent(NodeContent):
         self.output = value
 
     def get_execute_flow(self, output_execs):
-        return (
-            output_execs[0] if self.output else output_execs[1]
-        )
+        # TODO: take in consideration when the widget is hidden
+        condition = self.output or self.condition.isChecked()
+        return output_execs[0] if condition else output_execs[1]
 
 
 @NodesRegister.register_class

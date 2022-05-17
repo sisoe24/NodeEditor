@@ -17,7 +17,6 @@ class NodeStringContent(NodeContent):
     def __init__(self, node, parent=None):
         super().__init__(node, parent)
 
-        self.add_output_execute('Execute', pos=0)
         self.add_output(SocketType.text, 'Text', pos=1)
 
         self.make_upper = QRadioButton('Make Uppercase')
@@ -35,9 +34,7 @@ class NodeStringContent(NodeContent):
         self.text.setPlaceholderText('text')
         self.add_input_widget(self.text, pos=5)
 
-        self.add_input_execute('Execute', pos=6)
-
-        self.output_text = "STRINGMODE"
+        self.output_text = ""
 
     def update_text(self, text):
         if self.make_upper.isChecked():

@@ -24,7 +24,7 @@ poetry run python -m src.main
 ## Notes
 
 - Although the core logic is there, the project is not exactly in a working state. I am still trying to figure out most of the nodes with their execution, and there are many bugs and unfinished features.
-- I want to give some merit to Pavel Kaza for inspiring me to start this project.
+- I want to give merit to [Pavel Křupala](https://gitlab.com/pavel.krupala) for inspiring me to start this project.
 
 ## Demo
 

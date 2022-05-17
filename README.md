@@ -2,6 +2,8 @@
 
 A work in progress project to create a scripting framework in Python by using a nodal approach built in PySide2.
 
+Watch [demo](#demo)
+
 ## Description
 
 My end goal for this project is to create an API that allows the user to develop plugins for applications using PySide (Nuke, Maya, Houdini, etc.), much like the Blueprint system in Unreal Engine.
@@ -23,3 +25,7 @@ poetry run python -m src.main
 
 - Although the core logic is there, the project is not exactly in a working state. I am still trying to figure out most of the nodes with their execution, and there are many bugs and unfinished features.
 - I want to give some merit to Pavel Kaza for inspiring me to start this project.
+
+## Demo
+
+![demo](resources/demo.gif)

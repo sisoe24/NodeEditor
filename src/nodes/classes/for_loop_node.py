@@ -16,7 +16,7 @@ class NodeForLoopContent(NodeContent):
         self.add_input_execute(pos=3)
         self.add_input_list('List', pos=4)
 
-        self.output = ['virgil', 'sisoe', 'lara']
+        self.output = ['foo', 'bar', 'foobar']
 
     def get_output(self, index):
         if index == 1:

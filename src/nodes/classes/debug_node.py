@@ -1,6 +1,6 @@
 
 from PySide2.QtGui import QColor
-from PySide2.QtWidgets import QPlainTextEdit
+from PySide2.QtWidgets import QPlainTextEdit, QPushButton
 
 
 from src.nodes import NodeContent, NodesRegister
@@ -16,12 +16,17 @@ class NodeDebugContent(NodeContent):
 
         self.add_output_execute(pos=0)
         self.add_input_execute(pos=1)
+
         self.text_box = QPlainTextEdit()
         self.add_input(SocketType.text, 'Text', pos=2)
         self.add_widget(self.text_box, pos=3)
 
+        self.clean_btn = QPushButton('Clear')
+        self.clean_btn.clicked.connect(self.text_box.clear)
+        self.add_widget(self.clean_btn, pos=3)
+
     def set_input(self, value, index):
-        self.text_box.setPlainText(str(value))
+        self.text_box.appendPlainText(str(value))
 
     def clear_output(self, index):
         return

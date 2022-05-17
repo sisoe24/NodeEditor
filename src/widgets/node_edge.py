@@ -172,14 +172,13 @@ class NodeEdge(_EdgeInterface):
         self.socket_output = self.start_socket.node.base.get_output(
             self.start_socket.index)
 
-        try:
-            _ = iter(self.socket_output)
-        except TypeError:
-            self.end_socket.node.base.set_input(
-                self.socket_output, self.end_socket.index)
-        else:
+        # XXX: need to find a cleaner way for the for loop
+        if isinstance(self.socket_output, (list)):
             for n in self.socket_output:
                 self.end_socket.node.base.set_input(n, self.end_socket.index)
+        else:
+            self.end_socket.node.base.set_input(
+                self.socket_output, self.end_socket.index)
 
     @property
     def start_socket(self) -> SocketOutput:

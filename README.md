@@ -39,16 +39,18 @@ poetry run python -m src.main
 
 ## Create a custom node
 
-There is a script inside the scripts folder `create_node.py` that will create a custom
-node template. Upon starting, the script will ask for the node class name and the node name, 
-which can be anything. Once created, the script will create a new file inside `src/nodes/classes` with the new node.
+- If you use Visual Studio Code, you can use the task `Create sample node`
+- Or you che call the script `create_node.py` which is located inside the scripts.
+
+In Both cases you will be asked for a node class name and a node name, which can be anything.
+Once created, the script will create a new file inside `src/nodes/classes` with the new node.
 
 The node will start as a blanket template, i.e., no sockets.
 
 The node is subdivided into two sections: The Node class and the Node content.
 The node content is where you would put the node's logic with its appropriate sockets.
 
-For now, I suggest looking at other nodes inside the `nodes/classes` folder to see how they work. 
+For now, I suggest looking at other nodes inside the `nodes/classes` folder to see how they work.
 Ideally, it should be documented, but I don't think it is appropriate at this stage since much of the code is likely to change.
 
 ## Notes

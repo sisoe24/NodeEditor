@@ -138,7 +138,7 @@ class MainWindow(QMainWindow):
         self._set_toolbar()
         self._set_status_bar()
 
-        self.file = 'scripts/save_file.json'
+        self.file = 'example/save_file.json'
         self._load_file()
         # save_file(self._scene, self.file)
 

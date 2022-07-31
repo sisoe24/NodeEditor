@@ -25,7 +25,7 @@ from PySide2.QtWidgets import (
 
 from src.nodes import NodesRegister, create_node
 
-from src.utils.graph_state import load_file, save_file
+from src.utils.graph_state import load_file, save_file, scene_state
 
 from src.widgets.editor_menubar import NodeMenubar
 from src.widgets.editor_scene import Scene
@@ -140,15 +140,19 @@ class MainWindow(QMainWindow):
 
         self.file = 'example/save_file.json'
         self._load_file()
-        # save_file(self._scene, self.file)
 
-        self._debug_exec()
+        # save_file(self._scene, self.file)
+        # self._debug_exec()
 
     def reset_graph(self):
         self._scene.clear()
         self.undo_stack.clear()
         NodesRegister.clean_register()
         LeftClickConstants.reset_attrs()
+
+        if not scene_state(self._scene).get('nodes'):
+            node = create_node(self._scene, 'NodeExecute')
+            node.set_position(0, 0)
 
     def _load_file(self):
         load_file(self._scene, self.file)

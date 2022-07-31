@@ -42,8 +42,9 @@ class LeftClickConstants:
     @classmethod
     def reset_attrs(cls):
         for attr in cls.__dict__:
-            with contextlib.suppress(AttributeError):
-                setattr(cls, attr, None)
+            if not attr.startswith('__') and not callable(getattr(cls, attr)):
+                with contextlib.suppress(AttributeError):
+                    setattr(cls, attr, None)
 
 
 class LeftClick:

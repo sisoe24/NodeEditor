@@ -1,0 +1,92 @@
+{
+  "nodes": {
+    "NodeBranch.001": {
+      "class": "NodeBranch",
+      "output_edges": {
+        "<NodeEdge 108..2d0>": {
+          "end_socket": {
+            "index": 0,
+            "node": "NodeDebug.001"
+          },
+          "start_socket": {
+            "index": 1,
+            "node": "NodeBranch.001"
+          }
+        }
+      },
+      "position": {
+        "x": -262.0,
+        "y": -197.0
+      }
+    },
+    "NodeDebug.001": {
+      "class": "NodeDebug",
+      "output_edges": {},
+      "position": {
+        "x": 46.0,
+        "y": -229.0
+      }
+    },
+    "NodeExecute.001": {
+      "class": "NodeExecute",
+      "output_edges": {
+        "<NodeEdge 108..150>": {
+          "end_socket": {
+            "index": 0,
+            "node": "NodeBranch.001"
+          },
+          "start_socket": {
+            "index": 0,
+            "node": "NodeExecute.001"
+          }
+        }
+      },
+      "position": {
+        "x": -502.0,
+        "y": -134.0
+      }
+    },
+    "NodeInput.001": {
+      "class": "NodeInput",
+      "output_edges": {
+        "<NodeEdge 108..310>": {
+          "end_socket": {
+            "index": 0,
+            "node": "NodeString.001"
+          },
+          "start_socket": {
+            "index": 0,
+            "node": "NodeInput.001"
+          }
+        }
+      },
+      "position": {
+        "x": -461.0,
+        "y": 44.0
+      }
+    },
+    "NodeString.001": {
+      "class": "NodeString",
+      "output_edges": {
+        "<NodeEdge 108..690>": {
+          "end_socket": {
+            "index": 1,
+            "node": "NodeDebug.001"
+          },
+          "start_socket": {
+            "index": 0,
+            "node": "NodeString.001"
+          }
+        }
+      },
+      "position": {
+        "x": -257.0,
+        "y": 11.0
+      }
+    }
+  },
+  "viewport": {
+    "x": 0.0,
+    "y": 0.0
+  }
+}

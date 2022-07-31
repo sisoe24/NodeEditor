@@ -94,6 +94,7 @@ class EditorFileActions(EditorActions):
         if self._cancel_action():
             return
         self.top_window.reset_graph()
+        self.top_window.show_status_message('New Graph')
 
     def open_file(self):
         if self._cancel_action():

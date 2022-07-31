@@ -210,6 +210,7 @@ class EditorAddActions(EditorActions):
 
         nodes = NodesRegister.nodes_classes.items()
         for node, obj in nodes:
+
             action = QAction(obj.title, self)
 
             # XXX: lambda does not work in this case, don't know why
@@ -218,7 +219,14 @@ class EditorAddActions(EditorActions):
             self.nodes.append(action)
 
     def add_node(self, node):
-        # TODO: create the node at mouse point
+        # TODO: [NOD-4] create the node at mouse point
+
+        if node.is_event_node and NodesRegister.event_nodes:
+            self.topLevelWidget().show_status_message(
+                'Execute node already created.'
+            )
+            return
+
         pos = self.top_window._view._mouse_pos_scene
         command = AddNodeCommand(self.scene, (float(pos.x()), float(pos.y())),
                                  node, 'Add Node')

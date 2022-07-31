@@ -161,6 +161,10 @@ class DeleteNodeCommand(QUndoCommand):
         for node in self.selected_nodes:
 
             node = graph_node(node)
+
+            if node.base.is_event_node:
+                continue
+
             self.nodes_data[node.node_id] = node.data()
 
             node.delete_node()

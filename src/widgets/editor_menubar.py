@@ -208,6 +208,7 @@ class EditorAddActions(EditorActions):
         super().__init__(parent)
 
         self.nodes = []
+        self.top_window = self.topLevelWidget()
 
         nodes = NodesRegister.nodes_classes.items()
         for node, obj in nodes:
@@ -223,12 +224,13 @@ class EditorAddActions(EditorActions):
         # TODO: [NOD-4] create the node at mouse point
 
         if node.is_event_node and NodesRegister.event_nodes:
-            self.topLevelWidget().show_status_message(
-                'Execute node already created.'
-            )
+            self.top_window.show_status_message('Execute node already created')
             return
 
-        pos = self.top_window._view._mouse_pos_scene
+        # hack: the only way I currently know on how to get an updated pos
+        # of the mouse after creating the right click context menu.
+        pos = self.top_window._view.mouseCursorPosition()
+
         command = AddNodeCommand(self.scene, (float(pos.x()), float(pos.y())),
                                  node, 'Add Node')
         self.undo_stack.push(command)

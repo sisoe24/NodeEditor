@@ -2,7 +2,7 @@ import logging
 from collections import namedtuple
 
 from PySide2.QtCore import Signal, Qt
-from PySide2.QtGui import QPainter, QMouseEvent
+from PySide2.QtGui import QCursor, QPainter, QMouseEvent
 from PySide2.QtWidgets import (
     QApplication,
     QGraphicsView,
@@ -264,6 +264,14 @@ class GraphicsView(QGraphicsView):
             self._cut_edge.update()
 
         return super().mouseMoveEvent(event)
+
+    def mouseCursorPosition(self):
+        """Get the cursor position in the view.
+
+        Returns:
+            QPointF - the cursor position coordinates as a QPointF object.
+        """
+        return self.mapToScene(self.mapFromGlobal(QCursor.pos()))
 
     def keyPressEvent(self, event):
         key = event.key()

@@ -173,6 +173,12 @@ class NodeContent(QWidget):
     def set_input(self, value, index):
         raise NotImplementedError(self.node)
 
+    def save_state(self):
+        return {}
+
+    def restore_state(self, content):
+        pass
+
     def get_execute_flow(self, socket_outputs):
         if len(socket_outputs) >= 2:
             raise NotImplementedError(

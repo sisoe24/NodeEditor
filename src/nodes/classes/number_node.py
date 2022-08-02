@@ -22,6 +22,12 @@ class NodeNumberContent(NodeContent):
         self.add_widget(self.spinbox, pos=1)
         self.add_output(SocketType.number, 'Number', pos=2)
 
+    def restore_state(self, content):
+        return self.spinbox.setValue(content.get('spinbox', 0.0))
+
+    def save_state(self):
+        return {"spinbox": self.spinbox.value()}
+
     def set_input(self, value, index):
         return ""
 

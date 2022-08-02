@@ -25,6 +25,7 @@ def create_nodes_from_save_file(scene, file_data) -> dict:
         node = create_node(scene, node_attrs['class'])
         node.set_position(node_attrs['position']['x'],
                           node_attrs['position']['y'])
+        node.content.restore_state(node_attrs.get('content'))
 
         node_id = node.node_graphics.node_id
         connections[node_id] = node_attrs.get('output_edges', {})
@@ -74,7 +75,8 @@ def scene_state(scene) -> dict:
         state['nodes'][node_data.get('id')] = {
             'class': node_data.get('class'),
             'position': node_data.get('position'),
-            'output_edges': edges
+            'output_edges': edges,
+            'content': node.content.save_state()
         }
 
     return state

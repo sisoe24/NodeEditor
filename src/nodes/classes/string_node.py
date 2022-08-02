@@ -36,6 +36,23 @@ class NodeStringContent(NodeContent):
 
         self.output_text = ""
 
+    def restore_state(self, content):
+        self.text.setText(content.get('text'))
+        for button, state in content['buttons'].items():
+            if state:
+                getattr(self, button).setChecked(True)
+                break
+
+    def save_state(self):
+        return {
+            'text': self.text.text(),
+            'buttons': {
+                'make_upper': self.make_upper.isChecked(),
+                'make_lower': self.make_lower.isChecked(),
+                'make_title': self.make_title.isChecked()
+            }
+        }
+
     def update_text(self, text):
         if self.make_upper.isChecked():
             return text.upper()

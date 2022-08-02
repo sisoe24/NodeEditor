@@ -19,6 +19,12 @@ class NodeInputContent(NodeContent):
         self.text_box = QPlainTextEdit('foo BAR')
         self.add_widget(self.text_box, pos=2)
 
+    def restore_state(self, content):
+        self.text_box.setPlainText(content.get('text', ''))
+
+    def save_state(self):
+        return {'text': self.text_box.toPlainText()}
+
     def get_output(self, index=1):
 
         if index == 0:

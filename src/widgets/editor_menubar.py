@@ -14,8 +14,11 @@ from PySide2.QtWidgets import (
 )
 
 from src.nodes import NodesRegister
+from src.widgets.logic.left_click import LeftClickConstants
 from src.widgets.logic.undo_redo import AddNodeCommand, DeleteNodeCommand
 from src.utils.graph_state import connect_output_edges, load_file, save_file
+from src.widgets.node_edge import NodeEdge
+from src.widgets.node_graphics import NodeGraphics
 
 
 class EditorActions(QWidget):
@@ -211,7 +214,7 @@ class EditorAddActions(EditorActions):
         self.top_window = self.topLevelWidget()
 
         nodes = NodesRegister.nodes_classes.items()
-        for node, obj in nodes:
+        for _, obj in nodes:
 
             action = QAction(obj.title, self)
 
@@ -232,6 +235,13 @@ class EditorAddActions(EditorActions):
         command = AddNodeCommand(self.scene, (float(pos.x()), float(pos.y())),
                                  node, 'Add Node')
         self.undo_stack.push(command)
+
+        # when dragging edge, connect the nodes
+        node: NodeGraphics = NodesRegister.all_nodes[-1].base
+        if LeftClickConstants.mode_drag_edge and node.input_sockets:
+            NodeEdge(self.scene, LeftClickConstants.socket_clicked,
+                     node.input_sockets[0])
+            LeftClickConstants.mode_drag_edge = False
 
 
 class EditorRunActions(EditorActions):

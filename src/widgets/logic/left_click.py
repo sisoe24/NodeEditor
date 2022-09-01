@@ -270,12 +270,13 @@ class LeftClickRelease(LeftClick):
 
             if isinstance(self.item, SocketGraphics):
                 self.click_is_on_socket(self.item)
+                LeftClickConstants.mode_drag_edge = False
 
             elif LeftClickConstants.edge_tmp:
                 self._readjust_edge()
                 self._delete_tmp_edge('Edge release was not on a socket')
 
-                # TODO: create a search menu when edge dragging
+                # TODO: [HV-2] create a search menu when edge dragging
                 menu = QMenu(self.view)
 
                 top_menu = self.view.topLevelWidget().menubar
@@ -283,5 +284,3 @@ class LeftClickRelease(LeftClick):
 
                 pos = self.view.mapToGlobal(self.event.pos())
                 menu.popup(pos)
-
-            LeftClickConstants.mode_drag_edge = False

@@ -1,5 +1,10 @@
 import logging
 import contextlib
+
+
+from PySide2.QtWidgets import QMenu
+
+
 from src.nodes import nodes_register
 
 from src.widgets.logic.undo_redo import (
@@ -251,8 +256,8 @@ class LeftClickRelease(LeftClick):
         self._end_box_selection()
 
         if self._click_is_void():
-            self._create_selection_command(LeftClickConstants.selection_previous_node,
-                                           None, 'Select')
+            self._create_selection_command(
+                LeftClickConstants.selection_previous_node, None, 'Select')
             return
 
         self._end_node_move()
@@ -269,5 +274,14 @@ class LeftClickRelease(LeftClick):
             elif LeftClickConstants.edge_tmp:
                 self._readjust_edge()
                 self._delete_tmp_edge('Edge release was not on a socket')
+
+                # TODO: create a search menu when edge dragging
+                menu = QMenu(self.view)
+
+                top_menu = self.view.topLevelWidget().menubar
+                menu.addMenu(top_menu.add_menu)
+
+                pos = self.view.mapToGlobal(self.event.pos())
+                menu.popup(pos)
 
             LeftClickConstants.mode_drag_edge = False

@@ -221,8 +221,6 @@ class EditorAddActions(EditorActions):
             self.nodes.append(action)
 
     def add_node(self, node):
-        # TODO: [NOD-4] create the node at mouse point
-
         if node.is_event_node and NodesRegister.event_nodes:
             self.top_window.show_status_message('Execute node already created')
             return

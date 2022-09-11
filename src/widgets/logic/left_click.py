@@ -1,9 +1,8 @@
 import logging
 import contextlib
 
-
-from PySide2.QtWidgets import QMenu
-
+from PySide2.QtCore import Qt
+from PySide2.QtWidgets import QMenu, QApplication
 
 from src.nodes import nodes_register
 
@@ -150,6 +149,7 @@ class LeftClickPress(LeftClick):
 
     def on_node(self):
         LOGGER.debug('Edge drag-mode Enabled')
+        QApplication.setOverrideCursor(Qt.SizeAllCursor)
 
         LeftClickConstants.mode_drag_node = True
         LeftClickConstants.nodes_initial_position = self._selected_nodes_position()
@@ -250,6 +250,7 @@ class LeftClickRelease(LeftClick):
             LeftClickConstants.mode_drag_tmp_edge = False
 
     def release(self):
+        QApplication.setOverrideCursor(Qt.ArrowCursor)
         if not self._click_moved():
             LeftClickConstants.mode_drag_node = False
 

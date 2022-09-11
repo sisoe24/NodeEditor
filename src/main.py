@@ -30,7 +30,7 @@ from src.utils.graph_state import load_file, save_file, scene_state
 from src.widgets.editor_menubar import NodeMenubar
 from src.widgets.editor_scene import Scene
 from src.widgets.editor_view import GraphicsView
-from src.widgets.logic.left_click import LeftClickConstants
+from src.widgets.logic.left_click import reset_left_click_constants
 from src.widgets.node_edge import NodeEdge
 
 LOGGER = logging.getLogger('nodeeditor.main')
@@ -148,7 +148,7 @@ class MainWindow(QMainWindow):
         self._scene.clear()
         self.undo_stack.clear()
         NodesRegister.clean_register()
-        LeftClickConstants.reset_attrs()
+        reset_left_click_constants()
 
         if not scene_state(self._scene).get('nodes'):
             node = create_node(self._scene, 'NodeExecute')

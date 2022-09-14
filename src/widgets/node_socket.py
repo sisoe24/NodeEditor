@@ -21,10 +21,7 @@ class SocketObject:
 def create_socket(parent_node, socket_index, socket_data, widget, node_side):
     socket = SocketObject(parent_node, socket_index, socket_data, widget)
 
-    if node_side == 'left':
-        return SocketInput(socket)
-
-    return SocketOutput(socket)
+    return SocketInput(socket) if node_side == 'left' else SocketOutput(socket)
 
 
 class SocketType:

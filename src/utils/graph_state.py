@@ -1,5 +1,6 @@
 import json
 from pprint import pformat, pprint
+import traceback
 
 from PySide2.QtCore import QRectF, QRect
 from PySide2.QtWidgets import (
@@ -44,7 +45,7 @@ def load_file(scene: 'QGraphicsScene', file: str) -> None:
         try:
             load_scene(scene, json.load(f))
         except Exception as err:
-            print('Could not load the file.', err)
+            print('Could not load the file.', err, traceback.print_exc())
 
 
 def _visible_viewport(scene):

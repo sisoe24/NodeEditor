@@ -16,7 +16,7 @@ from src.widgets.logic.undo_redo import (
 
 from src.widgets.node_edge import NodeEdgeTmp
 from src.widgets.node_graphics import NodeGraphics
-from src.widgets.node_socket import SocketGraphics, SocketInput, SocketOutput
+from src.widgets.node_socket import SocketGraphics, SocketInput, SocketOutput, SocketType
 
 LOGGER = logging.getLogger('nodeeditor.left_click')
 LOGGER.setLevel(logging.DEBUG)
@@ -235,10 +235,12 @@ class LeftClickRelease(LeftClick):
             # invert the sockets if starting point is input to output
             end_socket, LeftClickConstants.socket_clicked = LeftClickConstants.socket_clicked, end_socket
 
-        command = ConnectEdgeCommand(self.view._scene,
-                                     LeftClickConstants.socket_clicked,
-                                     end_socket, 'Connect Edge')
-        self.view.top.undo_stack.push(command)
+        if LeftClickConstants.socket_clicked.can_connect(end_socket):
+            print('can connect')
+            command = ConnectEdgeCommand(self.view._scene,
+                                         LeftClickConstants.socket_clicked,
+                                         end_socket, 'Connect Edge')
+            self.view.top.undo_stack.push(command)
 
     def _readjust_edge(self):
         if LeftClickConstants.mode_drag_tmp_edge:
@@ -277,7 +279,6 @@ class LeftClickRelease(LeftClick):
                 self._readjust_edge()
                 self._delete_tmp_edge('Edge release was not on a socket')
 
-                # TODO: [HV-2] create a search menu when edge dragging
                 menu = QMenu(self.view)
 
                 top_menu = self.view.topLevelWidget().menubar

@@ -14,6 +14,7 @@ from PySide2.QtWidgets import (
 )
 
 from src.nodes import NodesRegister
+from src.widgets.node_socket import SocketType
 from src.widgets.logic.left_click import LeftClickConstants
 from src.widgets.logic.undo_redo import AddNodeCommand, DeleteNodeCommand
 from src.utils.graph_state import connect_output_edges, load_file, save_file
@@ -238,9 +239,19 @@ class EditorAddActions(EditorActions):
 
         # when dragging edge, connect the nodes
         node: NodeGraphics = NodesRegister.all_nodes[-1].base
-        if LeftClickConstants.mode_drag_edge and node.input_sockets:
-            NodeEdge(self.scene, LeftClickConstants.socket_clicked,
-                     node.input_sockets[0])
+        end_sockets = node.input_sockets
+        if LeftClickConstants.mode_drag_edge and end_sockets:
+            start_socket_type = LeftClickConstants.socket_clicked.data(
+                'type')
+            for socket in end_sockets:
+                socket_type = socket.data('type')
+                if (
+                    start_socket_type == socket_type
+                    or socket_type == SocketType.widget.get('type')
+                ):
+                    NodeEdge(self.scene, LeftClickConstants.socket_clicked,
+                             socket)
+
             LeftClickConstants.mode_drag_edge = False
 
 

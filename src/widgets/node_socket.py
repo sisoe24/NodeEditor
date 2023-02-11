@@ -148,6 +148,15 @@ class SocketGraphics(QGraphicsItem):
         # return pprint.pformat(self.data(), 1, 100)
         return json.dumps(self.data(), indent=1)
 
+    def can_connect(self, socket):
+        start_type = self.socket_type
+        end_type = socket.socket_type
+        if start_type == 'execute' and end_type != 'execute':
+            return False
+        if start_type != 'execute' and end_type == 'execute':
+            return False
+        return True
+
 
 class SocketInput(SocketGraphics):
 

@@ -19,11 +19,11 @@ class NodeDebugContent(NodeContent):
 
         self.text_box = QPlainTextEdit()
         self.add_input(SocketType.text, 'Text', pos=2)
-        self.add_widget(self.text_box, pos=3)
+        self.add_widget(self.text_box, pos=4)
 
         self.clean_btn = QPushButton('Clear')
         self.clean_btn.clicked.connect(self.text_box.clear)
-        self.add_widget(self.clean_btn, pos=3)
+        self.add_widget(self.clean_btn, pos=4)
 
     def set_input(self, value, index):
         self.text_box.setPlainText(str(value))
